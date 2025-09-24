@@ -3,9 +3,10 @@ import LoginScreen from './LoginScreen';
 import RegisterScreen from './RegisterScreen';
 import ForgotPasswordScreen1 from './ForgotPasswordScreen1';
 import ForgotPasswordScreen2 from './ForgotPasswordScreen2';
+import NavBar from './NavBar';
 
 const LoginScreenDemo = () => {
-  return <LoginScreen />;
+  return <NavBar />;
 };
 
 export default LoginScreenDemo;
