@@ -7,12 +7,12 @@ import FormInput from '../components/auth/FormInput';
 import { SocialButton } from '../components/auth/SocialButton';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/AppNavigator';
+import { AuthStackParamList } from '../navigation/AuthStack';
 
 const { height } = Dimensions.get('window');
 
 const LoginScreen = () => {
-  type LoginScreenProp = NativeStackNavigationProp<RootStackParamList, 'Login'>;
+  type LoginScreenProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
   const navigation = useNavigation<LoginScreenProp>();
 
   const [email, setEmail] = useState('');

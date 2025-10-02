@@ -1,7 +1,15 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
+import { CurrentStackParamList } from '../navigation/CurrentStack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 
 const CurrentEventsScreen = () => {
+  type LoginScreenProp = NativeStackNavigationProp<CurrentStackParamList, 'CurrentEvents'>;
+  const navigation = useNavigation<LoginScreenProp>();
+
+  const handleViewDetaill = () => { navigation.push('MoreEvents'); };
+
   const currentEvents = [
     {
       id: 1,
@@ -69,8 +77,8 @@ const CurrentEventsScreen = () => {
             }}
           />
           <Text className={`text-sm font-medium ${event.status === 'Live Now'
-              ? 'text-green-300'
-              : 'text-orange-300'
+            ? 'text-green-300'
+            : 'text-orange-300'
             }`}>
             {event.status}
           </Text>
@@ -142,6 +150,7 @@ const CurrentEventsScreen = () => {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
+          onPress={handleViewDetaill}
           className="flex-1 py-4 rounded-2xl"
           style={{
             backgroundColor: 'rgba(255, 255, 255, 0.1)',

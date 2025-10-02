@@ -1,9 +1,7 @@
 import "./global.css"
 import { StatusBar, useColorScheme, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
-
-import LoginScreenDemo from './src/screens/LoginScreenDemo';
-import AppNavigator from "./src/navigation/AppNavigator";
+import RootNavigator from "./src/navigation/RootNavigator";
 
 export default function App() {
   const isDarkMode = useColorScheme() === "dark";
@@ -18,7 +16,7 @@ export default function App() {
       />
       <SafeAreaView style={{ flex: 1 }} edges={["top", "bottom"]}>
         {/* <LoginScreenDemo /> */}
-        <AppNavigator />
+        <RootNavigator />
       </SafeAreaView>
     </SafeAreaProvider>
   );
