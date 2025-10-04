@@ -1,10 +1,15 @@
-import { useState } from "react";
-import { View } from "react-native";
-
-import NavBar from "../test/NavBar";
+import { useState, useEffect } from "react";
+import { View, Dimensions } from "react-native";
+import Animated, {
+    useSharedValue,
+    useAnimatedStyle,
+    withTiming,
+} from 'react-native-reanimated';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useNavigationState } from '@react-navigation/native';
+
+import NavBar from "../test/BottomBar";
 import HomeStack from "./HomeStack";
-import { BottomNavigation } from "react-native-paper";
 import CurrentStack from "./CurrentStack";
 
 export type AppStackParamList = {
@@ -15,6 +20,7 @@ export type AppStackParamList = {
 };
 
 const Tab = createBottomTabNavigator<AppStackParamList>();
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const appStackKeys: (keyof AppStackParamList)[] = [
     "HomeStack",
@@ -25,31 +31,62 @@ const appStackKeys: (keyof AppStackParamList)[] = [
 
 const AppStack = () => {
     const [activeTab, setActiveTab] = useState<keyof AppStackParamList>("HomeStack");
+    const translateX = useSharedValue(0);
+
+    const handleTabChange = (newTab: keyof AppStackParamList) => {
+        const currentIndex = appStackKeys.indexOf(activeTab);
+        const newIndex = appStackKeys.indexOf(newTab);
+
+        // Animate the slide transition
+        translateX.value = withTiming(
+            (newIndex - currentIndex) * SCREEN_WIDTH,
+            { duration: 300 }
+        );
+
+        setActiveTab(newTab);
+    };
+
+    const animatedStyle = useAnimatedStyle(() => ({
+        transform: [{ translateX: translateX.value }],
+    }));
 
     return (
-        <View style={{ flex: 1 }}>
+        <View style={{ flex: 1, backgroundColor: '#0F0F0F' }}>
+            {/* Navigation Container with hidden tab bar */}
             <Tab.Navigator
-                screenOptions={{ headerShown: false }}
+                screenOptions={{
+                    headerShown: false,
+                    // tabBarStyle: { display: 'none' }
+                }}
                 tabBar={(props) => (
-                    <BottomNavigation.Bar
-                        {...props}
-                        navigationState={{
-                            index: appStackKeys.indexOf(activeTab),
-                            routes: props.state.routes,
-                        }}
-                        onTabPress={({ route }) => {
-                            setActiveTab(route.name as keyof AppStackParamList);
-                        }}
+                    <NavBar
+                        activeTab={activeTab}
+                        setActiveTab={handleTabChange}
+                        navigation={props.navigation}
+                        state={props.state}
                     />
                 )}
+            // screenListeners={{
+            //     state: (e) => {
+            //         // Listen to navigation state changes
+            //         const state = e.data.state;
+            //         if (state) {
+            //             const routeName = state.routes[state.index].name as keyof AppStackParamList;
+            //             if (routeName !== activeTab) {
+            //                 handleTabChange(routeName);
+            //             }
+            //         }
+            //     },
+            // }}
             >
                 <Tab.Screen name="HomeStack" component={HomeStack} />
                 <Tab.Screen name="CurrentStack" component={CurrentStack} />
-                {/* <Tab.Screen name="UpcomingStack" component={UpcomingStack} /> */}
-                {/* <Tab.Screen name="MoreStack" component={MoreStack} /> */}
+                <Tab.Screen name="UpcomingStack" component={() => <View style={{ flex: 1, backgroundColor: '#0F0F0F' }} />} />
+                <Tab.Screen name="MoreStack" component={() => <View style={{ flex: 1, backgroundColor: '#0F0F0F' }} />} />
             </Tab.Navigator>
 
-            <NavBar activeTab={activeTab} setActiveTab={setActiveTab} />
+            {/* Custom Bottom Bar */}
+            {/* <NavBar activeTab={activeTab} setActiveTab={handleTabChange} /> */}
         </View>
     );
 };

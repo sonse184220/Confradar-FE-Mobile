@@ -6,7 +6,7 @@ import RegisterScreen from '../screens/RegisterScreen';
 import ForgotPasswordScreen1 from '../screens/ForgotPasswordScreen1';
 import ForgotPasswordScreen2 from '../screens/ForgotPasswordScreen2';
 import { navigationRef } from '../utils/NavigationUtil';
-import NavBar from '../test/NavBar';
+import NavBar from '../test/BottomBar';
 
 export type AuthStackParamList = {
     Login: undefined;
