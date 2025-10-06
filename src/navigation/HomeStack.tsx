@@ -3,7 +3,7 @@ import HomeScreen from "../test/HomeScreen";
 import CurrentEventsScreen from "../test/CurrentEventsScreen";
 import UpcomingEventsScreen from "../test/UpcomingEventsScreen";
 import MoreEventsScreen from "../test/MoreEventsScreen";
-import DiscoveryScreen from "../test/DiscoveryScreen";
+import DiscoveryScreen from "../screens/DiscoveryScreen";
 
 export type HomeStackParamList = {
     Home: undefined;

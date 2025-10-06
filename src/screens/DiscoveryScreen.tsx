@@ -15,6 +15,12 @@ import {
 
 const { width: screenWidth } = Dimensions.get('window');
 
+const getTextSize = (baseSize: number) => {
+    if (screenWidth < 360) return baseSize - 2;
+    if (screenWidth < 414) return baseSize;
+    return baseSize + 1;
+};
+
 const DiscoveryScreen = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFilter, setSelectedFilter] = useState('all');
@@ -94,7 +100,11 @@ const DiscoveryScreen = () => {
     ];
 
     const ConferenceCard = ({ conference, size = 'large' }: { conference: any; size?: 'large' | 'small' }) => {
-        const cardWidth = size === 'large' ? screenWidth * 0.8 : screenWidth * 0.65;
+        // const cardWidth = size === 'large' ? screenWidth * 0.8 : screenWidth * 0.65;
+        const baseWidth = size === 'large' ? screenWidth * 0.8 : screenWidth * 0.65;
+        const cardWidth = Math.min(Math.max(baseWidth, 280), 360);
+        // const cardWidth = size === 'large' ? 340 : 280;
+        const cardMinHeight = size === 'large' ? 300 : 260;
 
         return (
             <TouchableOpacity
@@ -107,25 +117,31 @@ const DiscoveryScreen = () => {
                         borderRadius: 20,
                         borderWidth: 1,
                         borderColor: 'rgba(246, 241, 241, 0.2)',
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 8 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 20,
-                        elevation: 10,
+                        // shadowColor: '#000',
+                        // shadowOffset: { width: 0, height: 8 },
+                        // shadowOpacity: 0.3,
+                        // shadowRadius: 20,
+                        // elevation: 10,
                         overflow: 'hidden',
+                        minHeight: cardMinHeight,
                     }}
+                    elevation={0}
                 >
+                    {/* <Card className="bg-white/10 rounded-3xl border border-white/20 shadow-lg"> */}
                     <LinearGradient
                         colors={['#146C94', '#19A7CE', '#000000']}
                         start={{ x: 0, y: 0 }}
                         end={{ x: 1, y: 1 }}
-                        style={{ padding: 16, minHeight: size === 'large' ? 120 : 100 }}
+                        // style={{ padding: 16, minHeight: size === 'large' ? 120 : 100 }}
+                        className={`p-4 ${size === 'large' ? 'min-h-[120px]' : 'min-h-[100px]'}`}
                     >
                         <View className="flex-row justify-between items-start mb-3">
                             <Chip
                                 mode="outlined"
-                                textStyle={{ color: '#F6F1F1', fontSize: 12 }}
-                                style={{ backgroundColor: 'rgba(246, 241, 241, 0.2)' }}
+                                // textStyle={{ color: '#F6F1F1', fontSize: 12 }}
+                                // style={{ backgroundColor: 'rgba(246, 241, 241, 0.2)' }}
+                                className="bg-white/20 text-white text-xs"
+                            // textStyle="text-white text-xs"
                             >
                                 {conference.category}
                             </Chip>
@@ -146,29 +162,40 @@ const DiscoveryScreen = () => {
                         </Text>
                     </LinearGradient>
 
-                    <Card.Content style={{ padding: 16 }}>
-                        <View className="space-y-3 mb-4">
-                            <View className="flex-row items-center">
-                                <Icon source="calendar" size={16} color="#19A7CE" />
-                                <Text className="text-gray-300 text-sm font-medium ml-2">
-                                    {conference.date}
-                                </Text>
-                            </View>
-                            <View className="flex-row items-center">
-                                <Icon source="map-marker" size={16} color="#19A7CE" />
-                                <Text className="text-gray-300 text-sm font-medium ml-2">
-                                    {conference.location}
-                                </Text>
-                            </View>
-                            <View className="flex-row items-center">
-                                <Icon source="account-group" size={16} color="#19A7CE" />
-                                <Text className="text-gray-300 text-sm font-medium ml-2">
-                                    {conference.attendees} attendees
-                                </Text>
-                            </View>
-                        </View>
+                    <Card.Content
+                        // style={{ padding: 16 }}
+                        className="p-4"
+                        style={{
+                            padding: 16,
+                            backgroundColor: 'transparent',
+                        }}
+                    >
+                        <View style={{ backgroundColor: 'transparent' }}>
+                            <View className="space-y-3 mb-4">
+                                <View className="flex-row items-center">
+                                    <Icon source="calendar" size={16} color="#19A7CE" />
+                                    <Text numberOfLines={1} className="text-gray-300 text-sm font-medium ml-2">
+                                        {conference.date}
+                                    </Text>
+                                </View>
+                                <View className="flex-row items-center">
+                                    <Icon source="map-marker" size={16} color="#19A7CE" />
+                                    <Text numberOfLines={1} className="text-gray-300 text-sm font-medium ml-2">
+                                        {conference.location}
+                                    </Text>
+                                </View>
+                                <View className="flex-row items-center">
+                                    <Icon source="account-group" size={16} color="#19A7CE" />
+                                    <Text numberOfLines={1} className="text-gray-300 text-sm font-medium ml-2">
+                                        {conference.attendees} attendees
+                                    </Text>
+                                </View>
+                            </View></View>
 
-                        <Divider style={{ marginVertical: 12, backgroundColor: 'rgba(246, 241, 241, 0.2)' }} />
+                        <Divider
+                            // style={{ marginVertical: 12, backgroundColor: 'rgba(246, 241, 241, 0.2)' }} 
+                            className="my-3 bg-white/20"
+                        />
 
                         <View className="flex-row justify-between items-center">
                             <Text className="text-white font-bold text-lg" style={{ color: '#F6F1F1' }}>
@@ -202,17 +229,19 @@ const DiscoveryScreen = () => {
                     minWidth: 120,
                     alignItems: 'center',
                 }}
+                elevation={0}
             >
                 <View
-                    style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: 'rgba(25, 167, 206, 0.2)',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginBottom: 12,
-                    }}
+                    className="w-12 h-12 rounded-full items-center justify-center mb-3"
+                // style={{
+                //     width: 48,
+                //     height: 48,
+                //     borderRadius: 24,
+                //     backgroundColor: 'rgba(25, 167, 206, 0.2)',
+                //     alignItems: 'center',
+                //     justifyContent: 'center',
+                //     marginBottom: 12,
+                // }}
                 >
                     <Icon source={category.icon} size={24} color="#19A7CE" />
                 </View>
@@ -367,12 +396,13 @@ const DiscoveryScreen = () => {
                             borderRadius: 24,
                             borderWidth: 1,
                             borderColor: 'rgba(246, 241, 241, 0.2)',
-                            shadowColor: '#000',
-                            shadowOffset: { width: 0, height: 8 },
-                            shadowOpacity: 0.3,
-                            shadowRadius: 20,
-                            elevation: 12,
+                            // shadowColor: '#000',
+                            // shadowOffset: { width: 0, height: 8 },
+                            // shadowOpacity: 0.3,
+                            // shadowRadius: 20,
+                            // elevation: 12,
                         }}
+                        elevation={0}
                     >
                         <Card.Content style={{ padding: 24 }}>
                             <View className="flex-row items-center mb-6">

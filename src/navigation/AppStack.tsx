@@ -8,9 +8,11 @@ import Animated, {
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useNavigationState } from '@react-navigation/native';
 
-import NavBar from "../test/BottomBar";
+import NavBar from "../components/BottomBar";
 import HomeStack from "./HomeStack";
 import CurrentStack from "./CurrentStack";
+import NotificationScreen from "../screens/NotificationScreen";
+import AccountSettingScreen from "../screens/AccountSettingScreen";
 
 export type AppStackParamList = {
     HomeStack: undefined;
@@ -29,6 +31,16 @@ const appStackKeys: (keyof AppStackParamList)[] = [
     "MoreStack",
 ];
 
+const UpcomingStack = () => (
+    // <View style={{ flex: 1, backgroundColor: '#0F0F0F' }} />
+    <NotificationScreen />
+);
+
+const MoreStack = () => (
+    // <View style={{ flex: 1, backgroundColor: '#0F0F0F' }} />
+    <AccountSettingScreen />
+);
+
 const AppStack = () => {
     const [activeTab, setActiveTab] = useState<keyof AppStackParamList>("HomeStack");
     const translateX = useSharedValue(0);
@@ -37,7 +49,6 @@ const AppStack = () => {
         const currentIndex = appStackKeys.indexOf(activeTab);
         const newIndex = appStackKeys.indexOf(newTab);
 
-        // Animate the slide transition
         translateX.value = withTiming(
             (newIndex - currentIndex) * SCREEN_WIDTH,
             { duration: 300 }
@@ -51,8 +62,7 @@ const AppStack = () => {
     }));
 
     return (
-        <View style={{ flex: 1, backgroundColor: '#0F0F0F' }}>
-            {/* Navigation Container with hidden tab bar */}
+        <View style={{ flex: 1, }}>
             <Tab.Navigator
                 screenOptions={{
                     headerShown: false,
@@ -81,11 +91,10 @@ const AppStack = () => {
             >
                 <Tab.Screen name="HomeStack" component={HomeStack} />
                 <Tab.Screen name="CurrentStack" component={CurrentStack} />
-                <Tab.Screen name="UpcomingStack" component={() => <View style={{ flex: 1, backgroundColor: '#0F0F0F' }} />} />
-                <Tab.Screen name="MoreStack" component={() => <View style={{ flex: 1, backgroundColor: '#0F0F0F' }} />} />
+                <Tab.Screen name="UpcomingStack" component={UpcomingStack} />
+                <Tab.Screen name="MoreStack" component={MoreStack} />
             </Tab.Navigator>
 
-            {/* Custom Bottom Bar */}
             {/* <NavBar activeTab={activeTab} setActiveTab={handleTabChange} /> */}
         </View>
     );
