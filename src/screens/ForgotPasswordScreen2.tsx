@@ -5,6 +5,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import LinearGradient from 'react-native-linear-gradient';
 import FormInput from '../components/auth/FormInput';
 import PasswordRequirements from '../components/auth/PasswordRequirements';
+import { AuthStackParamList } from '../navigation/AuthStack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 
 const { height } = Dimensions.get('window');
 
@@ -12,10 +15,14 @@ const ForgotPasswordScreen2 = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
+  type navigateprop = NativeStackNavigationProp<AuthStackParamList, 'ForgotPassword2'>;
+  const navigation = useNavigation<navigateprop>();
+
   const handleResetPassword = () => {
   };
 
   const handleBackToLogin = () => {
+    navigation.navigate('Login')
   };
 
   // const PasswordRequirements: React.FC = () => (
@@ -113,6 +120,7 @@ const ForgotPasswordScreen2 = () => {
               onChangeText={setPassword}
               placeholder="Nhập mật khẩu mới của bạn"
               secureTextEntry
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -121,6 +129,7 @@ const ForgotPasswordScreen2 = () => {
               onChangeText={setConfirmPassword}
               placeholder="Xác nhận mật khẩu mới của bạn"
               secureTextEntry
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <PasswordRequirements

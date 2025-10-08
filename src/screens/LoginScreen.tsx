@@ -8,19 +8,22 @@ import { SocialButton } from '../components/auth/SocialButton';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthStack';
+import { RootStackParamList } from '../navigation/RootNavigator';
 
 const { height } = Dimensions.get('window');
 
 const LoginScreen = () => {
   type LoginScreenProp = NativeStackNavigationProp<AuthStackParamList, 'Login'>;
+  type LoginScreenProp2 = NativeStackNavigationProp<RootStackParamList, 'Auth'>;
   const navigation = useNavigation<LoginScreenProp>();
+  const navigation2 = useNavigation<LoginScreenProp2>();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [cl, setCL] = useState('');
 
 
-  const handleLogin = () => { };
+  const handleLogin = () => { navigation2.replace('App'); };
   const handleForgotPassword = () => { navigation.navigate('ForgotPassword1'); };
   const handleSignUp = () => { navigation.navigate('Register'); };
   const handleGoogleLogin = () => { };
@@ -114,6 +117,7 @@ const LoginScreen = () => {
               value={email}
               onChangeText={setEmail}
               placeholder="Nhập email của bạn"
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -122,6 +126,7 @@ const LoginScreen = () => {
               onChangeText={setPassword}
               placeholder="Nhập mật khẩu của bạn"
               secureTextEntry
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -130,6 +135,7 @@ const LoginScreen = () => {
               onChangeText={setPassword}
               placeholder="Enter your password"
               secureTextEntry
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -138,6 +144,7 @@ const LoginScreen = () => {
               onChangeText={setPassword}
               placeholder="Enter your password"
               secureTextEntry
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -146,6 +153,7 @@ const LoginScreen = () => {
               onChangeText={setPassword}
               placeholder="Enter your password"
               secureTextEntry
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -154,6 +162,7 @@ const LoginScreen = () => {
               onChangeText={setPassword}
               placeholder="Enter your password"
               secureTextEntry
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -162,6 +171,7 @@ const LoginScreen = () => {
               onChangeText={setCL}
               placeholder="Enter your cl"
               secureTextEntry
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <TouchableOpacity className="items-end mb-6" onPress={handleForgotPassword}>

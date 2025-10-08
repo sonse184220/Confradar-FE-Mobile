@@ -4,19 +4,26 @@ import { Button, Card } from 'react-native-paper';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import LinearGradient from 'react-native-linear-gradient';
 import FormInput from '../components/auth/FormInput';
+import { AuthStackParamList } from '../navigation/AuthStack';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
 
 const { height } = Dimensions.get('window');
 
 const ForgotPasswordScreen1 = () => {
   const [email, setEmail] = useState('');
 
+  type navigateprop = NativeStackNavigationProp<AuthStackParamList, 'ForgotPassword1'>;
+  const navigation = useNavigation<navigateprop>();
+
   const handleSendCode = () => {
+    navigation.navigate('ForgotPassword2')
   };
 
   const handleBackToLogin = () => {
+    navigation.navigate('Login')
   };
 
-  // Reusable Info Card Component
   const InfoCard: React.FC<{ title: string; description: string }> = ({ title, description }) => (
     <View className="bg-blue-50 rounded-xl p-4 mb-6">
       <Text className="text-blue-800 text-sm font-medium mb-1">{title}</Text>
@@ -96,6 +103,7 @@ const ForgotPasswordScreen1 = () => {
               value={email}
               onChangeText={setEmail}
               placeholder="Nhập địa chỉ email của bạn"
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <Button

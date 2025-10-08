@@ -13,6 +13,11 @@ import {
   TextInput
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { RootStackParamList } from '../navigation/RootNavigator';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useNavigation } from '@react-navigation/native';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 interface SettingItem {
   id: string;
@@ -32,6 +37,8 @@ const AccountSettingScreen = () => {
   const [darkModeEnabled, setDarkModeEnabled] = useState(true);
   const [locationEnabled, setLocationEnabled] = useState(false);
 
+  const navigation = useNavigation<NavigationProp>();
+
   const userInfo = {
     name: 'Jin Yong Lim',
     email: 'jin.yong@example.com',
@@ -45,10 +52,18 @@ const AccountSettingScreen = () => {
       description: 'Update your personal information',
       icon: 'account-edit',
       hasArrow: true,
-      onPress: () => console.log('Edit Profile')
+      onPress: () => navigation.navigate('EditProfile')
     },
     {
       id: '2',
+      title: 'Change Password',
+      description: 'Manage your account security',
+      icon: 'lock',
+      hasArrow: true,
+      onPress: () => navigation.navigate('ChangePassword')
+    },
+    {
+      id: '3',
       title: 'Payment Methods',
       description: 'Manage your payment options',
       icon: 'credit-card',
@@ -56,7 +71,7 @@ const AccountSettingScreen = () => {
       onPress: () => console.log('Payment Methods')
     },
     {
-      id: '3',
+      id: '4',
       title: 'Event History',
       description: 'View your past events and bookings',
       icon: 'history',
@@ -226,7 +241,7 @@ const AccountSettingScreen = () => {
                 <Text className="text-gray-400 text-sm mt-1">
                   {userInfo.email}
                 </Text>
-                <TouchableOpacity className="mt-2">
+                <TouchableOpacity className="mt-2" onPress={() => { navigation.navigate('EditProfile'); }}>
                   <Text className="text-purple-400 text-sm">
                     Edit profile →
                   </Text>

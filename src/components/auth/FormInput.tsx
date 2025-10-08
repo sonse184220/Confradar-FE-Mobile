@@ -8,6 +8,11 @@ const FormInput: React.FC<FormInputProps> = ({
   onChangeText,
   placeholder,
   secureTextEntry = false,
+
+  style,
+  theme,
+  textColor,
+  contentStyle,
 }) => {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -20,17 +25,21 @@ const FormInput: React.FC<FormInputProps> = ({
       secureTextEntry={secureTextEntry && !showPassword
       }
       mode="outlined"
-      right={
-        secureTextEntry ? (
-          <TextInput.Icon
-            icon={showPassword ? 'eye' : 'eye-off'}
-            onPress={() => setShowPassword(!showPassword)
-            }
-            color="#7C3AED"
-          />
-        ) : undefined
-      }
-      style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
+      // right={
+      //   secureTextEntry ? (
+      //     <TextInput.Icon
+      //       icon={showPassword ? 'eye' : 'eye-off'}
+      //       onPress={() => setShowPassword(!showPassword)
+      //       }
+      //       color="#7C3AED"
+      //     />
+      //   ) : undefined
+      // }
+      // style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
+      style={style}
+      theme={theme}
+      textColor={textColor}
+      contentStyle={contentStyle}
     />
   );
 };

@@ -23,8 +23,8 @@ interface NavBarProps {
 const tabData = [
   { key: 'HomeStack' as TabType, label: 'Home', icon: 'home-outline' },
   { key: 'CurrentStack' as TabType, label: 'Current', icon: 'calendar-today' },
-  { key: 'UpcomingStack' as TabType, label: 'Upcoming', icon: 'calendar-clock' },
-  { key: 'MoreStack' as TabType, label: 'More', icon: 'dots-horizontal' },
+  { key: 'UpcomingStack' as TabType, label: 'Notification', icon: 'bell-ring-outline' },
+  { key: 'MoreStack' as TabType, label: 'Account', icon: 'account-circle-outline' },
 ];
 
 const BottomBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, navigation, state }) => {

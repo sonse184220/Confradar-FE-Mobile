@@ -13,6 +13,10 @@ import {
     Icon
 } from 'react-native-paper';
 
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AppStackParamList } from '../navigation/AppStack';
+
 const { width: screenWidth } = Dimensions.get('window');
 
 const getTextSize = (baseSize: number) => {
@@ -21,9 +25,14 @@ const getTextSize = (baseSize: number) => {
     return baseSize + 1;
 };
 
+type NavigationProp = NativeStackNavigationProp<AppStackParamList>;
+
+
 const DiscoveryScreen = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedFilter, setSelectedFilter] = useState('all');
+
+    const navigation = useNavigation<NavigationProp>();
 
     const conferenceData = [
         {
@@ -206,7 +215,11 @@ const DiscoveryScreen = () => {
                                 buttonColor="#19A7CE"
                                 textColor="#000000"
                                 style={{ borderRadius: 12 }}
-                                onPress={() => { }}
+                                onPress={() => {
+                                    // navigation.navigate('CurrentStack', {
+                                    //     screen: 'CurrentEvents',
+                                    // });
+                                }}
                             >
                                 View Details
                             </Button>
