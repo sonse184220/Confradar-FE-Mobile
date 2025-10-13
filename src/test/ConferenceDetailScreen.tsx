@@ -1,3 +1,5 @@
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import React, { useRef, useState } from 'react';
 import {
   View,
@@ -22,6 +24,7 @@ import {
   Divider,
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { HomeStackParamList } from '../navigation/HomeStack';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -63,6 +66,8 @@ const imageMap: Record<string, any> = {
   taylorswift: require('../assets/taylorswift.jpg'),
 };
 
+type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
+
 const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   navigation,
 }) => {
@@ -73,6 +78,8 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
 
   const flatListRef = useRef<FlatList>(null);
+
+  const navigationTo = useNavigation<NavigationProp>();
 
   const tabs = ['Conference Info', 'Sessions', 'Details', 'Feedback'];
 
@@ -467,7 +474,8 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     <View className="px-4 pb-6">
       <TouchableOpacity
         onPress={() => {
-          console.log('Check In Event');
+          // console.log('Check In Event');
+          navigationTo.navigate('TicketSelection')
         }}
         className="bg-white rounded-2xl py-4 flex-row items-center justify-center"
       >
