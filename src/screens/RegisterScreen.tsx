@@ -5,6 +5,9 @@ import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view
 import LinearGradient from 'react-native-linear-gradient';
 import FormInput from '../components/auth/FormInput';
 import { SocialButton } from '../components/auth/SocialButton';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { AuthStackParamList } from '../navigation/AuthStack';
+import { useNavigation } from '@react-navigation/native';
 
 const { height } = Dimensions.get('window');
 
@@ -18,9 +21,12 @@ const RegisterScreen = () => {
   const [agreeToTerms, setAgreeToTerms] = useState(false);
 
   const handleRegister = () => { };
-  const handleSignIn = () => { };
+  const handleSignIn = () => { navigation.navigate('Login') };
   const handleGoogleRegister = () => { };
   const handleFacebookRegister = () => { };
+
+  type navigateprop = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
+  const navigation = useNavigation<navigateprop>();
 
   return (
     <View style={{ flex: 1 }}>
@@ -83,6 +89,7 @@ const RegisterScreen = () => {
               value={name}
               onChangeText={setName}
               placeholder="Nhập tên đầy đủ của bạn"
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -90,6 +97,7 @@ const RegisterScreen = () => {
               value={phoneNumber}
               onChangeText={setPhoneNumber}
               placeholder="Nhập số điện thoại của bạn"
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -97,6 +105,7 @@ const RegisterScreen = () => {
               value={email}
               onChangeText={setEmail}
               placeholder="Nhập email của bạn"
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -105,6 +114,7 @@ const RegisterScreen = () => {
               onChangeText={setPassword}
               placeholder="Nhập mật khẩu của bạn"
               secureTextEntry
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -113,6 +123,7 @@ const RegisterScreen = () => {
               onChangeText={setConfirmPassword}
               placeholder="Nhập lại mật khẩu của bạn"
               secureTextEntry
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             <FormInput
@@ -120,6 +131,7 @@ const RegisterScreen = () => {
               value={birthday}
               onChangeText={setBirthday}
               placeholder="DD/MM/YYYY"
+              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
             {/* Terms and Conditions */}

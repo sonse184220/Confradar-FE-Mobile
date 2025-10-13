@@ -10,13 +10,14 @@ import { useNavigationState } from '@react-navigation/native';
 
 import NavBar from "../components/BottomBar";
 import HomeStack from "./HomeStack";
-import CurrentStack from "./CurrentStack";
+import CurrentStack, { CurrentStackParamList } from "./CurrentStack";
 import NotificationScreen from "../screens/NotificationScreen";
 import AccountSettingScreen from "../screens/AccountSettingScreen";
 
 export type AppStackParamList = {
     HomeStack: undefined;
-    CurrentStack: undefined;
+    // CurrentStack: undefined;
+    CurrentStack: { screen?: keyof CurrentStackParamList; params?: any };
     UpcomingStack: undefined;
     MoreStack: undefined;
 };
@@ -49,10 +50,11 @@ const AppStack = () => {
         const currentIndex = appStackKeys.indexOf(activeTab);
         const newIndex = appStackKeys.indexOf(newTab);
 
-        translateX.value = withTiming(
-            (newIndex - currentIndex) * SCREEN_WIDTH,
-            { duration: 300 }
-        );
+        // translateX.value = withTiming(
+        //     (newIndex - currentIndex) * SCREEN_WIDTH,
+        //     { duration: 300 }
+        // );
+        translateX.value = withTiming(-newIndex * SCREEN_WIDTH, { duration: 300 });
 
         setActiveTab(newTab);
     };
@@ -67,6 +69,7 @@ const AppStack = () => {
                 screenOptions={{
                     headerShown: false,
                     // tabBarStyle: { display: 'none' }
+                    animation: 'shift',
                 }}
                 tabBar={(props) => (
                     <NavBar
