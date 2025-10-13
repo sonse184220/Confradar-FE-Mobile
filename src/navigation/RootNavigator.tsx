@@ -36,8 +36,8 @@ const RootNavigator = () => {
             <Stack.Navigator screenOptions={{ headerShown: false }}>
                 {isAuthenticated ? (
                     <>
-                        {/* <Stack.Screen name="Auth" component={AuthStack} /> */}
-                        <Stack.Screen name="Auth" component={ConferenceDetailScreen} />
+                        <Stack.Screen name="Auth" component={AuthStack} />
+                        {/* <Stack.Screen name="Auth" component={ConferenceDetailScreen} /> */}
                         <Stack.Screen name="App" component={AppStack} />
                         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
                         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,9 @@ import {
   Image,
   Dimensions,
   ImageBackground,
+  FlatList,
+  TextInput,
+  Modal,
 } from 'react-native';
 import {
   Card,
@@ -15,6 +18,8 @@ import {
   Chip,
   IconButton,
   Appbar,
+  Surface,
+  Divider,
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
@@ -22,6 +27,34 @@ const { width: screenWidth } = Dimensions.get('window');
 
 interface ConferenceDetailScreenProps {
   navigation?: any;
+}
+
+type Session = {
+  id: number;
+  title: string;
+  speaker: string;
+  time: string;
+  room: string;
+  type: string;
+};
+
+type ConferenceType = 'technical' | 'research';
+
+interface ConferenceDetail {
+  sponsors: { name: string; logo: string }[];
+  targetAudience: string[];
+  faq: { question: string; answer: string }[];
+  policy: string;
+  photos: string[];
+  speakers?: { name: string; title: string; image: string }[];
+  ranking?: string;
+  deadlines?: {
+    abstract: string;
+    paper: string;
+    review: string;
+    ticket: string;
+  };
+  acceptedPapers?: number;
 }
 
 const imageMap: Record<string, any> = {
@@ -33,6 +66,16 @@ const imageMap: Record<string, any> = {
 const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   navigation,
 }) => {
+  const [activeTab, setActiveTab] = useState(0);
+  const [selectedDate, setSelectedDate] = useState('2024-11-23');
+  const [showAllSessions, setShowAllSessions] = useState(false);
+  const [photoModalVisible, setPhotoModalVisible] = useState(false);
+  const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+
+  const flatListRef = useRef<FlatList>(null);
+
+  const tabs = ['Conference Info', 'Sessions', 'Details', 'Feedback'];
+
   const eventData = {
     title: 'Hội thảo Khoa học Quốc tế về Trí tuệ Nhân tạo và Ứng dụng',
     date: 'Thứ Bảy, 23 Tháng 11, 2024',
@@ -68,7 +111,106 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     //   'taylorswift',
     //   'taylorswift',
     // ],
+    type: 'research' as ConferenceType, // or 'research'
   };
+
+  // Mock data for sessions
+  const sessionData: Record<string, Session[]> = {
+    '2024-11-23': [
+      {
+        id: 1,
+        title: 'Opening Keynote: The Future of AI',
+        speaker: 'Dr. John Smith',
+        time: '08:30 - 09:30',
+        room: 'Main Hall',
+        type: 'keynote'
+      },
+      {
+        id: 2,
+        title: 'Machine Learning Fundamentals',
+        speaker: 'Prof. Jane Doe',
+        time: '10:00 - 11:30',
+        room: 'Room A',
+        type: 'presentation'
+      },
+      {
+        id: 3,
+        title: 'Deep Learning Applications',
+        speaker: 'Dr. Mike Johnson',
+        time: '13:30 - 15:00',
+        room: 'Room B',
+        type: 'workshop'
+      }
+    ],
+    '2024-11-24': [
+      {
+        id: 4,
+        title: 'Neural Networks in Practice',
+        speaker: 'Dr. Sarah Wilson',
+        time: '09:00 - 10:30',
+        room: 'Room A',
+        type: 'presentation'
+      }
+    ]
+  };
+
+  const conferenceDetails: Record<ConferenceType, ConferenceDetail> = {
+    technical: {
+      speakers: [
+        { name: 'Dr. John Smith', title: 'AI Research Director', image: 'taylorswift' },
+        { name: 'Prof. Jane Doe', title: 'ML Expert', image: 'taylorswift' }
+      ],
+      sponsors: [
+        { name: 'Google', logo: 'https://via.placeholder.com/100x50/4285F4/FFFFFF?text=Google' },
+        { name: 'Microsoft', logo: 'https://via.placeholder.com/100x50/00BCF2/FFFFFF?text=Microsoft' }
+      ],
+      targetAudience: ['Researchers', 'Data Scientists', 'AI Engineers', 'Graduate Students'],
+      faq: [
+        { question: 'What should I bring?', answer: 'Laptop and notebook for taking notes.' },
+        { question: 'Is lunch provided?', answer: 'Yes, lunch is included in the registration fee.' }
+      ],
+      policy: 'Photography is allowed. Recording requires permission from speakers.',
+      photos: ['conf1', 'conf2', 'taylorswift', 'conf1', 'conf2']
+    },
+    research: {
+      sponsors: [
+        { name: 'IEEE', logo: 'https://via.placeholder.com/100x50/00629B/FFFFFF?text=IEEE' }
+      ],
+      targetAudience: ['PhD Students', 'Researchers', 'Academics'],
+      faq: [
+        { question: 'How to submit paper?', answer: 'Submit through EasyChair system.' }
+      ],
+      policy: 'All presentations must be original research.',
+      photos: ['conf1', 'conf2'],
+      ranking: 'Q1 Conference (Impact Factor: 3.2)',
+      deadlines: {
+        abstract: '2024-09-15',
+        paper: '2024-10-01',
+        review: '2024-10-30',
+        ticket: '2024-11-15'
+      },
+      acceptedPapers: 45
+    }
+  };
+
+  const feedbacks = [
+    {
+      id: 1,
+      user: 'Nguyễn Văn A',
+      avatar: 'taylorswift',
+      rating: 5,
+      comment: 'Hội thảo rất bổ ích, nội dung chất lượng cao!',
+      date: '2024-11-20'
+    },
+    {
+      id: 2,
+      user: 'Trần Thị B',
+      avatar: 'taylorswift',
+      rating: 4,
+      comment: 'Speakers giỏi, tuy nhiên thời gian hơi ngắn.',
+      date: '2024-11-19'
+    }
+  ];
 
   const EventImageSection = () => (
     // <View className="px-4 pb-4">
@@ -359,6 +501,469 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     // </View>
   );
 
+  // Tab Navigation Component
+  const TabNavigation = () => (
+    <View className="px-4 pb-4">
+      <View className="bg-white/10 border border-white/20 rounded-2xl p-1 backdrop-blur-lg">
+        <View className="flex-row">
+          {tabs.map((tab, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => setActiveTab(index)}
+              className={`flex-1 py-3 px-2 rounded-xl ${activeTab === index ? 'bg-white' : ''
+                }`}
+            >
+              <Text
+                className={`text-center text-sm font-medium ${activeTab === index ? 'text-gray-900' : 'text-white/80'
+                  }`}
+                numberOfLines={1}
+              >
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+
+  // Conference Info Content (existing sections)
+  const ConferenceInfoContent = () => (
+    <>
+      <EventImageSection />
+      <EventInfoSection />
+      <LocationSection />
+      <HostSection />
+      <AttendeesSection />
+      <AboutSection />
+      <CheckInButton />
+    </>
+  );
+
+  // Sessions Content
+  const SessionsContent = () => {
+    const dates = Object.keys(sessionData);
+    const currentSessions = showAllSessions
+      ? Object.values(sessionData).flat()
+      : sessionData[selectedDate] || [];
+
+    return (
+      <View className="px-4">
+        {/* Calendar Navigation */}
+        <View className="mb-4">
+          <Text className="text-lg font-semibold text-white mb-3">Sessions</Text>
+          <View className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg">
+            <View className="flex-row justify-between items-center mb-4">
+              <Text className="text-white font-medium">November 2024</Text>
+              <TouchableOpacity
+                onPress={() => setShowAllSessions(!showAllSessions)}
+                className="bg-white/20 rounded-lg px-3 py-1"
+              >
+                <Text className="text-white text-sm">
+                  {showAllSessions ? 'Show by date' : 'Show all'}
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {!showAllSessions && (
+              <View className="flex-row justify-between">
+                {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, index) => (
+                  <View key={index} className="items-center">
+                    <Text className="text-white/60 text-xs mb-2">{day}</Text>
+                    <View className="w-8 h-8" />
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {!showAllSessions && (
+              <View className="flex-row justify-between mt-2">
+                {[19, 20, 21, 22, 23, 24, 25].map((date, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => setSelectedDate(`2024-11-${date}`)}
+                    className={`w-8 h-8 rounded-full items-center justify-center ${selectedDate === `2024-11-${date}` ? 'bg-white' : ''
+                      }`}
+                  >
+                    <Text
+                      className={`text-sm ${selectedDate === `2024-11-${date}` ? 'text-gray-900 font-bold' : 'text-white'
+                        }`}
+                    >
+                      {date}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
+        </View>
+
+        {/* Sessions List */}
+        <View className="space-y-3">
+          {currentSessions.map((session) => (
+            <View
+              key={session.id}
+              className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg"
+            >
+              <View className="flex-row justify-between items-start mb-2">
+                <View className="flex-1 mr-3">
+                  <Text className="text-white font-semibold text-base mb-1">
+                    {session.title}
+                  </Text>
+                  <Text className="text-white/80 text-sm">
+                    by {session.speaker}
+                  </Text>
+                </View>
+                <Chip
+                  mode="outlined"
+                  textStyle={{ color: '#fff', fontSize: 12 }}
+                  style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderColor: 'rgba(255,255,255,0.3)' }}
+                >
+                  {session.type}
+                </Chip>
+              </View>
+
+              <View className="flex-row items-center mt-3">
+                <View className="flex-row items-center mr-4">
+                  <Icon name="access-time" size={16} color="#E5E7EB" />
+                  <Text className="text-white/80 text-sm ml-1">{session.time}</Text>
+                </View>
+                <View className="flex-row items-center">
+                  <Icon name="location-on" size={16} color="#E5E7EB" />
+                  <Text className="text-white/80 text-sm ml-1">{session.room}</Text>
+                </View>
+              </View>
+            </View>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
+  // Details Content
+  const DetailsContent = () => {
+    const details = conferenceDetails[eventData.type];
+
+    return (
+      <View className="px-4 space-y-4">
+        {/* Speakers Section (Technical only) */}
+        {eventData.type === 'technical' && details.speakers && (
+          <View>
+            <Text className="text-lg font-semibold text-white mb-3">Speakers</Text>
+            <View className="space-y-3">
+              {details.speakers.map((speaker, index) => (
+                <View
+                  key={index}
+                  className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg"
+                >
+                  <View className="flex-row items-center">
+                    <Avatar.Image size={50} source={imageMap[speaker.image]} />
+                    <View className="ml-3 flex-1">
+                      <Text className="text-white font-semibold">{speaker.name}</Text>
+                      <Text className="text-white/80 text-sm">{speaker.title}</Text>
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {/* Conference Ranking (Research only) */}
+        {eventData.type === 'research' && (
+          <View>
+            <Text className="text-lg font-semibold text-white mb-3">Conference Ranking</Text>
+            <View className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg">
+              <Text className="text-white">{details.ranking}</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Deadlines (Research only) */}
+        {eventData.type === 'research' && details.deadlines && (
+          <View>
+            <Text className="text-lg font-semibold text-white mb-3">Important Deadlines</Text>
+            <View className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg space-y-2">
+              <View className="flex-row justify-between">
+                <Text className="text-white/80">Abstract Submission:</Text>
+                <Text className="text-white">{details.deadlines.abstract}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-white/80">Paper Deadline:</Text>
+                <Text className="text-white">{details.deadlines.paper}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-white/80">Review Deadline:</Text>
+                <Text className="text-white">{details.deadlines.review}</Text>
+              </View>
+              <View className="flex-row justify-between">
+                <Text className="text-white/80">Ticket Sales:</Text>
+                <Text className="text-white">{details.deadlines.ticket}</Text>
+              </View>
+            </View>
+          </View>
+        )}
+
+        {/* Accepted Papers (Research only) */}
+        {eventData.type === 'research' && (
+          <View>
+            <Text className="text-lg font-semibold text-white mb-3">Accepted Papers</Text>
+            <View className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg">
+              <Text className="text-white text-2xl font-bold">{details.acceptedPapers}</Text>
+              <Text className="text-white/80">papers accepted</Text>
+            </View>
+          </View>
+        )}
+
+        {/* Sponsors */}
+        <View>
+          <Text className="text-lg font-semibold text-white mb-3">Sponsors</Text>
+          <View className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg">
+            <View className="flex-row flex-wrap">
+              {details.sponsors.map((sponsor, index) => (
+                <View key={index} className="mr-4 mb-2 items-center">
+                  <View className="w-20 h-10 bg-white rounded-lg items-center justify-center">
+                    <Text className="text-xs font-bold text-gray-800">{sponsor.name}</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        {/* Target Audience */}
+        <View>
+          <Text className="text-lg font-semibold text-white mb-3">Target Audience</Text>
+          <View className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg">
+            <View className="flex-row flex-wrap">
+              {details.targetAudience.map((audience, index) => (
+                <Chip
+                  key={index}
+                  mode="outlined"
+                  textStyle={{ color: '#fff', fontSize: 12 }}
+                  style={{
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    borderColor: 'rgba(255,255,255,0.3)',
+                    marginRight: 8,
+                    marginBottom: 8
+                  }}
+                >
+                  {audience}
+                </Chip>
+              ))}
+            </View>
+          </View>
+        </View>
+
+        {/* FAQ */}
+        <View>
+          <Text className="text-lg font-semibold text-white mb-3">FAQ</Text>
+          <View className="space-y-3">
+            {details.faq.map((item, index) => (
+              <View
+                key={index}
+                className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg"
+              >
+                <Text className="text-white font-semibold mb-2">{item.question}</Text>
+                <Text className="text-white/80">{item.answer}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+
+        {/* Policy */}
+        <View>
+          <Text className="text-lg font-semibold text-white mb-3">Conference Policy</Text>
+          <View className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg">
+            <Text className="text-white/90">{details.policy}</Text>
+          </View>
+        </View>
+
+        {/* Photos */}
+        <View className="pb-6">
+          <Text className="text-lg font-semibold text-white mb-3">Conference Photos</Text>
+          <View className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg">
+            <View className="flex-row flex-wrap">
+              {details.photos.slice(0, 3).map((photo, index) => (
+                <TouchableOpacity
+                  key={index}
+                  onPress={() => {
+                    setSelectedPhotoIndex(index);
+                    setPhotoModalVisible(true);
+                  }}
+                  className="w-20 h-20 rounded-lg overflow-hidden mr-2 mb-2"
+                >
+                  <Image
+                    source={imageMap[photo]}
+                    className="w-full h-full"
+                    resizeMode="cover"
+                  />
+                </TouchableOpacity>
+              ))}
+              {details.photos.length > 3 && (
+                <TouchableOpacity
+                  onPress={() => setPhotoModalVisible(true)}
+                  className="w-20 h-20 rounded-lg bg-white/20 items-center justify-center"
+                >
+                  <Text className="text-white font-bold">+{details.photos.length - 3}</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  // Feedback Content
+  const FeedbackContent = () => {
+    const [newFeedback, setNewFeedback] = useState('');
+    const [newRating, setNewRating] = useState(5);
+
+    const renderStars = (rating: number,
+      interactive: boolean = false,
+      onPress: ((rating: number) => void) | null = null) => {
+      return (
+        <View className="flex-row">
+          {[1, 2, 3, 4, 5].map((star) => (
+            <TouchableOpacity
+              key={star}
+              onPress={() => interactive && onPress && onPress(star)}
+              disabled={!interactive}
+            >
+              <Icon
+                name={star <= rating ? 'star' : 'star-border'}
+                size={20}
+                color="#FFD700"
+                style={{ marginRight: 2 }}
+              />
+            </TouchableOpacity>
+          ))}
+        </View>
+      );
+    };
+
+    return (
+      <View className="px-4">
+        {/* Add Feedback Section */}
+        <View className="mb-6">
+          <Text className="text-lg font-semibold text-white mb-3">Share Your Feedback</Text>
+          <View className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg">
+            <View className="mb-4">
+              <Text className="text-white mb-2">Rating:</Text>
+              {renderStars(newRating, true, setNewRating)}
+            </View>
+
+            <View className="mb-4">
+              <Text className="text-white mb-2">Your Comment:</Text>
+              <TextInput
+                value={newFeedback}
+                onChangeText={setNewFeedback}
+                placeholder="Share your experience..."
+                placeholderTextColor="rgba(255,255,255,0.5)"
+                multiline
+                numberOfLines={4}
+                className="bg-white/10 border border-white/20 rounded-xl p-3 text-white"
+                style={{ textAlignVertical: 'top' }}
+              />
+            </View>
+
+            <TouchableOpacity
+              onPress={() => {
+                // Handle submit feedback
+                console.log('Submit feedback:', { rating: newRating, comment: newFeedback });
+                setNewFeedback('');
+                setNewRating(5);
+              }}
+              className="bg-white rounded-xl py-3 items-center"
+            >
+              <Text className="text-gray-900 font-semibold">Submit Feedback</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Existing Feedbacks */}
+        <View>
+          <Text className="text-lg font-semibold text-white mb-3">
+            Reviews ({feedbacks.length})
+          </Text>
+          <View className="space-y-4">
+            {feedbacks.map((feedback) => (
+              <View
+                key={feedback.id}
+                className="bg-white/10 border border-white/20 rounded-2xl p-4 backdrop-blur-lg"
+              >
+                <View className="flex-row items-start mb-3">
+                  <Avatar.Image size={40} source={imageMap[feedback.avatar]} />
+                  <View className="ml-3 flex-1">
+                    <View className="flex-row justify-between items-start">
+                      <Text className="text-white font-semibold">{feedback.user}</Text>
+                      <Text className="text-white/60 text-xs">{feedback.date}</Text>
+                    </View>
+                    <View className="mt-1">
+                      {renderStars(feedback.rating)}
+                    </View>
+                  </View>
+                </View>
+
+                <Text className="text-white/90 leading-5">{feedback.comment}</Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      </View>
+    );
+  };
+
+  // Photo Modal
+  const PhotoModal = () => (
+    <Modal
+      visible={photoModalVisible}
+      transparent={true}
+      animationType="fade"
+      onRequestClose={() => setPhotoModalVisible(false)}
+    >
+      <View className="flex-1 bg-black/90 justify-center items-center">
+        <TouchableOpacity
+          onPress={() => setPhotoModalVisible(false)}
+          className="absolute top-12 right-4 z-10 bg-white/20 rounded-full p-2"
+        >
+          <Icon name="close" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+
+        <FlatList
+          data={conferenceDetails[eventData.type].photos}
+          horizontal
+          pagingEnabled
+          initialScrollIndex={selectedPhotoIndex}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => (
+            <View style={{ width: screenWidth }} className="justify-center items-center">
+              <Image
+                source={imageMap[item]}
+                style={{ width: screenWidth - 40, height: 300 }}
+                resizeMode="contain"
+              />
+            </View>
+          )}
+          keyExtractor={(item, index) => index.toString()}
+          getItemLayout={(_, index) => ({
+            length: screenWidth,
+            offset: screenWidth * index,
+            index,
+          })}
+          onScrollToIndexFailed={(info) => {
+            // fallback: cuộn thủ công khi index fail
+            setTimeout(() => {
+              flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
+            }, 100);
+          }}
+          ref={flatListRef}
+        />
+      </View>
+    </Modal>
+  );
+
   return (
     <View className="flex-1">
       <Appbar.Header
@@ -371,18 +976,20 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
           titleStyle={{ color: '#F6F1F1', fontWeight: 'bold', textAlign: 'center' }}
         />
       </Appbar.Header>
+
+      <TabNavigation />
+
       <ScrollView
         showsVerticalScrollIndicator={false}
         className="flex-1"
       >
-        <EventImageSection />
-        <EventInfoSection />
-        <LocationSection />
-        <HostSection />
-        <AttendeesSection />
-        <AboutSection />
-        <CheckInButton />
+        {activeTab === 0 && <ConferenceInfoContent />}
+        {activeTab === 1 && <SessionsContent />}
+        {activeTab === 2 && <DetailsContent />}
+        {activeTab === 3 && <FeedbackContent />}
       </ScrollView>
+
+      <PhotoModal />
     </View>
   );
 };
