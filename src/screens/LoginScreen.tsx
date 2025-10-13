@@ -38,6 +38,11 @@ const LoginScreen = () => {
         end={{ x: 1, y: 1 }}
         className="absolute inset-0"
       />
+      {/* <LinearGradient colors={[
+        '#000000', // đen 
+        '#2e2e2e', // xám đậm 
+        '#6b6b6b', // xám nhạt 
+      ]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} className="absolute inset-0" /> */}
 
       {/* Logo and Welcome text */}
       {/* <View className="items-center mb-12">
