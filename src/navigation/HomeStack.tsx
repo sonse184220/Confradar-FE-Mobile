@@ -4,8 +4,8 @@ import CurrentEventsScreen from "../test/CurrentEventsScreen";
 import UpcomingEventsScreen from "../test/UpcomingEventsScreen";
 import MoreEventsScreen from "../test/MoreEventsScreen";
 import DiscoveryScreen from "../screens/DiscoveryScreen";
-import ConferenceDetailScreen from "../test/ConferenceDetailScreen";
-import TicketSelectionScreen from "../test/TicketSelectionScreen";
+import ConferenceDetailScreen from "../screens/ConferenceDetailScreen";
+import TicketSelectionScreen from "../screens/TicketSelectionScreen";
 
 export type HomeStackParamList = {
     Home: undefined;

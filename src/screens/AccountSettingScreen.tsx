@@ -64,11 +64,11 @@ const AccountSettingScreen = () => {
     },
     {
       id: '3',
-      title: 'Payment Methods',
-      description: 'Manage your payment options',
-      icon: 'credit-card',
+      title: 'Transaction History',
+      description: 'Manage your payment transaction',
+      icon: 'money',
       hasArrow: true,
-      onPress: () => console.log('Payment Methods')
+      onPress: () => navigation.navigate('TransactionHistory')
     },
     {
       id: '4',

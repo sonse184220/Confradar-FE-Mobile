@@ -4,14 +4,17 @@ import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-
 import RootNavigator from "./src/navigation/RootNavigator";
 import Svg, { Defs, RadialGradient, Path, Stop, LinearGradient, Line, Rect, Ellipse } from "react-native-svg";
 import { Dimensions } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const { width, height } = Dimensions.get("window");
 
 export default function App() {
   return (
-    <SafeAreaProvider>
-      <AppInner />
-    </SafeAreaProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AppInner />
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
   // const isDarkMode = useColorScheme() === "dark";
   // const insets = useSafeAreaInsets();
