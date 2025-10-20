@@ -3,9 +3,10 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import AuthStack from "./AuthStack";
 import { navigationRef } from "../utils/navigationUtil";
 import AppStack from "./AppStack";
-import EditProfileScreen from "../test/EditProfileScreen";
-import ChangePasswordScreen from "../test/ChangePasswordScreen";
-import ConferenceDetailScreen from "../test/ConferenceDetailScreen";
+import EditProfileScreen from "../screens/EditProfileScreen";
+import ChangePasswordScreen from "../screens/ChangePasswordScreen";
+import ConferenceDetailScreen from "../screens/ConferenceDetailScreen";
+import TransactionHistoryScreen from "../screens/TransactionHistoryScreen";
 
 const navTheme = {
     ...DefaultTheme,
@@ -20,6 +21,7 @@ export type RootStackParamList = {
     App: undefined;
     EditProfile: undefined;
     ChangePassword: undefined;
+    TransactionHistory: undefined;
     BookingFlow: { confId: number };
     HistoryDetail: { historyId: number };
 };
@@ -41,6 +43,7 @@ const RootNavigator = () => {
                         <Stack.Screen name="App" component={AppStack} />
                         <Stack.Screen name="EditProfile" component={EditProfileScreen} />
                         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+                        <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
                     </>
                 ) : (
                     <Stack.Screen name="Auth" component={AuthStack} />
