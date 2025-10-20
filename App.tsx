@@ -5,16 +5,20 @@ import RootNavigator from "./src/navigation/RootNavigator";
 import Svg, { Defs, RadialGradient, Path, Stop, LinearGradient, Line, Rect, Ellipse } from "react-native-svg";
 import { Dimensions } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { Provider } from "react-redux";
+import { store } from "./src/store";
 
 const { width, height } = Dimensions.get("window");
 
 export default function App() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <AppInner />
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <Provider store={store}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <AppInner />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </Provider>
   );
   // const isDarkMode = useColorScheme() === "dark";
   // const insets = useSafeAreaInsets();

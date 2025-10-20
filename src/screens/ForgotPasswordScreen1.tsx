@@ -7,17 +7,38 @@ import FormInput from '../components/auth/FormInput';
 import { AuthStackParamList } from '../navigation/AuthStack';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../hooks/useAuth';
 
 const { height } = Dimensions.get('window');
 
 const ForgotPasswordScreen1 = () => {
   const [email, setEmail] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   type navigateprop = NativeStackNavigationProp<AuthStackParamList, 'ForgotPassword1'>;
   const navigation = useNavigation<navigateprop>();
 
-  const handleSendCode = () => {
-    navigation.navigate('ForgotPassword2')
+  // Use useAuth hook
+  const { forgotPassword, loading, forgotError, forgotSuccess } = useAuth();
+
+  const handleSendCode = async () => {
+    if (!email) {
+      return;
+    }
+
+    try {
+      const result = await forgotPassword(email);
+      if (result.Success) {
+        // setSuccessMessage('Hãy mở email để reset password');
+        // Auto navigate after 2 seconds
+        setTimeout(() => {
+          navigation.navigate('ForgotPassword2');
+        }, 2000);
+      }
+    } catch (error: any) {
+      // Error will be handled by useAuth hook and available in forgotError
+      console.log('Forgot password failed:', error);
+    }
   };
 
   const handleBackToLogin = () => {
@@ -106,14 +127,34 @@ const ForgotPasswordScreen1 = () => {
               style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
+            {/* Error Message */}
+            {forgotError && (
+              <View style={{ backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+                <Text style={{ color: '#DC2626', fontSize: 14 }}>
+                  {forgotError}
+                </Text>
+              </View>
+            )}
+
+            {/* Success Message */}
+            {forgotSuccess && (
+              <View style={{ backgroundColor: '#D1FAE5', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+                <Text style={{ color: '#065F46', fontSize: 14 }}>
+                  {forgotSuccess}
+                </Text>
+              </View>
+            )}
+
             <Button
               mode="contained"
               buttonColor="#7C3AED"
               textColor="#FFF"
               style={{ borderRadius: 16, marginBottom: 16 }}
               onPress={handleSendCode}
+              loading={loading}
+              disabled={loading || !email}
             >
-              Gửi mã xác minh
+              {loading ? 'Đang gửi...' : 'Gửi mã xác minh'}
             </Button>
 
             <View className="flex-row justify-center items-center mt-4">

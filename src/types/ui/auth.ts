@@ -16,6 +16,9 @@ export interface FormInputProps {
     // };
     textColor?: string;
     contentStyle?: StyleProp<ViewStyle>;
+
+    multiline?: boolean;
+    numberOfLines?: number;
 }
 
 export interface SocialButtonProps {

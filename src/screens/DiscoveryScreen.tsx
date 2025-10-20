@@ -394,7 +394,7 @@ const DiscoveryScreen = () => {
                     data={filteredData.filter(c => c.status === 'current')}
                 />
 
-                <CategorySection
+                {/* <CategorySection
                     title="Current Events"
                     data={filteredData.filter(c => c.status === 'current')}
                 />
@@ -402,9 +402,9 @@ const DiscoveryScreen = () => {
                 <CategorySection
                     title="Upcoming Events"
                     data={filteredData.filter(c => c.status === 'upcoming')}
-                />
+                /> */}
 
-                <View className="mx-6 mb-8">
+                {/* <View className="mx-6 mb-8">
                     <Card
                         style={{
                             backgroundColor: 'rgba(246, 241, 241, 0.1)',
@@ -477,7 +477,7 @@ const DiscoveryScreen = () => {
                             </View>
                         </Card.Content>
                     </Card>
-                </View>
+                </View> */}
             </ScrollView>
         </View >
     );

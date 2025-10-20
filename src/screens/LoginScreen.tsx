@@ -9,6 +9,7 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthStack';
 import { RootStackParamList } from '../navigation/RootNavigator';
+import { useAuth } from '../hooks/useAuth';
 
 const { height } = Dimensions.get('window');
 
@@ -22,8 +23,28 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [cl, setCL] = useState('');
 
+  // Use useAuth hook
+  const { login, loading, loginError, loginResponse } = useAuth();
 
-  const handleLogin = () => { navigation2.replace('App'); };
+  const handleLogin = async () => {
+    if (!email || !password) {
+      return;
+    }
+
+    try {
+      const result = await login({ email, password });
+      console.log('data:', result);
+      console.log('Message:', result.message);
+      if (result.success) {
+        // console.log('Message:', result.Message);
+        console.log('Hello Reactotron');
+        navigation2.replace('App');
+      }
+    } catch (error) {
+      // Error will be handled by useAuth hook and available in loginError
+      console.log('Login failed:', error);
+    }
+  };
   const handleForgotPassword = () => { navigation.navigate('ForgotPassword1'); };
   const handleSignUp = () => { navigation.navigate('Register'); };
   const handleGoogleLogin = () => { };
@@ -134,54 +155,26 @@ const LoginScreen = () => {
               style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
             />
 
-            <FormInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Enter your password"
-              secureTextEntry
-              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
-            />
-
-            <FormInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Enter your password"
-              secureTextEntry
-              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
-            />
-
-            <FormInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Enter your password"
-              secureTextEntry
-              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
-            />
-
-            <FormInput
-              label="Password"
-              value={password}
-              onChangeText={setPassword}
-              placeholder="Enter your password"
-              secureTextEntry
-              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
-            />
-
-            <FormInput
-              label="cl"
-              value={cl}
-              onChangeText={setCL}
-              placeholder="Enter your cl"
-              secureTextEntry
-              style={{ backgroundColor: '#F9FAFB', marginBottom: 16 }}
-            />
-
             <TouchableOpacity className="items-end mb-6" onPress={handleForgotPassword}>
               <Text className="text-purple-600 text-sm font-medium">Quên mật khẩu?</Text>
             </TouchableOpacity>
+
+            {/* Error Message */}
+            {loginError && (
+              <View style={{ backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+                <Text style={{ color: '#DC2626', fontSize: 14 }}>
+                  {loginError}
+                </Text>
+              </View>
+            )}
+
+            {loginResponse?.success && loginResponse.message && (
+              <View style={{ backgroundColor: '#D1FAE5', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+                <Text style={{ color: '#065F46', fontSize: 14 }}>
+                  {loginResponse.message}
+                </Text>
+              </View>
+            )}
 
             {/* <Button
               title="Đăng Nhập"
@@ -197,8 +190,10 @@ const LoginScreen = () => {
               textColor="#FFF"
               style={{ borderRadius: 16, marginBottom: 16 }}
               onPress={handleLogin}
+              loading={loading}
+              disabled={loading || !email || !password}
             >
-              Đăng Nhập
+              {loading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
             </Button>
 
             {/* Divider */}

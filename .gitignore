@@ -86,3 +86,8 @@ yarn-debug.log*
 # Editor
 .vscode/
 *.swp
+
+# Expo
+.expo
+dist/
+web-build/
