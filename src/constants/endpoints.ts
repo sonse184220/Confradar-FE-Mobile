@@ -8,10 +8,18 @@ export const ENDPOINTS = {
         RESET_PASSWORD: '/auth/reset-password',
     },
     USER: {
-        PROFILE: '/users/:id',
+        PROFILE: '/users',
         UPDATE_PROFILE: '/users/profile',
         UPLOAD_AVATAR: '/users/avatar',
         CHANGE_PASSWORD: '/users/change-password',
         DELETE_ACCOUNT: '/users/account',
+    },
+    CONFERENCE: {
+        GET_ALL: '/Conference',
+        GET_BY_ID: '/Conference',
+    },
+    CONFERENCE_CATEGORY: {
+        GET_ALL: '/api/conferencecategory',
+        GET_BY_ID: '/api/conferencecategory',
     },
 } as const;

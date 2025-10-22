@@ -1,6 +1,6 @@
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import {
   FlatList,
   TextInput,
   Modal,
+  ActivityIndicator,
 } from 'react-native';
 import {
   Card,
@@ -25,11 +26,18 @@ import {
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { HomeStackParamList } from '../navigation/HomeStack';
+import { useConference } from '../hooks/useConference';
+import { ConferenceResponse } from '../store/api/conferenceApi';
 
 const { width: screenWidth } = Dimensions.get('window');
 
 interface ConferenceDetailScreenProps {
   navigation?: any;
+  route?: {
+    params: {
+      conferenceId: string;
+    };
+  };
 }
 
 type Session = {
@@ -70,32 +78,93 @@ type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
 
 const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   navigation,
+  route,
 }) => {
   const [activeTab, setActiveTab] = useState(0);
   const [selectedDate, setSelectedDate] = useState('2024-11-23');
   const [showAllSessions, setShowAllSessions] = useState(false);
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState(0);
+  const [conferenceData, setConferenceData] = useState<ConferenceResponse | null>(null);
 
   const flatListRef = useRef<FlatList>(null);
-
   const navigationTo = useNavigation<NavigationProp>();
+
+  // Get conferenceId from route params
+  const conferenceId = route?.params?.conferenceId || '';
+
+  // Use custom hook for API calls
+  const { fetchConference, loading, error } = useConference();
+
+  // Fetch conference data on component mount
+  useEffect(() => {
+    if (conferenceId) {
+      loadConferenceData();
+    }
+  }, [conferenceId]);
+
+  const loadConferenceData = async () => {
+    try {
+      const response = await fetchConference(conferenceId);
+      setConferenceData(response.data);
+    } catch (err) {
+      console.error('Error loading conference data:', err);
+    }
+  };
+
+  const handleRetry = () => {
+    loadConferenceData();
+  };
 
   const tabs = ['Conference Info', 'Sessions', 'Details', 'Feedback'];
 
+  // Helper functions to format API data
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const options: Intl.DateTimeFormatOptions = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    };
+    return date.toLocaleDateString('vi-VN', options);
+  };
+
+  const formatTime = (startDate?: string, endDate?: string) => {
+    if (!startDate || !endDate) return '';
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return `${start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
+  const getDay = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.getDate().toString();
+  };
+
+  const getMonth = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const months = ['Thg 1', 'Thg 2', 'Thg 3', 'Thg 4', 'Thg 5', 'Thg 6', 'Thg 7', 'Thg 8', 'Thg 9', 'Thg 10', 'Thg 11', 'Thg 12'];
+    return months[date.getMonth()];
+  };
+
+  // Transform API data to match UI expectations
   const eventData = {
-    title: 'Hội thảo Khoa học Quốc tế về Trí tuệ Nhân tạo và Ứng dụng',
-    date: 'Thứ Bảy, 23 Tháng 11, 2024',
-    time: '8:00 - 17:30',
-    day: '23',
-    month: 'Thg 11',
-    location: 'Tòa nhà Innovation, Đại học FPT, TP. Hồ Chí Minh',
-    host: 'PGS. TS. Nguyễn Văn An',
-    attendees: 124,
-    maxAttendees: 200,
-    description: `Hội thảo quy tụ các chuyên gia hàng đầu trong lĩnh vực Trí tuệ Nhân tạo (AI) và Khoa học Dữ liệu nhằm chia sẻ những tiến bộ mới nhất, thảo luận các hướng nghiên cứu tiềm năng và ứng dụng thực tiễn trong công nghiệp. Tham dự hội thảo, bạn sẽ có cơ hội giao lưu, học hỏi và mở rộng mạng lưới hợp tác nghiên cứu trong nước và quốc tế.`,
-    image: 'conf1',
-    peopleGoing: ['taylorswift', 'taylorswift', 'taylorswift', 'taylorswift'],
+    title: conferenceData?.conferenceName || 'Đang tải...',
+    date: formatDate(conferenceData?.startDate),
+    time: formatTime(conferenceData?.startDate, conferenceData?.endDate),
+    day: getDay(conferenceData?.startDate),
+    month: getMonth(conferenceData?.startDate),
+    location: conferenceData?.address || '',
+    host: 'Organizer', // This might need to be added to API response
+    attendees: 0, // This might need to be added to API response
+    maxAttendees: conferenceData?.capacity || 0,
+    description: conferenceData?.description || '',
+    image: conferenceData?.bannerImageUrl ? conferenceData.bannerImageUrl : 'conf1',
+    peopleGoing: ['taylorswift', 'taylorswift', 'taylorswift', 'taylorswift'], // This might need to be added to API response
     // title: 'Basketball Offline Class On Sritex',
     // date: 'Sunday, September 2024',
     // time: '7:30am - 9am',
@@ -118,85 +187,64 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     //   'taylorswift',
     //   'taylorswift',
     // ],
-    type: 'research' as ConferenceType, // or 'research'
+    type: (conferenceData?.isResearchConference ? 'research' : 'technical') as ConferenceType,
   };
 
-  // Mock data for sessions
-  const sessionData: Record<string, Session[]> = {
-    '2024-11-23': [
-      {
-        id: 1,
-        title: 'Opening Keynote: The Future of AI',
-        speaker: 'Dr. John Smith',
-        time: '08:30 - 09:30',
-        room: 'Main Hall',
-        type: 'keynote'
-      },
-      {
-        id: 2,
-        title: 'Machine Learning Fundamentals',
-        speaker: 'Prof. Jane Doe',
-        time: '10:00 - 11:30',
-        room: 'Room A',
-        type: 'presentation'
-      },
-      {
-        id: 3,
-        title: 'Deep Learning Applications',
-        speaker: 'Dr. Mike Johnson',
-        time: '13:30 - 15:00',
-        room: 'Room B',
-        type: 'workshop'
-      }
-    ],
-    '2024-11-24': [
-      {
-        id: 4,
-        title: 'Neural Networks in Practice',
-        speaker: 'Dr. Sarah Wilson',
-        time: '09:00 - 10:30',
-        room: 'Room A',
-        type: 'presentation'
-      }
-    ]
-  };
+  // Transform API sessions data
+  const sessionData: Record<string, Session[]> = {};
 
+  if (conferenceData?.sessions) {
+    conferenceData.sessions.forEach((session, index) => {
+      const sessionDate = session.date || conferenceData?.startDate || '2024-11-23';
+      if (!sessionData[sessionDate]) {
+        sessionData[sessionDate] = [];
+      }
+
+      sessionData[sessionDate].push({
+        id: index + 1,
+        title: session.title,
+        speaker: session.speaker?.name || 'TBA',
+        time: `${session.startTime || ''} - ${session.endTime || ''}`,
+        room: session.room?.displayName || session.room?.number || 'TBA',
+        type: 'presentation'
+      });
+    });
+  }
+
+  // Transform API data for conference details
   const conferenceDetails: Record<ConferenceType, ConferenceDetail> = {
     technical: {
-      speakers: [
-        { name: 'Dr. John Smith', title: 'AI Research Director', image: 'taylorswift' },
-        { name: 'Prof. Jane Doe', title: 'ML Expert', image: 'taylorswift' }
-      ],
-      sponsors: [
-        { name: 'Google', logo: 'https://via.placeholder.com/100x50/4285F4/FFFFFF?text=Google' },
-        { name: 'Microsoft', logo: 'https://via.placeholder.com/100x50/00BCF2/FFFFFF?text=Microsoft' }
-      ],
+      speakers: conferenceData?.sessions?.map(session => ({
+        name: session.speaker?.name || 'TBA',
+        title: session.speaker?.description || '',
+        image: 'taylorswift'
+      })) || [],
+      sponsors: conferenceData?.sponsors?.map(sponsor => ({
+        name: sponsor.name || '',
+        logo: sponsor.imageUrl || 'https://via.placeholder.com/100x50/4285F4/FFFFFF?text=Sponsor'
+      })) || [],
       targetAudience: ['Researchers', 'Data Scientists', 'AI Engineers', 'Graduate Students'],
-      faq: [
-        { question: 'What should I bring?', answer: 'Laptop and notebook for taking notes.' },
-        { question: 'Is lunch provided?', answer: 'Yes, lunch is included in the registration fee.' }
-      ],
-      policy: 'Photography is allowed. Recording requires permission from speakers.',
-      photos: ['conf1', 'conf2', 'taylorswift', 'conf1', 'conf2']
+      faq: [],
+      policy: conferenceData?.policies?.map(policy => policy.description).join('. ') || 'Please follow conference guidelines.',
+      photos: conferenceData?.media?.map(media => media.mediaUrl || 'conf1') || ['conf1']
     },
     research: {
-      sponsors: [
-        { name: 'IEEE', logo: 'https://via.placeholder.com/100x50/00629B/FFFFFF?text=IEEE' }
-      ],
+      sponsors: conferenceData?.sponsors?.map(sponsor => ({
+        name: sponsor.name || '',
+        logo: sponsor.imageUrl || 'https://via.placeholder.com/100x50/00629B/FFFFFF?text=Sponsor'
+      })) || [],
       targetAudience: ['PhD Students', 'Researchers', 'Academics'],
-      faq: [
-        { question: 'How to submit paper?', answer: 'Submit through EasyChair system.' }
-      ],
-      policy: 'All presentations must be original research.',
-      photos: ['conf1', 'conf2'],
-      ranking: 'Q1 Conference (Impact Factor: 3.2)',
+      faq: [],
+      policy: conferenceData?.policies?.map(policy => policy.description).join('. ') || 'All presentations must be original research.',
+      photos: conferenceData?.media?.map(media => media.mediaUrl || 'conf1') || ['conf1'],
+      ranking: 'Conference Ranking TBA',
       deadlines: {
         abstract: '2024-09-15',
         paper: '2024-10-01',
         review: '2024-10-30',
         ticket: '2024-11-15'
       },
-      acceptedPapers: 45
+      acceptedPapers: 0
     }
   };
 
@@ -219,55 +267,48 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     }
   ];
 
-  const EventImageSection = () => (
-    // <View className="px-4 pb-4">
-    //   <Card className="overflow-hidden">
-    //     <View className="relative">
-    //       <Image
-    //         // source={{ uri: eventData.image }}
-    //         source={imageMap[eventData.image]}
-    //         className="w-full h-48"
-    //         resizeMode="cover"
-    //       />
-    //       <View className="absolute top-4 left-4 bg-white rounded-xl px-3 py-2 shadow-sm">
-    //         <Text className="text-lg font-bold text-gray-900">{eventData.day}</Text>
-    //         <Text className="text-sm text-gray-600">{eventData.month}</Text>
-    //       </View>
-    //     </View>
-    //   </Card>
-    // </View>
-    <View className="px-4 pb-4">
-      <View className="overflow-hidden rounded-3xl" style={{ aspectRatio: 16 / 6 }}>
-        <ImageBackground
-          source={imageMap[eventData.image]}
-          className="w-full h-full"
-          resizeMode="cover"
-          blurRadius={50}
-        >
-          <View className="flex-row items-center p-4 h-full">
-            <View className="w-24 h-24 rounded-2xl overflow-hidden mr-4">
-              <Image
-                source={imageMap[eventData.image]}
-                className="w-full h-full"
-                resizeMode="cover"
-              />
-            </View>
+  const EventImageSection = () => {
+    const getImageSource = (imageData: any) => {
+      if (typeof imageData === 'string' && imageData.startsWith('http')) {
+        return { uri: imageData };
+      }
+      return imageMap[imageData] || imageMap['conf1'];
+    };
 
-            <View className="flex-1">
-              <Text className="text-white text-xl font-bold mb-2">
-                {eventData.title}
-              </Text>
-              <View className="bg-white/30 rounded-full px-3 py-1 self-start">
-                <Text className="text-white text-sm font-medium">
-                  {eventData.attendees} người đã đăng ký
+    return (
+      <View className="px-4 pb-4">
+        <View className="overflow-hidden rounded-3xl" style={{ aspectRatio: 16 / 6 }}>
+          <ImageBackground
+            source={getImageSource(eventData.image)}
+            className="w-full h-full"
+            resizeMode="cover"
+            blurRadius={50}
+          >
+            <View className="flex-row items-center p-4 h-full">
+              <View className="w-24 h-24 rounded-2xl overflow-hidden mr-4">
+                <Image
+                  source={getImageSource(eventData.image)}
+                  className="w-full h-full"
+                  resizeMode="cover"
+                />
+              </View>
+
+              <View className="flex-1">
+                <Text className="text-white text-xl font-bold mb-2">
+                  {eventData.title}
                 </Text>
+                <View className="bg-white/30 rounded-full px-3 py-1 self-start">
+                  <Text className="text-white text-sm font-medium">
+                    {eventData.attendees} người đã đăng ký
+                  </Text>
+                </View>
               </View>
             </View>
-          </View>
-        </ImageBackground>
+          </ImageBackground>
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   const EventInfoSection = () => (
     <View className="px-4 pb-4">
@@ -475,7 +516,10 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
       <TouchableOpacity
         onPress={() => {
           // console.log('Check In Event');
-          navigationTo.navigate('TicketSelection')
+          // navigationTo.navigate('TicketSelection')
+          navigation.navigate('TicketSelection', {
+            conferenceId: conferenceData?.conferenceId.toString(),
+          });
         }}
         className="bg-white rounded-2xl py-4 flex-row items-center justify-center"
       >
@@ -972,6 +1016,46 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     </Modal>
   );
 
+  // Loading State Component
+  const LoadingState = () => (
+    <View className="flex-1 justify-center items-center">
+      <ActivityIndicator size="large" color="#FFFFFF" />
+      <Text className="text-white mt-4 text-lg">Đang tải thông tin hội nghị...</Text>
+    </View>
+  );
+
+  // Error State Component
+  const ErrorState = () => (
+    <View className="flex-1 justify-center items-center px-4">
+      <Icon name="error-outline" size={64} color="#FF6B6B" />
+      <Text className="text-white text-lg font-semibold mt-4 text-center">
+        Có lỗi xảy ra
+      </Text>
+      <Text className="text-white/70 text-center mt-2 mb-6">
+        {error || 'Không thể tải thông tin hội nghị. Vui lòng thử lại.'}
+      </Text>
+      <TouchableOpacity
+        onPress={handleRetry}
+        className="bg-white rounded-xl px-6 py-3"
+      >
+        <Text className="text-gray-900 font-semibold">Thử lại</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
+  // Empty Conference ID State
+  const EmptyIdState = () => (
+    <View className="flex-1 justify-center items-center px-4">
+      <Icon name="event-note" size={64} color="#FFA726" />
+      <Text className="text-white text-lg font-semibold mt-4 text-center">
+        Không tìm thấy ID hội nghị
+      </Text>
+      <Text className="text-white/70 text-center mt-2">
+        Vui lòng chọn một hội nghị để xem chi tiết.
+      </Text>
+    </View>
+  );
+
   return (
     <View className="flex-1">
       <Appbar.Header
@@ -985,19 +1069,30 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
         />
       </Appbar.Header>
 
-      <TabNavigation />
+      {/* Show different states based on loading/error/data */}
+      {!conferenceId ? (
+        <EmptyIdState />
+      ) : loading && !conferenceData ? (
+        <LoadingState />
+      ) : error && !conferenceData ? (
+        <ErrorState />
+      ) : (
+        <>
+          <TabNavigation />
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        className="flex-1"
-      >
-        {activeTab === 0 && <ConferenceInfoContent />}
-        {activeTab === 1 && <SessionsContent />}
-        {activeTab === 2 && <DetailsContent />}
-        {activeTab === 3 && <FeedbackContent />}
-      </ScrollView>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            className="flex-1"
+          >
+            {activeTab === 0 && <ConferenceInfoContent />}
+            {activeTab === 1 && <SessionsContent />}
+            {activeTab === 2 && <DetailsContent />}
+            {activeTab === 3 && <FeedbackContent />}
+          </ScrollView>
 
-      <PhotoModal />
+          <PhotoModal />
+        </>
+      )}
     </View>
   );
 };

@@ -7,7 +7,7 @@ import { ENDPOINTS } from '../../constants/endpoints';
 const baseQuery = fetchBaseQuery({
     baseUrl: API_CONFIG.baseURL,
     prepareHeaders: async (headers) => {
-        const token = await AsyncStorage.getItem('auth_token');
+        const token = await AsyncStorage.getItem('access_token');
 
         if (token) {
             headers.set('Authorization', `Bearer ${token}`);

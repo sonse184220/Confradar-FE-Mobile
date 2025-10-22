@@ -2,11 +2,17 @@ import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { authApi } from './api/authApi';
 import authReducer from './slices/authSlice';
+import { conferenceApi } from './api/conferenceApi';
+import { conferenceCategoryApi } from './api/conferenceCategoryApi';
+import { ticketApi } from './api/ticketApi';
 
 export const store = configureStore({
     reducer: {
         // RTK Query API reducers
         [authApi.reducerPath]: authApi.reducer,
+        [conferenceApi.reducerPath]: conferenceApi.reducer,
+        [conferenceCategoryApi.reducerPath]: conferenceCategoryApi.reducer,
+        [ticketApi.reducerPath]: ticketApi.reducer,
 
         // Slice reducers (cho local state)
         auth: authReducer,
@@ -14,6 +20,9 @@ export const store = configureStore({
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(
             authApi.middleware,
+            conferenceApi.middleware,
+            conferenceCategoryApi.middleware,
+            ticketApi.middleware,
             //   userApi.middleware
         ),
 });
