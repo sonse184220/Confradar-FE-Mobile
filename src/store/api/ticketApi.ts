@@ -7,21 +7,44 @@ export interface CreateTechPaymentRequest {
     conferencePriceId: string;
 }
 
-export interface MomoPaymentCallBackResponse {
-    partnerCode?: string;
-    orderId?: string;
-    requestId?: string;
-    amount?: number;
-    orderInfo?: string;
-    orderType?: string;
-    transId?: string;
-    resultCode?: number;
-    message?: string;
-    payType?: string;
-    responseTime?: number;
-    extraData?: string;
-    signature?: string;
+// export interface UserCheckIn {
+//     userCheckInId: string;
+//     isPresenter?: boolean;
+//     hasCheckIn?: boolean;
+//     checkInTime?: string;
+//     conferenceSessionId?: string;
+//     userId?: string;
+//     ticketId?: string;
+//     conferenceSession?: ConferenceSession;
+//     ticket?: Ticket;
+//     user?: User;
+// }
+
+export interface Ticket {
+    ticketId: string;
+    userId?: string;
+    conferencePriceId?: string;
+    transactionId?: string;
+    registeredDate?: string;
+    isRefunded?: boolean;
+    actualPrice?: number;
 }
+
+// export interface MomoPaymentCallBackResponse {
+//     partnerCode?: string;
+//     orderId?: string;
+//     requestId?: string;
+//     amount?: number;
+//     orderInfo?: string;
+//     orderType?: string;
+//     transId?: string;
+//     resultCode?: number;
+//     message?: string;
+//     payType?: string;
+//     responseTime?: number;
+//     extraData?: string;
+//     signature?: string;
+// }
 
 export interface Transaction {
     id: string;
@@ -64,15 +87,33 @@ export const ticketApi = createApi({
             invalidatesTags: ['Transaction'],
         }),
 
-        getOwnTransaction: builder.query<ApiResponse<Transaction[]>, void>({
-            query: () => '/payment/get-own-transaction',
-            providesTags: ['Transaction'],
+        // Get own paid tickets
+        getOwnPaidTickets: builder.query<ApiResponse<Ticket[]>, void>({
+            query: () => ({
+                url: '/Ticket/get-own-paid-ticket',
+                method: 'GET',
+            }),
+            providesTags: (result) =>
+                result?.data
+                    ? [
+                        ...result.data.map(({ ticketId }) => ({
+                            type: 'Ticket' as const,
+                            id: ticketId,
+                        })),
+                        { type: 'Ticket', id: 'LIST' },
+                    ]
+                    : [{ type: 'Ticket', id: 'LIST' }],
         }),
+
+        // getOwnTransaction: builder.query<ApiResponse<Transaction[]>, void>({
+        //     query: () => '/payment/get-own-transaction',
+        //     providesTags: ['Transaction'],
+        // }),
     }),
 });
 
 export const {
     useCreatePaymentForTechMutation,
-    useGetOwnTransactionQuery,
-    useLazyGetOwnTransactionQuery,
+    useGetOwnPaidTicketsQuery,
+    useLazyGetOwnPaidTicketsQuery,
 } = ticketApi;

@@ -8,16 +8,16 @@ declare global {
     }
 }
 
-// Reactotron
-//     .configure({ name: 'Confradar' })
-//     .useReactNative(
-//         {
-//             networking: { ignoreUrls: /symbolicate/ },
-//             editor: false,
-//             overlay: false
-//         }
-//     )
-//     .use(reactotronRedux())
-//     .connect()
+Reactotron
+    .configure({ name: 'Confradar' })
+    .useReactNative(
+        {
+            networking: { ignoreUrls: /symbolicate/ },
+            editor: false,
+            overlay: false
+        }
+    )
+    .use(reactotronRedux())
+    .connect()
 
-// console.tron = Reactotron
+console.tron = Reactotron

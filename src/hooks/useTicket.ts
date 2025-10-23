@@ -1,15 +1,14 @@
 import { useEffect } from 'react';
 import {
     useCreatePaymentForTechMutation,
-    useLazyGetOwnTransactionQuery,
+    useGetOwnPaidTicketsQuery,
+    useLazyGetOwnPaidTicketsQuery,
     type CreateTechPaymentRequest,
-    type MomoPaymentCallBackResponse,
+    // type MomoPaymentCallBackResponse,
 } from '../store/api/ticketApi';
 import { useAppDispatch, useAppSelector } from './useRedux';
 
 export const useTicket = () => {
-    const dispatch = useAppDispatch();
-    const { user } = useAppSelector((state) => state.auth);
 
     // RTK Query hooks
     const [
@@ -17,10 +16,22 @@ export const useTicket = () => {
         { isLoading: paymentLoading, error: paymentRawError, data: paymentData }
     ] = useCreatePaymentForTechMutation();
 
+    const {
+        data: ticketsData,
+        isLoading: ticketsLoading,
+        error: ticketsRawError,
+        refetch: refetchTickets
+    } = useGetOwnPaidTicketsQuery();
+
     const [
-        getTransactions,
-        { isLoading: transactionsLoading, data: transactionsData, error: transactionsRawError }
-    ] = useLazyGetOwnTransactionQuery();
+        getTickets,
+        { isLoading: lazyTicketsLoading, error: lazyTicketsRawError }
+    ] = useLazyGetOwnPaidTicketsQuery();
+
+    // const [
+    //     getTransactions,
+    //     { isLoading: transactionsLoading, data: transactionsData, error: transactionsRawError }
+    // ] = useLazyGetOwnTransactionQuery();
 
     // Parse error function
     const parseError = (error: any): string => {
@@ -37,7 +48,9 @@ export const useTicket = () => {
     };
 
     const paymentError = paymentRawError ? parseError(paymentRawError) : null;
-    const transactionsError = transactionsRawError ? parseError(transactionsRawError) : null;
+    const ticketsError = ticketsRawError ? parseError(ticketsRawError) : null;
+    const lazyTicketsError = lazyTicketsRawError ? parseError(lazyTicketsRawError) : null;
+    // const transactionsError = transactionsRawError ? parseError(transactionsRawError) : null;
 
     const purchaseTicket = async (request: CreateTechPaymentRequest) => {
         try {
@@ -49,23 +62,41 @@ export const useTicket = () => {
         }
     };
 
-    const fetchTransactions = async () => {
+    const fetchTickets = async () => {
         try {
-            const result = await getTransactions().unwrap();
+            const result = await getTickets().unwrap();
             return result;
         } catch (error) {
             throw error;
         }
     };
 
+    // const fetchTransactions = async () => {
+    //     try {
+    //         const result = await getTransactions().unwrap();
+    //         return result;
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // };
+
     return {
-        user,
         purchaseTicket,
-        fetchTransactions,
-        loading: paymentLoading || transactionsLoading,
+        fetchTickets,
+        refetchTickets,
+
+        tickets: ticketsData?.data || [],
+        ticketsResponse: ticketsData,
+        // fetchTransactions,
+        // loading: paymentLoading || transactionsLoading,
+        loading: paymentLoading || ticketsLoading,
+        // ticketsLoading,
+
         paymentError,
-        transactionsError,
+        ticketsError: ticketsError || lazyTicketsError,
+        // transactionsError,
+
         paymentResponse: paymentData,
-        transactions: transactionsData?.data || [],
+        // transactions: transactionsData?.data || [],
     };
 };

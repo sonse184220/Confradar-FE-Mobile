@@ -19,7 +19,12 @@ export const ENDPOINTS = {
         GET_BY_ID: '/Conference',
     },
     CONFERENCE_CATEGORY: {
-        GET_ALL: '/api/conferencecategory',
+        GET_ALL: '/ConferenceCategory',
         GET_BY_ID: '/api/conferencecategory',
     },
+    TRANSACTION: {
+        GET_OWN: '/Payment/get-own-transaction',
+        GET_BY_ID: '/transaction',
+        CREATE: '/transaction',
+    }
 } as const;

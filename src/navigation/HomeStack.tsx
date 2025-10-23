@@ -22,7 +22,7 @@ const Stack = createNativeStackNavigator<HomeStackParamList>();
 
 const HomeStack = () => (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Home" component={DiscoveryScreen} />
+        {/* <Stack.Screen name="Home" component={DiscoveryScreen} /> */}
         <Stack.Screen name="ConferenceList" component={ConferenceListScreen} />
         <Stack.Screen name="ConferenceDetails" component={ConferenceDetailScreen} />
         <Stack.Screen name="TicketSelection" component={TicketSelectionScreen} />

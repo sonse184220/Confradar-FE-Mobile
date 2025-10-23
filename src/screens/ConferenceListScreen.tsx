@@ -170,9 +170,11 @@ const ConferenceListScreen = () => {
         ];
 
         if (categoriesData && categoriesData.length > 0) {
-            const categoryOptions = categoriesData.map(cat => ({
-                key: cat.categoryId.toString(),
-                label: cat.categoryName
+            const categoryOptions = categoriesData.map((cat, index) => ({
+                // key: cat.categoryId.toString(),
+                // label: cat.categoryName
+                key: (cat?.categoryId ?? `unknown-${index}`).toString(),
+                label: cat?.categoryName ?? 'Unknown'
             }));
             return [...baseOptions, ...categoryOptions];
         }
@@ -549,6 +551,7 @@ const ConferenceListScreen = () => {
 
                         {/* Filter Button */}
                         <Menu
+                            key={`filter-${filterMenuVisible}`}
                             visible={filterMenuVisible}
                             onDismiss={() => setFilterMenuVisible(false)}
                             anchor={
