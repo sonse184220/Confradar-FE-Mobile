@@ -11,7 +11,7 @@ import ConferenceListScreen from "../screens/ConferenceListScreen";
 export type HomeStackParamList = {
     Home: undefined;
     ConferenceList: undefined;
-    ConferenceDetails: { conferenceId: string };
+    ConferenceDetails: { conferenceId: string, type: string };
     TicketSelection: { conferenceId: string };
     CurrentEvents: undefined;
     UpcomingEvents: undefined;

@@ -17,9 +17,10 @@ import {
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import LinearGradient from 'react-native-linear-gradient';
-import { ConferencePriceResponse, ConferenceResponse } from '../store/api/conferenceApi';
+// import { ConferencePriceResponse, ConferenceResponse } from '../store/api/conferenceApi';
 import { useTicket } from '../hooks/useTicket';
 import { useConference } from '../hooks/useConference';
+import { ConferencePriceResponse, ConferenceResponse, TechnicalConferenceDetailResponse } from '../types/conference.type';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -93,6 +94,28 @@ const ConferenceHeader: React.FC<{
   );
 };
 
+export const getCurrentPrice = (price: ConferencePriceResponse) => {
+  const basePrice = price.ticketPrice ?? 0;
+
+  if (!price.pricePhases || price.pricePhases.length === 0) {
+    return basePrice;
+  }
+
+  const now = new Date();
+  const currentPhase = price.pricePhases.find(phase => {
+    const startDate = new Date(phase.startDate || '');
+    const endDate = new Date(phase.endDate || '');
+    return now >= startDate && now <= endDate;
+  });
+
+  if (!currentPhase || !currentPhase.applyPercent) {
+    return basePrice;
+  }
+
+  const finalPrice = Math.round(basePrice * (currentPhase.applyPercent / 100));
+  return finalPrice;
+};
+
 const TicketTypeCard: React.FC<{
   ticket: ConferencePriceResponse;
   isSelected: boolean;
@@ -104,6 +127,67 @@ const TicketTypeCard: React.FC<{
       className={`mb-4 rounded-2xl border-2 ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
         }`}
     >
+      <View className="p-4">
+        <View className="flex-row items-center justify-between mb-3">
+          {/* Thông tin vé */}
+          <View className="flex-1">
+            <Text className="text-lg font-semibold text-gray-900 mb-1">
+              {ticket.ticketName || 'Vé hội nghị'}
+            </Text>
+            <Text className="text-sm text-gray-600 mb-1">
+              {ticket.ticketDescription || 'Mô tả vé hội nghị'}
+            </Text>
+            <Text className="text-xs text-gray-500">
+              Tổng số vé: {ticket.totalSlot ?? 0} | Còn lại: {ticket.availableSlot ?? 0}
+            </Text>
+            {ticket.isAuthor && (
+              <Text className="text-xs text-emerald-600 mt-1 font-medium">
+                Dành cho tác giả
+              </Text>
+            )}
+          </View>
+
+          {/* Phần giá */}
+          <View className="ml-4 items-end">
+            {(() => {
+              // const currentPhase = getCurrentPhase(ticket);
+              const now = new Date();
+              const currentPhase = ticket.pricePhases?.find((phase) => {
+                const startDate = new Date(phase.startDate || "");
+                const endDate = new Date(phase.endDate || "");
+                return now >= startDate && now <= endDate;
+              });
+              const currentPrice = getCurrentPrice(ticket);
+              const basePrice = ticket.ticketPrice ?? 0;
+
+              return (
+                <>
+                  {/* Giá hiện tại */}
+                  <Text className="text-lg font-bold text-gray-900">
+                    {currentPrice.toLocaleString('vi-VN')}₫
+                  </Text>
+
+                  {/* Nếu có phase đang áp dụng và khác giá gốc */}
+                  {currentPhase && currentPrice !== basePrice && (
+                    <Text className="text-sm text-gray-500 line-through">
+                      {basePrice.toLocaleString('vi-VN')}₫
+                    </Text>
+                  )}
+
+                  {/* Tên phase */}
+                  {currentPhase ? (
+                    <Text className="text-xs text-blue-600 font-medium mt-1">
+                      {currentPhase.phaseName} ({currentPhase.applyPercent}%)
+                    </Text>
+                  ) : (
+                    <Text className="text-xs text-gray-500 mt-1">Chưa có giai đoạn áp dụng</Text>
+                  )}
+                </>
+              );
+            })()}
+          </View>
+        </View>
+      </View>
       <View className="p-4">
         <View className="flex-row items-center justify-between mb-3">
           <View className="flex-1">
@@ -119,16 +203,16 @@ const TicketTypeCard: React.FC<{
             <Text className="text-lg font-bold text-gray-900">
               {ticket.ticketPrice?.toLocaleString('vi-VN')}₫
             </Text>
-            {ticket.actualPrice && ticket.actualPrice !== ticket.ticketPrice && (
+            {/* {ticket.actualPrice && ticket.actualPrice !== ticket.ticketPrice && (
               <Text className="text-sm text-gray-500 line-through">
                 {ticket.actualPrice.toLocaleString('vi-VN')}₫
               </Text>
-            )}
-            {ticket.currentPhase && (
+            )} */}
+            {/* {ticket.currentPhase && (
               <Text className="text-xs text-blue-600 font-medium">
                 {ticket.currentPhase}
               </Text>
-            )}
+            )} */}
           </View>
         </View>
 
@@ -150,7 +234,7 @@ const TicketTypeCard: React.FC<{
         {/* Radio Button */}
         <View className="flex-row items-center justify-end">
           <RadioButton
-            value={ticket.priceId}
+            value={ticket.conferencePriceId}
             status={isSelected ? 'checked' : 'unchecked'}
             onPress={onSelect}
             color="#3B82F6"
@@ -207,14 +291,24 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
   route,
 }) => {
   const [selectedTicketId, setSelectedTicketId] = useState<string>('');
-  const [conferenceDataState, setConferenceDataState] = useState<ConferenceResponse | null>(null);
+  const [conferenceDataState, setConferenceDataState] = useState<TechnicalConferenceDetailResponse | null>(null);
 
   // Get conferenceId from route params
   const conferenceId = route?.params?.conferenceId || '';
 
   // Get hooks
   const { purchaseTicket, loading: ticketLoading, paymentError } = useTicket();
-  const { fetchConference, loading: conferenceLoading, error: conferenceError } = useConference();
+  // const { fetchConference, loading: conferenceLoading, error: conferenceError } = useConference();
+  const {
+    technicalConference,
+    technicalConferenceLoading,
+    technicalConferenceError,
+    refetchTechnicalConference,
+    researchConference,
+    researchConferenceLoading,
+    researchConferenceError,
+    refetchResearchConference
+  } = useConference({ id: conferenceId });
 
   // Fetch conference data on component mount
   useEffect(() => {
@@ -225,9 +319,9 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
 
   const loadConferenceData = async () => {
     try {
-      const response = await fetchConference(conferenceId);
+      // const response = await fetchConference(conferenceId);
       console.log('conferenceDataState:', conferenceDataState);
-      setConferenceDataState(response.data);
+      setConferenceDataState(technicalConference ?? null);
     } catch (err) {
       console.error('Error loading conference data:', err);
     }
@@ -261,7 +355,7 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
   };
 
   // Get conference prices from API data
-  const conferencePrices = conferenceDataState?.prices || [];
+  const conferencePrices = conferenceDataState?.conferencePrices || [];
 
   // Use conference prices directly from API
   const ticketTypes: ConferencePriceResponse[] = conferencePrices;
@@ -269,12 +363,12 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
   // Set first ticket as default selection
   useEffect(() => {
     if (ticketTypes.length > 0 && !selectedTicketId) {
-      setSelectedTicketId(ticketTypes[0].priceId);
+      setSelectedTicketId(ticketTypes[0].conferencePriceId);
     }
   }, [ticketTypes, selectedTicketId]);
 
   const handleBuyTickets = async () => {
-    const selectedTicket = ticketTypes.find(ticket => ticket.priceId === selectedTicketId);
+    const selectedTicket = ticketTypes.find(ticket => ticket.conferencePriceId === selectedTicketId);
 
     if (!selectedTicket) {
       Alert.alert('Lỗi', 'Vui lòng chọn một loại vé');
@@ -283,7 +377,7 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
 
     try {
       const paymentRequest = {
-        conferencePriceId: selectedTicket.priceId
+        conferencePriceId: selectedTicket.conferencePriceId
       };
 
       const response = await purchaseTicket(paymentRequest);
@@ -440,17 +534,17 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
             </Text>
 
             {/* Loading state for conference data */}
-            {conferenceLoading && !conferenceDataState ? (
+            {technicalConferenceLoading && !conferenceDataState ? (
               <View className="items-center py-8">
                 <ActivityIndicator size="large" color="#6B7280" />
                 <Text className="text-gray-600 mt-2">Đang tải thông tin vé...</Text>
               </View>
-            ) : conferenceError && !conferenceDataState ? (
+            ) : technicalConferenceError && !conferenceDataState ? (
               <View className="items-center py-8">
                 <Icon name="error-outline" size={48} color="#EF4444" />
                 <Text className="text-gray-900 text-lg font-semibold mt-2">Có lỗi xảy ra</Text>
                 <Text className="text-gray-600 text-center mt-1 mb-4">
-                  {conferenceError || 'Không thể tải thông tin hội nghị'}
+                  {technicalConferenceError.data?.Message || 'Không thể tải thông tin hội nghị'}
                 </Text>
                 <TouchableOpacity
                   onPress={handleRetryConference}
@@ -470,10 +564,10 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
               /* Ticket Types */
               ticketTypes.map((ticket) => (
                 <TicketTypeCard
-                  key={ticket.priceId}
+                  key={ticket.conferencePriceId}
                   ticket={ticket}
-                  isSelected={selectedTicketId === ticket.priceId}
-                  onSelect={() => setSelectedTicketId(ticket.priceId)}
+                  isSelected={selectedTicketId === ticket.conferencePriceId}
+                  onSelect={() => setSelectedTicketId(ticket.conferencePriceId)}
                 />
               ))
             )}
@@ -485,7 +579,7 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
           {ticketTypes.length > 0 && (
             <BuyTicketsButton
               onPress={handleBuyTickets}
-              disabled={!selectedTicketId || conferenceLoading}
+              disabled={!selectedTicketId || technicalConferenceLoading}
               loading={ticketLoading}
             />
           )}
