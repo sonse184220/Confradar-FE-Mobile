@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,6 +7,9 @@ import {
   Image,
   Dimensions,
   StyleSheet,
+  ActivityIndicator,
+  Linking,
+  Alert,
 } from 'react-native';
 import {
   Appbar,
@@ -14,6 +17,10 @@ import {
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import LinearGradient from 'react-native-linear-gradient';
+// import { ConferencePriceResponse, ConferenceResponse } from '../store/api/conferenceApi';
+import { useTicket } from '../hooks/useTicket';
+import { useConference } from '../hooks/useConference';
+import { ConferencePriceResponse, ConferenceResponse, TechnicalConferenceDetailResponse } from '../types/conference.type';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -21,19 +28,12 @@ interface TicketSelectionScreenProps {
   navigation?: any;
   route?: {
     params?: {
-      conferenceData?: any;
+      conferenceId: string;
     };
   };
 }
 
-interface TicketType {
-  id: string;
-  name: string;
-  description: string;
-  price: string;
-  priceRange?: string;
-  benefits: string[];
-}
+// Use ConferencePriceResponse directly instead of custom TicketType
 
 // Reusable Components
 const ConferenceHeader: React.FC<{
@@ -94,8 +94,30 @@ const ConferenceHeader: React.FC<{
   );
 };
 
+export const getCurrentPrice = (price: ConferencePriceResponse) => {
+  const basePrice = price.ticketPrice ?? 0;
+
+  if (!price.pricePhases || price.pricePhases.length === 0) {
+    return basePrice;
+  }
+
+  const now = new Date();
+  const currentPhase = price.pricePhases.find(phase => {
+    const startDate = new Date(phase.startDate || '');
+    const endDate = new Date(phase.endDate || '');
+    return now >= startDate && now <= endDate;
+  });
+
+  if (!currentPhase || !currentPhase.applyPercent) {
+    return basePrice;
+  }
+
+  const finalPrice = Math.round(basePrice * (currentPhase.applyPercent / 100));
+  return finalPrice;
+};
+
 const TicketTypeCard: React.FC<{
-  ticket: TicketType;
+  ticket: ConferencePriceResponse;
   isSelected: boolean;
   onSelect: () => void;
 }> = ({ ticket, isSelected, onSelect }) => {
@@ -107,41 +129,112 @@ const TicketTypeCard: React.FC<{
     >
       <View className="p-4">
         <View className="flex-row items-center justify-between mb-3">
+          {/* Thông tin vé */}
           <View className="flex-1">
             <Text className="text-lg font-semibold text-gray-900 mb-1">
-              {ticket.name}
+              {ticket.ticketName || 'Vé hội nghị'}
+            </Text>
+            <Text className="text-sm text-gray-600 mb-1">
+              {ticket.ticketDescription || 'Mô tả vé hội nghị'}
+            </Text>
+            <Text className="text-xs text-gray-500">
+              Tổng số vé: {ticket.totalSlot ?? 0} | Còn lại: {ticket.availableSlot ?? 0}
+            </Text>
+            {ticket.isAuthor && (
+              <Text className="text-xs text-emerald-600 mt-1 font-medium">
+                Dành cho tác giả
+              </Text>
+            )}
+          </View>
+
+          {/* Phần giá */}
+          <View className="ml-4 items-end">
+            {(() => {
+              // const currentPhase = getCurrentPhase(ticket);
+              const now = new Date();
+              const currentPhase = ticket.pricePhases?.find((phase) => {
+                const startDate = new Date(phase.startDate || "");
+                const endDate = new Date(phase.endDate || "");
+                return now >= startDate && now <= endDate;
+              });
+              const currentPrice = getCurrentPrice(ticket);
+              const basePrice = ticket.ticketPrice ?? 0;
+
+              return (
+                <>
+                  {/* Giá hiện tại */}
+                  <Text className="text-lg font-bold text-gray-900">
+                    {currentPrice.toLocaleString('vi-VN')}₫
+                  </Text>
+
+                  {/* Nếu có phase đang áp dụng và khác giá gốc */}
+                  {currentPhase && currentPrice !== basePrice && (
+                    <Text className="text-sm text-gray-500 line-through">
+                      {basePrice.toLocaleString('vi-VN')}₫
+                    </Text>
+                  )}
+
+                  {/* Tên phase */}
+                  {currentPhase ? (
+                    <Text className="text-xs text-blue-600 font-medium mt-1">
+                      {currentPhase.phaseName} ({currentPhase.applyPercent}%)
+                    </Text>
+                  ) : (
+                    <Text className="text-xs text-gray-500 mt-1">Chưa có giai đoạn áp dụng</Text>
+                  )}
+                </>
+              );
+            })()}
+          </View>
+        </View>
+      </View>
+      <View className="p-4">
+        <View className="flex-row items-center justify-between mb-3">
+          <View className="flex-1">
+            <Text className="text-lg font-semibold text-gray-900 mb-1">
+              {ticket.ticketName || 'Vé hội nghị'}
             </Text>
             <Text className="text-sm text-gray-600">
-              {ticket.description}
+              {ticket.ticketDescription || 'Mô tả vé hội nghị'}
             </Text>
           </View>
 
           <View className="ml-4 items-end">
             <Text className="text-lg font-bold text-gray-900">
-              {ticket.priceRange || ticket.price}
+              {ticket.ticketPrice?.toLocaleString('vi-VN')}₫
             </Text>
-            {ticket.priceRange && (
-              <Text className="text-sm text-gray-500">each</Text>
-            )}
+            {/* {ticket.actualPrice && ticket.actualPrice !== ticket.ticketPrice && (
+              <Text className="text-sm text-gray-500 line-through">
+                {ticket.actualPrice.toLocaleString('vi-VN')}₫
+              </Text>
+            )} */}
+            {/* {ticket.currentPhase && (
+              <Text className="text-xs text-blue-600 font-medium">
+                {ticket.currentPhase}
+              </Text>
+            )} */}
           </View>
         </View>
 
-        {/* Benefits */}
-        {ticket.benefits.length > 0 && (
-          <View className="mb-3">
-            {ticket.benefits.map((benefit, index) => (
-              <View key={index} className="flex-row items-center mb-1">
-                <Icon name="check-circle" size={16} color="#10B981" />
-                <Text className="text-sm text-gray-600 ml-2">{benefit}</Text>
-              </View>
-            ))}
-          </View>
-        )}
+        {/* Benefits - Using default benefits since API doesn't provide them */}
+        <View className="mb-3">
+          {[
+            'Tham dự tất cả các phiên chính',
+            'Tài liệu hội nghị',
+            'Coffee break',
+            'Certificate tham dự'
+          ].map((benefit, index) => (
+            <View key={index} className="flex-row items-center mb-1">
+              <Icon name="check-circle" size={16} color="#10B981" />
+              <Text className="text-sm text-gray-600 ml-2">{benefit}</Text>
+            </View>
+          ))}
+        </View>
 
         {/* Radio Button */}
         <View className="flex-row items-center justify-end">
           <RadioButton
-            value={ticket.id}
+            value={ticket.conferencePriceId}
             status={isSelected ? 'checked' : 'unchecked'}
             onPress={onSelect}
             color="#3B82F6"
@@ -155,13 +248,14 @@ const TicketTypeCard: React.FC<{
 const BuyTicketsButton: React.FC<{
   onPress: () => void;
   disabled?: boolean;
-}> = ({ onPress, disabled = false }) => {
+  loading?: boolean;
+}> = ({ onPress, disabled = false, loading = false }) => {
   return (
     <View className="px-4 pb-6">
       <TouchableOpacity
         onPress={onPress}
-        disabled={disabled}
-        className={`rounded-2xl overflow-hidden ${disabled ? 'opacity-50' : ''}`}
+        disabled={disabled || loading}
+        className={`rounded-2xl overflow-hidden ${disabled || loading ? 'opacity-50' : ''}`}
       >
         <LinearGradient
           colors={['#8B5CF6', '#3B82F6']}
@@ -170,10 +264,21 @@ const BuyTicketsButton: React.FC<{
           className="py-4 px-6"
         >
           <View className="flex-row items-center justify-center">
-            <Text className="text-white text-lg font-semibold mr-2">
-              Buy tickets
-            </Text>
-            <Icon name="arrow-forward" size={20} color="#FFFFFF" />
+            {loading ? (
+              <>
+                <ActivityIndicator size="small" color="#FFFFFF" />
+                <Text className="text-white text-lg font-semibold ml-2">
+                  Đang xử lý...
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text className="text-white text-lg font-semibold mr-2">
+                  Đăng ký
+                </Text>
+                <Icon name="arrow-forward" size={20} color="#FFFFFF" />
+              </>
+            )}
           </View>
         </LinearGradient>
       </TouchableOpacity>
@@ -185,72 +290,183 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
   navigation,
   route,
 }) => {
-  const [selectedTicketId, setSelectedTicketId] = useState<string>('standard');
+  const [selectedTicketId, setSelectedTicketId] = useState<string>('');
+  const [conferenceDataState, setConferenceDataState] = useState<TechnicalConferenceDetailResponse | null>(null);
 
-  const conferenceData = route?.params?.conferenceData || {
-    title: 'Hội thảo Khoa học Quốc tế về Trí tuệ Nhân tạo và Ứng dụng',
-    shortTitle: 'AI & Applications Conference',
-    date: '23. Nov. 2024',
-    venue: 'Đại học FPT, TP. HCM',
-    time: '8:00 - 17:30',
-    image: 'conf1',
+  // Get conferenceId from route params
+  const conferenceId = route?.params?.conferenceId || '';
+
+  // Get hooks
+  const { purchaseTicket, loading: ticketLoading, paymentError } = useTicket();
+  // const { fetchConference, loading: conferenceLoading, error: conferenceError } = useConference();
+  const {
+    technicalConference,
+    technicalConferenceLoading,
+    technicalConferenceError,
+    refetchTechnicalConference,
+    researchConference,
+    researchConferenceLoading,
+    researchConferenceError,
+    refetchResearchConference
+  } = useConference({ id: conferenceId });
+
+  // Fetch conference data on component mount
+  useEffect(() => {
+    if (conferenceId) {
+      loadConferenceData();
+    }
+  }, [conferenceId]);
+
+  const loadConferenceData = async () => {
+    try {
+      // const response = await fetchConference(conferenceId);
+      console.log('conferenceDataState:', conferenceDataState);
+      setConferenceDataState(technicalConference ?? null);
+    } catch (err) {
+      console.error('Error loading conference data:', err);
+    }
   };
 
-  const ticketTypes: TicketType[] = [
-    {
-      id: 'standard',
-      name: 'Standard',
-      description: 'Quyền truy cập cơ bản vào hội thảo',
-      price: '500.000₫',
-      priceRange: '500.000₫-800.000₫',
-      benefits: [
-        'Tham dự tất cả các phiên chính',
-        'Tài liệu hội thảo',
-        'Coffee break',
-        'Certificate tham dự'
-      ],
-    },
-    {
-      id: 'vip',
-      name: 'VIP Access',
-      description: 'Quyền truy cập cao cấp với nhiều ưu đãi',
-      price: '1.200.000₫',
-      benefits: [
-        'Tất cả quyền lợi Standard',
-        'Chỗ ngồi ưu tiên',
-        'Networking lunch với speakers',
-        'Túi quà cao cấp',
-        'Q&A riêng với chuyên gia'
-      ],
-    },
-    {
-      id: 'premium',
-      name: 'Premium',
-      description: 'Trải nghiệm hoàn hảo nhất',
-      price: '2.000.000₫',
-      priceRange: '2.000.000₫-2.500.000₫',
-      benefits: [
-        'Tất cả quyền lợi VIP',
-        'Workshop riêng',
-        'Meet & greet với speakers',
-        'Dinner gala',
-        'Chứng chỉ đặc biệt',
-        'Hỗ trợ 1-1 consulting'
-      ],
-    },
-  ];
+  // Helper functions to format API data
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '23. Nov. 2024';
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day}. ${month}. ${year}`;
+  };
 
-  const handleBuyTickets = () => {
-    const selectedTicket = ticketTypes.find(ticket => ticket.id === selectedTicketId);
-    console.log('Selected ticket:', selectedTicket);
+  const formatTime = (startDate?: string, endDate?: string) => {
+    if (!startDate || !endDate) return '8:00 - 17:30';
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return `${start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+  };
 
-    // navigation?.navigate('PaymentScreen', { 
-    //   ticket: selectedTicket, 
-    //   conference: conferenceData 
-    // });
+  // Transform API data to match UI expectations
+  const conferenceData = {
+    title: conferenceDataState?.conferenceName || 'Hội thảo Khoa học Quốc tế về Trí tuệ Nhân tạo và Ứng dụng',
+    shortTitle: conferenceDataState?.conferenceName || 'AI & Applications Conference',
+    date: formatDate(conferenceDataState?.startDate),
+    venue: conferenceDataState?.address || 'Đại học FPT, TP. HCM',
+    time: formatTime(conferenceDataState?.startDate, conferenceDataState?.endDate),
+    image: conferenceDataState?.bannerImageUrl ? 'conf1' : 'conf1', // Use default for now
+  };
 
-    // For now, just show alert
-    // alert(`Đã chọn vé: ${selectedTicket?.name} - ${selectedTicket?.price}`);
+  // Get conference prices from API data
+  const conferencePrices = conferenceDataState?.conferencePrices || [];
+
+  // Use conference prices directly from API
+  const ticketTypes: ConferencePriceResponse[] = conferencePrices;
+
+  // Set first ticket as default selection
+  useEffect(() => {
+    if (ticketTypes.length > 0 && !selectedTicketId) {
+      setSelectedTicketId(ticketTypes[0].conferencePriceId);
+    }
+  }, [ticketTypes, selectedTicketId]);
+
+  const handleBuyTickets = async () => {
+    const selectedTicket = ticketTypes.find(ticket => ticket.conferencePriceId === selectedTicketId);
+
+    if (!selectedTicket) {
+      Alert.alert('Lỗi', 'Vui lòng chọn một loại vé');
+      return;
+    }
+
+    try {
+      const paymentRequest = {
+        conferencePriceId: selectedTicket.conferencePriceId
+      };
+
+      const response = await purchaseTicket(paymentRequest);
+      console.log(response);
+
+      // Check if response contains payment URL
+      if (response?.data && typeof response.data === 'string') {
+        const paymentUrl = response.data;
+        // const text = response.data;
+        // const urlMatch = text.match(/https?:\/\/[^\s]+/);
+
+        // if (!urlMatch) {
+        //   Alert.alert('Lỗi', 'Không tìm thấy liên kết thanh toán trong dữ liệu');
+        //   return;
+        // }
+
+        // const paymentUrl = urlMatch[0];
+
+        console.log('url ne: ', paymentUrl);
+
+        // Check if URL is valid
+        const isValidUrl = paymentUrl.startsWith('http://') || paymentUrl.startsWith('https://');
+
+        if (isValidUrl) {
+          // Try to open payment URL
+          const supported = await Linking.canOpenURL(paymentUrl);
+
+          await openUrlDirectly(paymentUrl);
+
+          // if (supported) {
+          //   await Linking.openURL(paymentUrl);
+          // } else {
+          //   Alert.alert(
+          //     'Lỗi',
+          //     'Không thể mở liên kết thanh toán. Vui lòng sao chép liên kết và mở trong trình duyệt.',
+          //     [
+          //       { text: 'OK', style: 'default' },
+          //       {
+          //         text: 'Sao chép',
+          //         onPress: () => {
+          //           // Note: Would need to import Clipboard from @react-native-clipboard/clipboard
+          //           Alert.alert('URL thanh toán', paymentUrl);
+          //         }
+          //       }
+          //     ]
+          //   );
+          // }
+        } else {
+          Alert.alert('Lỗi', 'Liên kết thanh toán không hợp lệ');
+        }
+      } else {
+        Alert.alert('Lỗi', 'Không nhận được liên kết thanh toán từ máy chủ');
+      }
+
+    } catch (error: any) {
+      console.error('Purchase ticket error:', error);
+
+      // Show retry option
+      Alert.alert(
+        'Lỗi thanh toán',
+        paymentError || 'Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.',
+        [
+          { text: 'Hủy', style: 'cancel' },
+          { text: 'Thử lại', onPress: handleBuyTickets }
+        ]
+      );
+    }
+  };
+
+  const openUrlDirectly = async (url: string) => {
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      Alert.alert(
+        'Lỗi',
+        'Không thể mở liên kết thanh toán. Vui lòng sao chép và mở trong trình duyệt.',
+        [
+          { text: 'OK', style: 'default' },
+          {
+            text: 'Sao chép',
+            onPress: () => Alert.alert('URL thanh toán', url),
+          },
+        ]
+      );
+    }
+  };
+
+  const handleRetryConference = () => {
+    loadConferenceData();
   };
 
   return (
@@ -317,24 +533,56 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
               Select ticket
             </Text>
 
-            {/* Ticket Types */}
-            {ticketTypes.map((ticket) => (
-              <TicketTypeCard
-                key={ticket.id}
-                ticket={ticket}
-                isSelected={selectedTicketId === ticket.id}
-                onSelect={() => setSelectedTicketId(ticket.id)}
-              />
-            ))}
+            {/* Loading state for conference data */}
+            {technicalConferenceLoading && !conferenceDataState ? (
+              <View className="items-center py-8">
+                <ActivityIndicator size="large" color="#6B7280" />
+                <Text className="text-gray-600 mt-2">Đang tải thông tin vé...</Text>
+              </View>
+            ) : technicalConferenceError && !conferenceDataState ? (
+              <View className="items-center py-8">
+                <Icon name="error-outline" size={48} color="#EF4444" />
+                <Text className="text-gray-900 text-lg font-semibold mt-2">Có lỗi xảy ra</Text>
+                <Text className="text-gray-600 text-center mt-1 mb-4">
+                  {technicalConferenceError.data?.Message || 'Không thể tải thông tin hội nghị'}
+                </Text>
+                <TouchableOpacity
+                  onPress={handleRetryConference}
+                  className="bg-blue-500 rounded-xl px-6 py-3"
+                >
+                  <Text className="text-white font-semibold">Thử lại</Text>
+                </TouchableOpacity>
+              </View>
+            ) : ticketTypes.length === 0 ? (
+              <View className="items-center py-8">
+                <Icon name="confirmation-number" size={48} color="#9CA3AF" />
+                <Text className="text-gray-600 text-center mt-2">
+                  Chưa có thông tin vé cho hội nghị này
+                </Text>
+              </View>
+            ) : (
+              /* Ticket Types */
+              ticketTypes.map((ticket) => (
+                <TicketTypeCard
+                  key={ticket.conferencePriceId}
+                  ticket={ticket}
+                  isSelected={selectedTicketId === ticket.conferencePriceId}
+                  onSelect={() => setSelectedTicketId(ticket.conferencePriceId)}
+                />
+              ))
+            )}
           </View>
 
           <View className="flex-1" />
 
           {/* Buy Tickets Button */}
-          <BuyTicketsButton
-            onPress={handleBuyTickets}
-            disabled={!selectedTicketId}
-          />
+          {ticketTypes.length > 0 && (
+            <BuyTicketsButton
+              onPress={handleBuyTickets}
+              disabled={!selectedTicketId || technicalConferenceLoading}
+              loading={ticketLoading}
+            />
+          )}
         </ScrollView>
       </View>
     </View>

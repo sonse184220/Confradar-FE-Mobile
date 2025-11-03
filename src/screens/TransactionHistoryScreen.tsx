@@ -22,122 +22,65 @@ import BottomSheet, { BottomSheetBackdrop, BottomSheetView } from '@gorhom/botto
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { BlurView } from '@react-native-community/blur';
+import { useTransaction } from '../hooks/useTransaction';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-// Types
+// Types - Updated to match API response
 interface Transaction {
-  id: string;
-  name: string;
-  amount: number;
-  type: 'income' | 'expense';
-  date: string;
-  time: string;
-  avatar: string;
   transactionId: string;
-  cardDetails: string;
-  location: string;
-  category: string;
+  userId?: string;
+  currency?: string;
+  amount?: number;
+  transactionCode?: string;
+  createdAt?: string;
+  transactionStatusId?: string;
+  transactionTypeId?: string;
+  paymentMethodId?: string;
+  PaymentStatusName?: string;
+  PaymentMethodName?: string;
 }
 
 interface TransactionHistoryScreenProps {
   navigation?: any;
 }
 
-// Mock data
-const mockTransactions: Transaction[] = [
-  {
-    id: '1',
-    name: 'Mickey Obama Jr.',
-    amount: -450.00,
-    type: 'expense',
-    date: 'Today',
-    time: '8:19 am',
-    avatar: 'MO',
-    transactionId: 'ABX049123182',
-    cardDetails: 'Visa (Ending in 3920)',
-    location: 'Krupnicza 10, 31-123 Kraków',
-    category: 'Conference'
-  },
-  {
-    id: '2',
-    name: 'X-treme Fitness',
-    amount: -25.99,
-    type: 'expense',
-    date: 'Yesterday',
-    time: '1:23 pm',
-    avatar: 'XF',
-    transactionId: 'ABX049123183',
-    cardDetails: 'Visa (Ending in 3920)',
-    location: 'Fitness Center Downtown',
-    category: 'Fitness'
-  },
-  {
-    id: '3',
-    name: 'Abysso Co.',
-    amount: 7500.00,
-    type: 'income',
-    date: 'Monday',
-    time: '9:28 am',
-    avatar: 'AC',
-    transactionId: 'ABX049123184',
-    cardDetails: 'Visa (Ending in 3920)',
-    location: 'Business District',
-    category: 'Income'
-  },
-  {
-    id: '4',
-    name: 'KFC',
-    amount: -25.99,
-    type: 'expense',
-    date: 'Monday',
-    time: '4:09 am',
-    avatar: 'KF',
-    transactionId: 'ABX049123185',
-    cardDetails: 'Visa (Ending in 3920)',
-    location: 'KFC Restaurant',
-    category: 'Food'
-  },
-  {
-    id: '5',
-    name: 'KFC',
-    amount: -25.99,
-    type: 'expense',
-    date: 'Monday',
-    time: '4:09 am',
-    avatar: 'KF',
-    transactionId: 'ABX049123186',
-    cardDetails: 'Visa (Ending in 3920)',
-    location: 'KFC Restaurant',
-    category: 'Food'
-  },
-  {
-    id: '6',
-    name: 'KFC',
-    amount: -25.99,
-    type: 'expense',
-    date: 'Monday',
-    time: '4:09 am',
-    avatar: 'KF',
-    transactionId: 'ABX049123187',
-    cardDetails: 'Visa (Ending in 3920)',
-    location: 'KFC Restaurant',
-    category: 'Food'
-  },
-  {
-    id: '7',
-    name: 'KFC',
-    amount: -25.99,
-    type: 'expense',
-    date: 'Monday',
-    time: '4:09 am',
-    avatar: 'KF',
-    transactionId: 'ABX049123188',
-    cardDetails: 'Visa (Ending in 3920)',
-    location: 'KFC Restaurant',
-    category: 'Food'
-  },
-];
+// Helper functions for API data
+const formatDate = (dateString?: string): string => {
+  if (!dateString) return 'Unknown';
+  const date = new Date(dateString);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  if (date >= today) {
+    return 'Today';
+  } else if (date >= yesterday) {
+    return 'Yesterday';
+  } else {
+    return date.toLocaleDateString();
+  }
+};
+
+const formatTime = (dateString?: string): string => {
+  if (!dateString) return 'Unknown';
+  return new Date(dateString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+const getAvatarInitials = (transactionCode?: string, paymentMethod?: string): string => {
+  if (transactionCode) {
+    return transactionCode.slice(0, 2).toUpperCase();
+  }
+  if (paymentMethod) {
+    return paymentMethod.slice(0, 2).toUpperCase();
+  }
+  return 'TX';
+};
+
+const getTransactionName = (transaction: Transaction): string => {
+  return transaction.PaymentMethodName || transaction.transactionCode || 'Transaction';
+};
 
 const filterTabs = ['Period', 'Amount', 'Type', 'Product'];
 
@@ -178,72 +121,70 @@ const TransactionItem = ({
 }: {
   transaction: Transaction;
   onPress: () => void;
-}) => (
-  <View className="px-4 py-2">
-    <TouchableOpacity onPress={onPress}
-      // className="px-4 py-3"
-      // className="bg-gray-50 rounded-2xl p-4"
-      style={{
-        backgroundColor: '#1F2937',
-        borderColor: '#374151',
-        borderWidth: 1,
-        borderRadius: 16,
-        padding: 16,
-        marginHorizontal: 16,
-        marginVertical: 6,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.15,
-        shadowRadius: 4,
-        elevation: 3,
-      }}
-    // className="bg-gray-100 rounded-2xl p-4 border border-gray-200"
-    // style={{
-    //   shadowColor: "#000",
-    //   shadowOffset: { width: 0, height: 1 },
-    //   shadowOpacity: 0.05,
-    //   shadowRadius: 2,
-    //   elevation: 1,
-    // }}
-    >
-      <View className="flex-row items-center justify-between">
-        <View className="flex-row items-center flex-1">
-          {/* Avatar */}
-          <View className="w-12 h-12 rounded-full bg-gray-600 items-center justify-center mr-3">
-            <Text className="text-white font-semibold text-sm">
-              {transaction.avatar}
-            </Text>
+}) => {
+  const transactionName = getTransactionName(transaction);
+  const avatarInitials = getAvatarInitials(transaction.transactionCode, transaction.PaymentMethodName);
+  const formattedDate = formatDate(transaction.createdAt);
+  const formattedTime = formatTime(transaction.createdAt);
+  const amount = transaction.amount || 0;
+  const isPositive = amount > 0;
+
+  return (
+    <View className="px-4 py-2">
+      <TouchableOpacity onPress={onPress}
+        style={{
+          backgroundColor: '#1F2937',
+          borderColor: '#374151',
+          borderWidth: 1,
+          borderRadius: 16,
+          padding: 16,
+          marginHorizontal: 16,
+          marginVertical: 6,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.15,
+          shadowRadius: 4,
+          elevation: 3,
+        }}
+      >
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center flex-1">
+            {/* Avatar */}
+            <View className="w-12 h-12 rounded-full bg-gray-600 items-center justify-center mr-3">
+              <Text className="text-white font-semibold text-sm">
+                {avatarInitials}
+              </Text>
+            </View>
+
+            {/* Transaction Info */}
+            <View className="flex-1">
+              <Text className="text-white font-medium text-base">
+                {transactionName}
+              </Text>
+              <Text className="text-gray-400 text-sm">
+                {formattedDate}, {formattedTime}
+              </Text>
+            </View>
           </View>
 
-          {/* Transaction Info */}
-          <View className="flex-1">
-            <Text className="text-white font-medium text-base">
-              {transaction.name}
+          {/* Amount and Arrow */}
+          <View className="flex-row items-center">
+            <Text
+              className={`font-semibold text-base mr-2 ${isPositive ? 'text-green-400' : 'text-white'}`}
+            >
+              {isPositive ? '+' : ''} ${amount.toFixed(2)}
             </Text>
-            <Text className="text-gray-400 text-sm">
-              {transaction.date}, {transaction.time}
-            </Text>
+            <Icon
+              name={isPositive ? 'trending-up' : 'trending-down'}
+              size={20}
+              color="#6B7280"
+            />
           </View>
         </View>
-
-        {/* Amount and Arrow */}
-        <View className="flex-row items-center">
-          <Text
-            className={`font-semibold text-base mr-2 ${transaction.type === 'income' ? 'text-green-400' : 'text-white'
-              }`}
-          >
-            {transaction.type === 'income' ? '+' : '-'} ${Math.abs(transaction.amount).toFixed(2)}
-          </Text>
-          <Icon
-            name={transaction.type === 'income' ? 'trending-up' : 'trending-down'}
-            size={20}
-            color="#6B7280"
-          />
-        </View>
-      </View>
-    </TouchableOpacity>
-  </View>
-);
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const TransactionDetailModal = ({ visible, transaction, onClose }: { visible: boolean; transaction: Transaction | null; onClose: () => void }) => {
   const sheetRef = useRef<BottomSheet>(null);
@@ -342,21 +283,21 @@ const TransactionDetailModal = ({ visible, transaction, onClose }: { visible: bo
           <View className="flex-row items-center mb-6 bg-gray-800/50 rounded-2xl p-4">
             <View className="w-12 h-12 rounded-full bg-gray-700 items-center justify-center">
               <Icon
-                name={transaction.type === 'income' ? 'trending-up' : 'trending-down'}
+                name={(transaction.amount || 0) > 0 ? 'trending-up' : 'trending-down'}
                 size={24}
                 color="#10B981"
               />
             </View>
             <View className="ml-4 flex-1">
               <Text className="text-white text-xl font-semibold">
-                {transaction.name}
+                {getTransactionName(transaction)}
               </Text>
               <Text className="text-gray-400 text-sm">
-                {transaction.date}, {transaction.time}
+                {formatDate(transaction.createdAt)}, {formatTime(transaction.createdAt)}
               </Text>
             </View>
             <Text className="font-bold text-2xl text-white">
-              {transaction.type === 'income' ? '' : '-'} ${Math.abs(transaction.amount).toFixed(2)}
+              ${(transaction.amount || 0).toFixed(2)}
             </Text>
           </View>
 
@@ -378,21 +319,45 @@ const TransactionDetailModal = ({ visible, transaction, onClose }: { visible: bo
               </Text>
             </View>
 
-            {/* Card Details */}
-            <View className="mb-5">
-              <Text className="text-gray-500 text-xs mb-1.5">Card Details</Text>
-              <Text className="text-white font-medium text-base">
-                {transaction.cardDetails}
-              </Text>
-            </View>
+            {/* Transaction Code */}
+            {transaction.transactionCode && (
+              <View className="mb-5">
+                <Text className="text-gray-500 text-xs mb-1.5">Transaction Code</Text>
+                <Text className="text-white font-medium text-base">
+                  {transaction.transactionCode}
+                </Text>
+              </View>
+            )}
 
-            {/* Place */}
-            <View className="mb-5">
-              <Text className="text-gray-500 text-xs mb-1.5">Place</Text>
-              <Text className="text-white font-medium text-base">
-                {transaction.location}
-              </Text>
-            </View>
+            {/* Payment Method */}
+            {transaction.PaymentMethodName && (
+              <View className="mb-5">
+                <Text className="text-gray-500 text-xs mb-1.5">Payment Method</Text>
+                <Text className="text-white font-medium text-base">
+                  {transaction.PaymentMethodName}
+                </Text>
+              </View>
+            )}
+
+            {/* Payment Status */}
+            {transaction.PaymentStatusName && (
+              <View className="mb-5">
+                <Text className="text-gray-500 text-xs mb-1.5">Payment Status</Text>
+                <Text className="text-white font-medium text-base">
+                  {transaction.PaymentStatusName}
+                </Text>
+              </View>
+            )}
+
+            {/* Currency */}
+            {transaction.currency && (
+              <View className="mb-5">
+                <Text className="text-gray-500 text-xs mb-1.5">Currency</Text>
+                <Text className="text-white font-medium text-base">
+                  {transaction.currency}
+                </Text>
+              </View>
+            )}
           </View>
         </ScrollView>
       </BottomSheetView>
@@ -409,9 +374,51 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const filteredTransactions = mockTransactions.filter(transaction =>
-    transaction.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // Use transaction hook
+  const { transactions, loading, transactionsError } = useTransaction();
+
+  // Filter and sort transactions
+  const filteredAndSortedTransactions = useMemo(() => {
+    let filtered = transactions.filter(transaction => {
+      const transactionName = getTransactionName(transaction);
+      const transactionCode = transaction.transactionCode || '';
+      const paymentMethod = transaction.PaymentMethodName || '';
+      
+      return transactionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             transactionCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+             paymentMethod.toLowerCase().includes(searchQuery.toLowerCase());
+    });
+
+    // Sort based on active filter
+    switch (activeFilter) {
+      case 'Period':
+        return filtered.sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA; // Latest first
+        });
+      case 'Amount':
+        return filtered.sort((a, b) => {
+          const amountA = Math.abs(a.amount || 0);
+          const amountB = Math.abs(b.amount || 0);
+          return amountB - amountA; // Highest amount first
+        });
+      case 'Type':
+        return filtered.sort((a, b) => {
+          const statusA = a.PaymentStatusName || '';
+          const statusB = b.PaymentStatusName || '';
+          return statusA.localeCompare(statusB);
+        });
+      case 'Product':
+        return filtered.sort((a, b) => {
+          const methodA = a.PaymentMethodName || '';
+          const methodB = b.PaymentMethodName || '';
+          return methodA.localeCompare(methodB);
+        });
+      default:
+        return filtered;
+    }
+  }, [transactions, searchQuery, activeFilter]);
 
   const handleTransactionPress = (transaction: Transaction) => {
     console.log('Transaction clicked:', transaction);
@@ -473,23 +480,38 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
 
         {/* Transactions List */}
         <ScrollView
-          // className="flex-1 bg-white"
           style={{ flex: 1, backgroundColor: 'transparent', paddingVertical: 8 }}
           showsVerticalScrollIndicator={true}
         >
-          {filteredTransactions.map((transaction, index) => (
-            <View key={transaction.id}>
-              <TransactionItem
-                transaction={transaction}
-                onPress={() => handleTransactionPress(transaction)}
-              />
-              {index < filteredTransactions.length - 1 && (
-                <View className="px-4">
-                  <Divider style={{ backgroundColor: '#374151' }} />
-                </View>
-              )}
+          {loading ? (
+            <View className="flex-1 items-center justify-center py-20">
+              <Text className="text-white text-base">Loading transactions...</Text>
             </View>
-          ))}
+          ) : transactionsError ? (
+            <View className="flex-1 items-center justify-center py-20">
+              <Text className="text-red-400 text-base text-center px-4">
+                {transactionsError}
+              </Text>
+            </View>
+          ) : filteredAndSortedTransactions.length === 0 ? (
+            <View className="flex-1 items-center justify-center py-20">
+              <Text className="text-gray-400 text-base">No transactions found</Text>
+            </View>
+          ) : (
+            filteredAndSortedTransactions.map((transaction, index) => (
+              <View key={transaction.transactionId}>
+                <TransactionItem
+                  transaction={transaction}
+                  onPress={() => handleTransactionPress(transaction)}
+                />
+                {index < filteredAndSortedTransactions.length - 1 && (
+                  <View className="px-4">
+                    <Divider style={{ backgroundColor: '#374151' }} />
+                  </View>
+                )}
+              </View>
+            ))
+          )}
         </ScrollView>
 
         {/* Transaction Detail Modal */}

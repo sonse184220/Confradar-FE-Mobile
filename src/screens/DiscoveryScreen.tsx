@@ -220,7 +220,10 @@ const DiscoveryScreen = () => {
                                     // navigation.navigate('CurrentStack', {
                                     //     screen: 'CurrentEvents',
                                     // });
-                                    navigation.navigate('ConferenceDetails')
+                                    navigation.navigate('ConferenceList')
+                                    // navigation.navigate('ConferenceDetails', {
+                                    //     conferenceId: conference.id.toString(),
+                                    // });
                                 }}
                             >
                                 View Details

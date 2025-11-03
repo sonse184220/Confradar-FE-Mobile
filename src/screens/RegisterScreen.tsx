@@ -30,7 +30,7 @@ const RegisterScreen = () => {
   const [successMessage, setSuccessMessage] = useState('');
 
   // Use useAuth hook
-  const { register, loading, registerError, registerSuccess } = useAuth();
+  const { register, loading, registerError, registerResponse } = useAuth();
 
   const handleSelectImage = () => {
     const options: ImageLibraryOptions = {
@@ -84,7 +84,7 @@ const RegisterScreen = () => {
       };
 
       const result = await register(registerData);
-      if (result.Success) {
+      if (result.success) {
         // setSuccessMessage(result.Message || 'Đăng ký thành công!');
         // Auto navigate to login after 2 seconds
         setTimeout(() => {
@@ -297,10 +297,10 @@ const RegisterScreen = () => {
             )}
 
             {/* Success Message */}
-            {registerSuccess && (
+            {registerResponse?.success && (
               <View style={{ backgroundColor: '#D1FAE5', padding: 12, borderRadius: 8, marginBottom: 16 }}>
                 <Text style={{ color: '#065F46', fontSize: 14 }}>
-                  {registerSuccess}
+                  {registerResponse?.message}
                 </Text>
               </View>
             )}

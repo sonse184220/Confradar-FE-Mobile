@@ -19,7 +19,7 @@ const ForgotPasswordScreen1 = () => {
   const navigation = useNavigation<navigateprop>();
 
   // Use useAuth hook
-  const { forgotPassword, loading, forgotError, forgotSuccess } = useAuth();
+  const { forgotPassword, loading, forgotError, forgotResponse } = useAuth();
 
   const handleSendCode = async () => {
     if (!email) {
@@ -28,7 +28,7 @@ const ForgotPasswordScreen1 = () => {
 
     try {
       const result = await forgotPassword(email);
-      if (result.Success) {
+      if (result.success) {
         // setSuccessMessage('Hãy mở email để reset password');
         // Auto navigate after 2 seconds
         setTimeout(() => {
@@ -137,10 +137,10 @@ const ForgotPasswordScreen1 = () => {
             )}
 
             {/* Success Message */}
-            {forgotSuccess && (
+            {forgotResponse?.success && (
               <View style={{ backgroundColor: '#D1FAE5', padding: 12, borderRadius: 8, marginBottom: 16 }}>
                 <Text style={{ color: '#065F46', fontSize: 14 }}>
-                  {forgotSuccess}
+                  {forgotResponse?.message}
                 </Text>
               </View>
             )}

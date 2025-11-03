@@ -1,8 +1,8 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import HomeScreen from "../test/HomeScreen";
-import CurrentEventsScreen from "../test/CurrentEventsScreen";
-import UpcomingEventsScreen from "../test/UpcomingEventsScreen";
-import MoreEventsScreen from "../test/MoreEventsScreen";
+import HomeScreen from "../screens/draft-screen/HomeScreen";
+import CurrentEventsScreen from "../screens/draft-screen/CurrentEventsScreen";
+import UpcomingEventsScreen from "../screens/draft-screen/UpcomingEventsScreen";
+import MoreEventsScreen from "../screens/draft-screen/MoreEventsScreen";
 
 export type CurrentStackParamList = {
     Home: undefined;

@@ -34,8 +34,8 @@ export const authApi = createApi({
                 try {
                     const { data } = await queryFulfilled;
 
-                    if (data.Data) {
-                        const { accessToken, refreshToken } = data.Data;
+                    if (data.data) {
+                        const { accessToken, refreshToken } = data.data;
 
                         // ✅ Decode token using jwt-decode
                         const decoded = jwtDecode<JwtPayload>(accessToken);
