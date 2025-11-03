@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from './baseApi';
 import { ENDPOINTS } from '../../constants/endpoints';
-import type { ConferenceFormData, ConferenceResponse, RegisteredUserInConference, ResearchConferenceDetailResponse, TechnicalConferenceDetailResponse } from "../../types/conference.type";
+import type { ConferenceResponse, ResearchConferenceDetailResponse, TechnicalConferenceDetailResponse } from "../../types/conference.type";
 import type { ApiResponse, ApiResponsePagination } from "../../types/api.type";
 
 export const conferenceApi = createApi({
@@ -51,13 +51,6 @@ export const conferenceApi = createApi({
                     ]
                     : [{ type: 'Conference', id: 'LIST' }],
         }),
-        // getAllConferences: builder.query<ApiResponse<Conference[]>, void>({
-        //   query: () => ({
-        //     url: endpoint.CONFERENCE.LIST,
-        //     method: "GET",
-        //   }),
-        //   providesTags: ["Conference"],
-        // }),
 
         //tech detail endpoint
         getTechnicalConferenceDetail: builder.query<
@@ -102,95 +95,6 @@ export const conferenceApi = createApi({
                     : [{ type: "Conference", id: "LIST" }],
         }),
 
-        //view conf detail for customer old version
-        // getConferenceById: builder.query<ApiResponse<ConferenceResponse>, string>({
-        //   query: (id) => ({
-        //     url: `${endpoint.CONFERENCE.DETAIL}/${id}`,
-        //     method: 'GET',
-        //   }),
-        //   providesTags: (result, error, id) => [{ type: 'Conference', id }],
-        // }),
-        // getConferenceById: builder.query<ApiResponse<Conference>, string>({
-        //   query: (id) => ({
-        //     url: `${endpoint.CONFERENCE.DETAIL}/${id}`,
-        //     method: "GET",
-        //   }),
-        //   providesTags: ["Conference"],
-        // }),
-
-        createConference: builder.mutation<ApiResponse<string>, ConferenceFormData>({
-            query: (body) => ({
-                url: ENDPOINTS.CONFERENCE.CREATE,
-                method: "POST",
-                body,
-            }),
-            invalidatesTags: ["Conference"],
-        }),
-
-        updateConference: builder.mutation<ApiResponse<string>, { id: string; data: ConferenceFormData }>({
-            query: ({ id, data }) => ({
-                url: `${ENDPOINTS.CONFERENCE.UPDATE}/${id}`,
-                method: "PUT",
-                body: data,
-            }),
-            invalidatesTags: ["Conference"],
-        }),
-
-
-        deleteConference: builder.mutation<ApiResponse<string>, string>({
-            query: (id) => ({
-                url: `${ENDPOINTS.CONFERENCE.DELETE}/${id}`,
-                method: "DELETE",
-            }),
-            invalidatesTags: ["Conference"],
-        }),
-
-        viewRegisteredUsersForConference: builder.query<
-            ApiResponse<RegisteredUserInConference[]>,
-            string
-        >({
-            query: (conferenceId) => ({
-                url: `${ENDPOINTS.CONFERENCE.VIEW_REGISTERED_USERS}?conferenceId=${conferenceId}`,
-                method: "GET",
-            }),
-            providesTags: ["Conference"],
-        }),
-
-
-        getPendingConferences: builder.query<
-            ApiResponsePagination<ConferenceResponse[]>,
-            { page?: number; pageSize?: number }
-        >({
-            query: ({ page = 1, pageSize = 10 }) => ({
-                url: ENDPOINTS.CONFERENCE.PENDING_CONFERENCES,
-                method: "GET",
-                params: { page, pageSize },
-            }),
-            providesTags: (result) =>
-                result?.data?.items
-                    ? [
-                        ...result.data.items.map(({ conferenceId }) => ({
-                            type: "Conference" as const,
-                            id: conferenceId,
-                        })),
-                        { type: "Conference", id: "PENDING_LIST" },
-                    ]
-                    : [{ type: "Conference", id: "PENDING_LIST" }],
-        }),
-
-        approveConference: builder.mutation<
-            ApiResponse<null>,
-            { conferenceId: string; reason: string; isApprove: boolean }
-        >({
-            query: ({ conferenceId, reason, isApprove }) => ({
-                url: ENDPOINTS.CONFERENCE.APPROVE_CONFERENCE(conferenceId),
-                method: "PUT",
-                body: { reason, isApprove },
-            }),
-            invalidatesTags: ["Conference"],
-        }),
-
-
     }),
 });
 
@@ -199,20 +103,10 @@ export const {
     useGetTechnicalConferenceDetailQuery,
     useGetResearchConferenceDetailQuery,
     useGetAllConferencesWithPricesPaginationQuery,
-    // useGetConferenceByIdQuery,
     useGetConferencesByStatusQuery,
     useLazyGetAllConferencesPaginationQuery,
     useLazyGetAllConferencesWithPricesPaginationQuery,
-    // useLazyGetConferenceByIdQuery,
     useLazyGetConferencesByStatusQuery,
-    useViewRegisteredUsersForConferenceQuery,
-    useLazyGetPendingConferencesQuery,
-
-    useApproveConferenceMutation,
-
-    useCreateConferenceMutation,
-    useUpdateConferenceMutation,
-    useDeleteConferenceMutation,
 } = conferenceApi;
 
 

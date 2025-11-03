@@ -12,6 +12,8 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  ImageBackground,
+  StyleSheet,
 } from 'react-native';
 import {
   Card,
@@ -20,12 +22,19 @@ import {
   IconButton,
   Surface,
   Divider,
+  Appbar,
 } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { HomeStackParamList } from '../navigation/HomeStack';
 import { useConference } from '../hooks/useConference';
 import { useTransaction } from '../hooks/useTransaction';
-import { ConferencePriceResponse, ResearchConferenceDetailResponse, ResearchConferenceSessionResponse, TechnicalConferenceDetailResponse, TechnicalConferenceSessionResponse } from '../types/conference.type';
+import { ConferencePricePhaseResponse, ConferencePriceResponse, ResearchConferenceDetailResponse, ResearchConferenceSessionResponse, TechnicalConferenceDetailResponse, TechnicalConferenceSessionResponse } from '../types/conference.type';
+import InformationTab from '@/components/conference-discovery/conference-detail/InformationTab';
+import SessionsTab from '@/components/conference-discovery/conference-detail/SessionsTab';
+import ConferencePriceTab from '@/components/conference-discovery/conference-detail/ConferencePriceTab';
+import ResearchPaperInformationTab from '@/components/conference-discovery/conference-detail/ResearchPaperInformationTab';
+import FeedbackTab from '@/components/conference-discovery/conference-detail/FeedbackTab';
+import { BlurView } from '@react-native-community/blur';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -53,12 +62,10 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
 
   const navigationTo = useNavigation<NavigationProp>();
 
-  // Get conferenceId and type from route params
   const conferenceId = route?.params?.conferenceId || '';
   const type = route?.params?.type || 'technical';
   const isResearch = type === 'research';
 
-  // Use the same logic as web ConferenceDetail
   const {
     technicalConference,
     technicalConferenceLoading,
@@ -86,12 +93,10 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   //   researchPaymentError,
   // } = useTransaction();
 
-  // Use the appropriate conference data based on type (like web)
   const conference = isResearch ? researchConference : technicalConference;
   const loading = isResearch ? researchConferenceLoading : technicalConferenceLoading;
   const error = isResearch ? researchConferenceError : technicalConferenceError;
 
-  // Handle purchase ticket (like web)
   // const handlePurchaseTicket = async () => {
   //   if (!selectedTicket) return;
 
@@ -120,7 +125,6 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   //   }
   // };
 
-  // Format date and time functions (like web)
   const formatDate = (dateString?: string) => {
     if (!dateString) return '';
     return new Date(dateString).toLocaleDateString('vi-VN', {
@@ -139,7 +143,6 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     });
   };
 
-  // Loading state (like web)
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a2e' }}>
@@ -149,7 +152,6 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     );
   }
 
-  // Error state (like web)
   if (error) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a2e' }}>
@@ -162,7 +164,6 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     );
   }
 
-  // No data state (like web)
   if (!conference) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a2e' }}>
@@ -172,16 +173,78 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   }
 
   const tabs = [
-    { key: 'info', label: 'Conference Info' },
+    { key: 'info', label: 'Information' },
     { key: 'sessions', label: 'Sessions' },
-    ...(isResearch ? [{ key: 'research', label: 'Details' }] : [{ key: 'details', label: 'Details' }]),
+    { key: 'price', label: 'Price' },
+    ...(isResearch ? [{ key: 'research', label: 'Research Detail' }] : []),
     { key: 'feedback', label: 'Feedback' }
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#1a1a2e' }}>
-      {/* Header with back button */}
-      <View style={{
+    <View style={{ flex: 1 }}>
+      <Appbar.Header
+        mode="center-aligned"
+        style={{ backgroundColor: '#16213e' }}>
+        <Appbar.BackAction onPress={() => navigationTo.goBack()} color="white" />
+        <Appbar.Content
+          title="Chi tiết hội nghị"
+          titleStyle={{ color: 'white', fontWeight: 'bold' }}
+        />
+        <IconButton
+          icon={isFavorite ? "heart" : "heart-outline"}
+          iconColor={isFavorite ? "#EF4444" : "white"}
+          onPress={() => setIsFavorite(!isFavorite)}
+        />
+      </Appbar.Header>
+
+      {/* <View style={{ position: 'relative', width: '100%', height: 200 }}>
+        <ImageBackground
+          source={{ uri: conference.bannerImageUrl || 'https://via.placeholder.com/400x200' }}
+          style={{ width: '100%', height: '100%' }}
+          resizeMode="cover"
+          blurRadius={50}
+        >
+          <View style={{
+            position: 'absolute',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingTop: 40,
+          }}>
+            <IconButton
+              icon="arrow-left"
+              iconColor="white"
+              onPress={() => navigationTo.goBack()}
+            />
+
+            <View style={{ flex: 1, marginLeft: 8 }}>
+              <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>
+                {conference.conferenceName}
+              </Text>
+              <Chip
+                mode="flat"
+                style={{
+                  backgroundColor: isResearch ? '#EF4444' : '#3B82F6',
+                  alignSelf: 'flex-start',
+                  marginTop: 4
+                }}
+                textStyle={{ color: 'white', fontSize: 12 }}
+              >
+                {isResearch ? 'Nghiên cứu' : 'Công nghệ'}
+              </Chip>
+            </View>
+
+            <IconButton
+              icon={isFavorite ? "heart" : "heart-outline"}
+              iconColor={isFavorite ? "#EF4444" : "white"}
+              onPress={() => setIsFavorite(!isFavorite)}
+            />
+          </View>
+        </ImageBackground>
+      </View> */}
+      {/* <View style={{
         paddingTop: 40,
         paddingHorizontal: 16,
         paddingBottom: 16,
@@ -202,11 +265,52 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
           iconColor={isFavorite ? "#EF4444" : "white"}
           onPress={() => setIsFavorite(!isFavorite)}
         />
-      </View>
+      </View> */}
 
       <ScrollView style={{ flex: 1 }}>
         {/* Hero Section */}
-        <View style={{ position: 'relative' }}>
+        <View className="px-4 pb-4">
+          <View className="overflow-hidden rounded-3xl" style={{ aspectRatio: 16 / 6 }}>
+            <ImageBackground
+              source={{ uri: conference.bannerImageUrl }}
+              className="w-full h-full"
+              resizeMode="cover"
+              blurRadius={50}
+            >
+              <View className="flex-row items-center p-4 h-full">
+                <View className="w-24 h-24 rounded-2xl overflow-hidden mr-4">
+                  <Image
+                    source={{ uri: conference.bannerImageUrl }}
+                    className="w-full h-full"
+                    resizeMode="cover"
+                  />
+                </View>
+
+                <View className="flex-1">
+                  <Text className="text-white text-xl font-bold mb-2">
+                    {conference.conferenceName}
+                  </Text>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+                    <Icon name="event" size={16} color="white" style={{ marginRight: 8 }} />
+                    <Text style={{ color: 'white' }}>{formatDate(conference.startDate)}</Text>
+                  </View>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                    <Icon name="location-on" size={16} color="white" style={{ marginRight: 8 }} />
+                    <Text style={{ color: 'white', flex: 1 }}>{conference.address}</Text>
+                  </View>
+                  <Chip
+                    mode="flat"
+                    style={{ backgroundColor: isResearch ? '#EF4444' : '#3B82F6', alignSelf: 'flex-start' }}
+                    textStyle={{ color: 'white' }}
+                  >
+                    {isResearch ? 'Nghiên cứu' : 'Công nghệ'}
+                  </Chip>
+                </View>
+              </View>
+            </ImageBackground>
+          </View>
+        </View>
+        {/* <View style={{ position: 'relative' }}>
           <Image
             source={{ uri: conference.bannerImageUrl || 'https://via.placeholder.com/400x200' }}
             style={{ width: screenWidth, height: 200 }}
@@ -239,7 +343,7 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
               {isResearch ? 'Nghiên cứu' : 'Công nghệ'}
             </Chip>
           </View>
-        </View>
+        </View> */}
 
         {/* Register Button */}
         <Surface style={{ margin: 16, padding: 16, backgroundColor: 'rgba(255,255,255,0.1)' }}>
@@ -281,8 +385,14 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
             borderWidth: 1,
             borderRadius: 16,
             padding: 4,
+            // overflow: 'hidden',
             // backdropFilter: 'blur(16px)'
           }}>
+            {/* <BlurView
+              style={{ ...StyleSheet.absoluteFillObject, borderRadius: 16 }}
+              blurType="light"
+              blurAmount={16}
+            /> */}
             <View style={{ flexDirection: 'row' }}>
               {tabs.map((tab) => (
                 <TouchableOpacity
@@ -320,217 +430,29 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
             {/* Tab Content */}
             <View style={{ padding: 16 }}>
               {activeTab === 'info' && (
-                <View>
-                  <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
-                    Conference Info
-                  </Text>
-
-                  {/* Basic Conference Information */}
-                  <Surface style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 16, marginBottom: 12 }}>
-                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Location:</Text>
-                    <Text style={{ color: 'white', marginBottom: 12 }}>{conference.address}</Text>
-
-                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Date:</Text>
-                    <Text style={{ color: 'white', marginBottom: 12 }}>{formatDate(conference.startDate)} - {formatDate(conference.endDate)}</Text>
-
-                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Capacity:</Text>
-                    <Text style={{ color: 'white' }}>{conference.totalSlot || 'Unlimited'} attendees</Text>
-                  </Surface>
-
-                  {/* Conference Description */}
-                  <Surface style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 16, marginBottom: 12 }}>
-                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>About:</Text>
-                    <Text style={{ color: 'white', lineHeight: 20 }}>{conference.description}</Text>
-                  </Surface>
-
-                  {/* Media */}
-                  {conference.conferenceMedia && conference.conferenceMedia.length > 0 && (
-                    <View style={{ marginBottom: 20 }}>
-                      <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>
-                        Conference Photos
-                      </Text>
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        {conference.conferenceMedia.map((media) => (
-                          <TouchableOpacity
-                            key={media.mediaId}
-                            onPress={() => setSelectedImage(media.mediaUrl || '')}
-                            style={{ marginRight: 12 }}
-                          >
-                            <Image
-                              source={{ uri: media.mediaUrl || 'https://via.placeholder.com/200x150' }}
-                              style={{ width: 200, height: 150, borderRadius: 8 }}
-                              resizeMode="cover"
-                            />
-                          </TouchableOpacity>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  )}
-                </View>
+                <InformationTab
+                  conference={conference}
+                  isResearch={isResearch}
+                  formatDate={formatDate}
+                  setSelectedImage={setSelectedImage}
+                />
               )}
 
               {activeTab === 'sessions' && (
-                <View>
-                  <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
-                    Sessions
-                  </Text>
+                <SessionsTab
+                  conference={conference}
+                  isResearch={isResearch}
+                  formatDate={formatDate}
+                  formatTime={formatTime}
+                />
+              )}
 
-                  {(() => {
-                    const isResearch = conference.isResearchConference === true;
-                    const sessions = isResearch
-                      ? (conference as ResearchConferenceDetailResponse).researchSessions || []
-                      : (conference as TechnicalConferenceDetailResponse).sessions || [];
-
-                    return sessions.length > 0 ? (
-                      sessions.map((session, index) => {
-                        if (isResearch) {
-                          const s = session as ResearchConferenceSessionResponse;
-                          return (
-                            <Surface
-                              key={s.conferenceSessionId || index}
-                              style={{
-                                backgroundColor: 'rgba(255,255,255,0.2)',
-                                borderRadius: 8,
-                                padding: 16,
-                                marginBottom: 12
-                              }}
-                            >
-                              <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>
-                                {s.title}
-                              </Text>
-                              {s.description && (
-                                <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, marginBottom: 8 }}>
-                                  {s.description}
-                                </Text>
-                              )}
-                              {s.startTime && s.endTime && (
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                                  <Icon name="access-time" size={16} color="white" style={{ marginRight: 8 }} />
-                                  <Text style={{ color: 'white', fontSize: 12 }}>
-                                    {formatTime(s.startTime)} - {formatTime(s.endTime)}
-                                  </Text>
-                                </View>
-                              )}
-                              {s.date && (
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                                  <Icon name="event" size={16} color="white" style={{ marginRight: 8 }} />
-                                  <Text style={{ color: 'white', fontSize: 12 }}>
-                                    {formatDate(s.date)}
-                                  </Text>
-                                </View>
-                              )}
-                              {s.sessionMedia && s.sessionMedia.length > 0 && (
-                                <View style={{ marginTop: 8 }}>
-                                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12, marginBottom: 4 }}>
-                                    Session Media:
-                                  </Text>
-                                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                                    {s.sessionMedia.map((media, idx) => (
-                                      <Text
-                                        key={media.conferenceSessionMediaId || idx}
-                                        style={{ color: '#60A5FA', fontSize: 12 }}
-                                        onPress={() => media.conferenceSessionMediaUrl && Linking.openURL(media.conferenceSessionMediaUrl)}
-                                      >
-                                        Media {idx + 1}
-                                      </Text>
-                                    ))}
-                                  </View>
-                                </View>
-                              )}
-                            </Surface>
-                          );
-                        } else {
-                          const s = session as TechnicalConferenceSessionResponse;
-                          return (
-                            <Surface
-                              key={s.conferenceSessionId || index}
-                              style={{
-                                backgroundColor: 'rgba(255,255,255,0.2)',
-                                borderRadius: 8,
-                                padding: 16,
-                                marginBottom: 12
-                              }}
-                            >
-                              <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>
-                                {s.title}
-                              </Text>
-                              {s.description && (
-                                <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12, marginBottom: 8 }}>
-                                  {s.description}
-                                </Text>
-                              )}
-                              {s.startTime && s.endTime && (
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                                  <Icon name="access-time" size={16} color="white" style={{ marginRight: 8 }} />
-                                  <Text style={{ color: 'white', fontSize: 12 }}>
-                                    {formatTime(s.startTime)} - {formatTime(s.endTime)}
-                                  </Text>
-                                </View>
-                              )}
-                              {s.sessionDate && (
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                                  <Icon name="event" size={16} color="white" style={{ marginRight: 8 }} />
-                                  <Text style={{ color: 'white', fontSize: 12 }}>
-                                    {formatDate(s.sessionDate)}
-                                  </Text>
-                                </View>
-                              )}
-                              {s.room && (
-                                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
-                                  <Icon name="location-on" size={16} color="white" style={{ marginRight: 8 }} />
-                                  <Text style={{ color: 'white', fontSize: 12 }}>
-                                    {s.room.displayName || s.room.number || 'Phòng chưa xác định'}
-                                  </Text>
-                                </View>
-                              )}
-                              {s.speakers && s.speakers.length > 0 && (
-                                <View style={{ marginBottom: 8 }}>
-                                  <Text style={{ color: 'white', fontSize: 12, fontWeight: 'bold' }}>
-                                    Diễn giả:
-                                  </Text>
-                                  {s.speakers.map((speaker) => (
-                                    <View key={speaker.speakerId} style={{ marginLeft: 8, marginTop: 4 }}>
-                                      <Text style={{ color: 'white', fontSize: 12 }}>
-                                        {speaker.name}
-                                      </Text>
-                                      {speaker.description && (
-                                        <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 10 }}>
-                                          {speaker.description}
-                                        </Text>
-                                      )}
-                                    </View>
-                                  ))}
-                                </View>
-                              )}
-                              {s.sessionMedia && s.sessionMedia.length > 0 && (
-                                <View style={{ marginTop: 8 }}>
-                                  <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 12, marginBottom: 4 }}>
-                                    Session Media:
-                                  </Text>
-                                  <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-                                    {s.sessionMedia.map((media, idx) => (
-                                      <Text
-                                        key={media.conferenceSessionMediaId || idx}
-                                        style={{ color: '#60A5FA', fontSize: 12 }}
-                                        onPress={() => media.conferenceSessionMediaUrl && Linking.openURL(media.conferenceSessionMediaUrl)}
-                                      >
-                                        Media {idx + 1}
-                                      </Text>
-                                    ))}
-                                  </View>
-                                </View>
-                              )}
-                            </Surface>
-                          );
-                        }
-                      })
-                    ) : (
-                      <Text style={{ color: 'rgba(255,255,255,0.7)', textAlign: 'center', paddingVertical: 32 }}>
-                        Chưa có thông tin về sessions
-                      </Text>
-                    );
-                  })()}
-                </View>
+              {activeTab === 'price' && (
+                <ConferencePriceTab
+                  conference={conference}
+                  formatDate={formatDate}
+                  formatTime={formatTime}
+                />
               )}
 
               {/* {activeTab === 'sessions' && (
@@ -587,120 +509,16 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
                 </View>
               )} */}
 
-              {(activeTab === 'research' || activeTab === 'details') && (
-                <View>
-                  <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
-                    {isResearch ? 'Research Paper Information' : 'Conference Details'}
-                  </Text>
-
-                  {isResearch && researchConference ? (
-                    <>
-                      {/* Research specific fields */}
-                      <Surface style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 16, marginBottom: 12 }}>
-                        <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Paper Format:</Text>
-                        <Text style={{ color: 'white', marginBottom: 12 }}>{researchConference.paperFormat || 'Chưa xác định'}</Text>
-
-                        <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Number of Papers Accepted:</Text>
-                        <Text style={{ color: 'white', marginBottom: 12 }}>{researchConference.numberPaperAccept || 'Chưa xác định'}</Text>
-
-                        <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Ranking:</Text>
-                        <Text style={{ color: 'white' }}>{researchConference.rankingDescription || 'Chưa xác định'}</Text>
-                      </Surface>
-
-                      {/* Research phases */}
-                      {researchConference.researchPhase && (
-                        <Surface style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 16 }}>
-                          <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 12 }}>Important Deadlines:</Text>
-                          <View style={{ marginBottom: 8 }}>
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Registration:</Text>
-                            <Text style={{ color: 'white' }}>
-                              {formatDate(researchConference.researchPhase.registrationStartDate)} - {formatDate(researchConference.researchPhase.registrationEndDate)}
-                            </Text>
-                          </View>
-                          <View style={{ marginBottom: 8 }}>
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Full Paper:</Text>
-                            <Text style={{ color: 'white' }}>
-                              {formatDate(researchConference.researchPhase.fullPaperStartDate)} - {formatDate(researchConference.researchPhase.fullPaperEndDate)}
-                            </Text>
-                          </View>
-                          <View style={{ marginBottom: 8 }}>
-                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Review:</Text>
-                            <Text style={{ color: 'white' }}>
-                              {formatDate(researchConference.researchPhase.reviewStartDate)} - {formatDate(researchConference.researchPhase.reviewEndDate)}
-                            </Text>
-                          </View>
-                        </Surface>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      {/* Technical Conference Details */}
-                      {conference.sponsors && conference.sponsors.length > 0 && (
-                        <View style={{ marginBottom: 20 }}>
-                          <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>
-                            Sponsors
-                          </Text>
-                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                            {conference.sponsors.map((sponsor) => (
-                              <View key={sponsor.sponsorId} style={{
-                                backgroundColor: 'rgba(255,255,255,0.2)',
-                                borderRadius: 8,
-                                padding: 12,
-                                marginRight: 12,
-                                alignItems: 'center',
-                                width: 120
-                              }}>
-                                <Image
-                                  source={{ uri: sponsor.imageUrl || 'https://via.placeholder.com/60x60' }}
-                                  style={{ width: 60, height: 60, borderRadius: 8, marginBottom: 8 }}
-                                  resizeMode="contain"
-                                />
-                                <Text style={{ color: 'white', fontSize: 12, textAlign: 'center' }}>
-                                  {sponsor.name}
-                                </Text>
-                              </View>
-                            ))}
-                          </ScrollView>
-                        </View>
-                      )}
-
-                      {/* Policies */}
-                      {conference.policies && conference.policies.length > 0 && (
-                        <View>
-                          <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>
-                            Conference Policy
-                          </Text>
-                          {conference.policies.map((policy) => (
-                            <Surface key={policy.policyId} style={{
-                              backgroundColor: 'rgba(255,255,255,0.2)',
-                              borderRadius: 8,
-                              padding: 12,
-                              marginBottom: 8
-                            }}>
-                              <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 4 }}>
-                                {policy.policyName}
-                              </Text>
-                              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12 }}>
-                                {policy.description}
-                              </Text>
-                            </Surface>
-                          ))}
-                        </View>
-                      )}
-                    </>
-                  )}
-                </View>
+              {activeTab === 'research' && isResearch && (
+                <ResearchPaperInformationTab
+                  conference={(conference as ResearchConferenceDetailResponse)}
+                  formatDate={formatDate}
+                  formatTime={formatTime}
+                />
               )}
 
               {activeTab === 'feedback' && (
-                <View>
-                  <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
-                    Feedback
-                  </Text>
-                  <Text style={{ color: 'rgba(255,255,255,0.7)', textAlign: 'center', paddingVertical: 32 }}>
-                    Tính năng đánh giá sẽ được bổ sung sau
-                  </Text>
-                </View>
+                <FeedbackTab conference={conference} />
               )}
             </View>
           </View>

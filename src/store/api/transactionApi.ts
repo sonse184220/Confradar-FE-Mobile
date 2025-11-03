@@ -2,8 +2,8 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseApi';
 import { ApiResponse } from '../../types/api';
 import { ENDPOINTS } from '../../constants/endpoints';
+import { CreateTechPaymentRequest } from './ticketApi';
 
-// Transaction types
 export interface PaymentMethod {
     paymentMethodId: string;
     name?: string;
@@ -21,21 +21,6 @@ export interface TransactionType {
     typeName?: string;
     description?: string;
 }
-
-// export interface Transaction {
-//     transactionId: string;
-//     userId?: string;
-//     currency?: string;
-//     amount?: number;
-//     transactionCode?: string;
-//     createdAt?: string;
-//     transactionStatusId?: string;
-//     transactionTypeId?: string;
-//     paymentMethodId?: string;
-//     paymentMethod?: PaymentMethod;
-//     transactionStatus?: TransactionStatus;
-//     transactionType?: TransactionType;
-// }
 
 export interface Transaction {
     transactionId: string;
@@ -57,7 +42,24 @@ export const transactionApi = createApi({
     baseQuery: baseQueryWithReauth,
     tagTypes: ['Transaction'],
     endpoints: (builder) => ({
-        // Get own transactions
+        createPaymentForTech: builder.mutation<ApiResponse<string>, CreateTechPaymentRequest>({
+            query: (request) => ({
+                url: ENDPOINTS.TRANSACTION.GET_OWN,
+                method: 'POST',
+                body: request,
+            }),
+            async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+                try {
+                    const { data } = await queryFulfilled;
+                } catch (err: any) {
+                    // dispatch(setError(err?.error?.data?.message || 'Payment failed'));
+                } finally {
+                    // dispatch(setLoading(false));
+                }
+            },
+            invalidatesTags: ['Transaction'],
+        }),
+
         getOwnTransactions: builder.query<ApiResponse<Transaction[]>, void>({
             query: () => ({
                 url: ENDPOINTS.TRANSACTION.GET_OWN,
@@ -75,24 +77,13 @@ export const transactionApi = createApi({
                     : [{ type: 'Transaction', id: 'LIST' }],
         }),
 
-        // Get transaction by ID
         getTransactionById: builder.query<ApiResponse<Transaction>, string>({
             query: (id) => ({
-                url: `${ENDPOINTS.TRANSACTION.GET_BY_ID}/${id}`, // hoặc `/transaction/${id}`
+                url: `${ENDPOINTS.TRANSACTION.GET_BY_ID}/${id}`,
                 method: 'GET',
             }),
             providesTags: (result, error, id) => [{ type: 'Transaction', id }],
         }),
-
-        // Create transaction (nếu cần)
-        // createTransaction: builder.mutation<ApiResponse<Transaction>, Partial<Transaction>>({
-        //     query: (data) => ({
-        //         url: ENDPOINTS.TRANSACTION.CREATE, // hoặc '/transaction'
-        //         method: 'POST',
-        //         body: data,
-        //     }),
-        //     invalidatesTags: [{ type: 'Transaction', id: 'LIST' }],
-        // }),
     }),
 });
 
@@ -101,5 +92,4 @@ export const {
     useLazyGetOwnTransactionsQuery,
     useGetTransactionByIdQuery,
     useLazyGetTransactionByIdQuery,
-    // useCreateTransactionMutation,
 } = transactionApi;

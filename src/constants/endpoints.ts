@@ -19,22 +19,8 @@ export const ENDPOINTS = {
         LIST_WITH_PRICES: "/Conference/conferences-with-prices",
         LIST_BY_STATUS: "/Conference/by-status",
 
-        VIEW_REGISTERED_USERS: "/Conference/view-registered-users-for-conference",
-
-
         GET_TECH_BY_ID: (conferenceId: string) => `/Conference/technical-detail/${conferenceId}`,
         GET_RESEARCH_BY_ID: (conferenceId: string) => `/Conference/research-detail/${conferenceId}`,
-
-        // ✅ Trạng thái & hoàn thành bước
-        STEP_COMPLETION_STATUS: "/Conference/step-completion-status",
-        RESEARCH_STEP_COMPLETION_STATUS: "/Conference/research-step-completion-status",
-        CHECK_TECH_STEP_COMPLETION: "/Conference/check-technical-step-completion",
-        CHECK_RESEARCH_STEP_COMPLETION: "/Conference/check-research-step-completion",
-
-        //pending & approve
-        PENDING_CONFERENCES: "/Conference/pending-conferences",
-        APPROVE_CONFERENCE: (conferenceId: string) => `/Conference/approve-conference/${conferenceId}`,
-
 
         DETAIL: "/Conference",
         TECHNICAL_DETAIL: "/Conference/technical-detail",
@@ -53,6 +39,6 @@ export const ENDPOINTS = {
     TRANSACTION: {
         GET_OWN: '/Payment/get-own-transaction',
         GET_BY_ID: '/transaction',
-        CREATE: '/transaction',
+        PAY_TECH: '/Payment/pay-tech-with-momo',
     }
 } as const;

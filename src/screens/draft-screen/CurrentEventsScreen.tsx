@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
-import { CurrentStackParamList } from '../navigation/CurrentStack';
+import { CurrentStackParamList } from '../../navigation/CurrentStack';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
-import { useTicket } from '../hooks/useTicket';
+import { useTicket } from '../../hooks/useTicket';
 
 // Ticket interface from API
 interface Ticket {

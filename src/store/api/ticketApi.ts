@@ -73,11 +73,6 @@ export const ticketApi = createApi({
                 dispatch(setLoading(true));
                 try {
                     const { data } = await queryFulfilled;
-                    // Payment URL returned, can be used to redirect user
-                    if (data.data) {
-                        // Optionally handle payment URL
-                        console.log('Payment URL:', data.data);
-                    }
                 } catch (err: any) {
                     dispatch(setError(err?.error?.data?.message || 'Payment failed'));
                 } finally {
@@ -87,7 +82,6 @@ export const ticketApi = createApi({
             invalidatesTags: ['Transaction'],
         }),
 
-        // Get own paid tickets
         getOwnPaidTickets: builder.query<ApiResponse<Ticket[]>, void>({
             query: () => ({
                 url: '/Ticket/get-own-paid-ticket',
