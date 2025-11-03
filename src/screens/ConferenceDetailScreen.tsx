@@ -55,7 +55,7 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
 
   // Get conferenceId and type from route params
   const conferenceId = route?.params?.conferenceId || '';
-  const type = route?.params?.type || 'technical'; // default to technical
+  const type = route?.params?.type || 'technical';
   const isResearch = type === 'research';
 
   // Use the same logic as web ConferenceDetail
@@ -172,10 +172,10 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   }
 
   const tabs = [
-    { key: 'info', label: 'Thông tin & Hình ảnh' },
-    { key: 'sessions', label: 'Lịch trình Sessions' },
-    ...(isResearch ? [{ key: 'research', label: 'Research Paper Information' }] : []),
-    { key: 'feedback', label: 'Đánh giá' }
+    { key: 'info', label: 'Conference Info' },
+    { key: 'sessions', label: 'Sessions' },
+    ...(isResearch ? [{ key: 'research', label: 'Details' }] : [{ key: 'details', label: 'Details' }]),
+    { key: 'feedback', label: 'Feedback' }
   ];
 
   return (
@@ -273,46 +273,81 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
           <Text style={{ color: 'white', lineHeight: 24 }}>{conference.description}</Text>
         </Surface>
 
-        {/* Tabs Section */}
-        <View style={{ margin: 16 }}>
-          <Surface style={{ backgroundColor: '#000', borderRadius: 12, overflow: 'hidden' }}>
-            {/* Tab Headers */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ flexDirection: 'row' }}>
+        {/* Tab Navigation */}
+        <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
+          <View style={{
+            backgroundColor: 'rgba(255,255,255,0.1)',
+            borderColor: 'rgba(255,255,255,0.2)',
+            borderWidth: 1,
+            borderRadius: 16,
+            padding: 4,
+            // backdropFilter: 'blur(16px)'
+          }}>
+            <View style={{ flexDirection: 'row' }}>
               {tabs.map((tab) => (
                 <TouchableOpacity
                   key={tab.key}
                   onPress={() => setActiveTab(tab.key)}
                   style={{
-                    paddingHorizontal: 20,
-                    paddingVertical: 16,
-                    borderBottomWidth: activeTab === tab.key ? 2 : 0,
-                    borderBottomColor: '#EF4444',
+                    flex: 1,
+                    paddingVertical: 12,
+                    paddingHorizontal: 8,
+                    borderRadius: 12,
+                    backgroundColor: activeTab === tab.key ? '#FFFFFF' : 'transparent',
                   }}
                 >
-                  <Text style={{
-                    color: activeTab === tab.key ? '#3B82F6' : 'rgba(255,255,255,0.7)',
-                    fontWeight: 'medium',
-                    fontSize: 14
-                  }}>
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 14,
+                      fontWeight: '500',
+                      color: activeTab === tab.key ? '#1F2937' : 'rgba(255,255,255,0.8)',
+                    }}
+                    numberOfLines={1}
+                  >
                     {tab.label}
                   </Text>
                 </TouchableOpacity>
               ))}
-            </ScrollView>
+            </View>
+          </View>
+        </View>
+
+        {/* Tab Content */}
+        <View style={{ paddingHorizontal: 16 }}>
+          <View style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 16, overflow: 'hidden' }}>
 
             {/* Tab Content */}
             <View style={{ padding: 16 }}>
               {activeTab === 'info' && (
                 <View>
                   <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
-                    Thông tin chi tiết
+                    Conference Info
                   </Text>
+
+                  {/* Basic Conference Information */}
+                  <Surface style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 16, marginBottom: 12 }}>
+                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Location:</Text>
+                    <Text style={{ color: 'white', marginBottom: 12 }}>{conference.address}</Text>
+
+                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Date:</Text>
+                    <Text style={{ color: 'white', marginBottom: 12 }}>{formatDate(conference.startDate)} - {formatDate(conference.endDate)}</Text>
+
+                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Capacity:</Text>
+                    <Text style={{ color: 'white' }}>{conference.totalSlot || 'Unlimited'} attendees</Text>
+                  </Surface>
+
+                  {/* Conference Description */}
+                  <Surface style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 16, marginBottom: 12 }}>
+                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>About:</Text>
+                    <Text style={{ color: 'white', lineHeight: 20 }}>{conference.description}</Text>
+                  </Surface>
 
                   {/* Media */}
                   {conference.conferenceMedia && conference.conferenceMedia.length > 0 && (
                     <View style={{ marginBottom: 20 }}>
                       <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>
-                        Hình ảnh & Media
+                        Conference Photos
                       </Text>
                       <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                         {conference.conferenceMedia.map((media) => (
@@ -331,67 +366,13 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
                       </ScrollView>
                     </View>
                   )}
-
-                  {/* Sponsors */}
-                  {conference.sponsors && conference.sponsors.length > 0 && (
-                    <View style={{ marginBottom: 20 }}>
-                      <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>
-                        Nhà tài trợ
-                      </Text>
-                      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                        {conference.sponsors.map((sponsor) => (
-                          <View key={sponsor.sponsorId} style={{
-                            backgroundColor: 'rgba(255,255,255,0.2)',
-                            borderRadius: 8,
-                            padding: 12,
-                            marginRight: 12,
-                            alignItems: 'center',
-                            width: 120
-                          }}>
-                            <Image
-                              source={{ uri: sponsor.imageUrl || 'https://via.placeholder.com/60x60' }}
-                              style={{ width: 60, height: 60, borderRadius: 8, marginBottom: 8 }}
-                              resizeMode="contain"
-                            />
-                            <Text style={{ color: 'white', fontSize: 12, textAlign: 'center' }}>
-                              {sponsor.name}
-                            </Text>
-                          </View>
-                        ))}
-                      </ScrollView>
-                    </View>
-                  )}
-
-                  {/* Policies */}
-                  {conference.policies && conference.policies.length > 0 && (
-                    <View>
-                      <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>
-                        Chính sách & Quy định
-                      </Text>
-                      {conference.policies.map((policy) => (
-                        <Surface key={policy.policyId} style={{
-                          backgroundColor: 'rgba(255,255,255,0.2)',
-                          borderRadius: 8,
-                          padding: 12,
-                          marginBottom: 8
-                        }}>
-                          <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 4 }}>
-                            {policy.policyName}
-                          </Text>
-                          <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12 }}>
-                            {policy.description}
-                          </Text>
-                        </Surface>
-                      ))}
-                    </View>
-                  )}
                 </View>
               )}
 
               {activeTab === 'sessions' && (
                 <View>
                   <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
-                    Lịch trình Sessions
+                    Sessions
                   </Text>
 
                   {(() => {
@@ -606,47 +587,107 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
                 </View>
               )} */}
 
-              {activeTab === 'research' && isResearch && researchConference && (
+              {(activeTab === 'research' || activeTab === 'details') && (
                 <View>
                   <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
-                    Research Paper Information
+                    {isResearch ? 'Research Paper Information' : 'Conference Details'}
                   </Text>
 
-                  {/* Research specific fields */}
-                  <Surface style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 16, marginBottom: 12 }}>
-                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Paper Format:</Text>
-                    <Text style={{ color: 'white', marginBottom: 12 }}>{researchConference.paperFormat || 'Chưa xác định'}</Text>
+                  {isResearch && researchConference ? (
+                    <>
+                      {/* Research specific fields */}
+                      <Surface style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 16, marginBottom: 12 }}>
+                        <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Paper Format:</Text>
+                        <Text style={{ color: 'white', marginBottom: 12 }}>{researchConference.paperFormat || 'Chưa xác định'}</Text>
 
-                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Number of Papers Accepted:</Text>
-                    <Text style={{ color: 'white', marginBottom: 12 }}>{researchConference.numberPaperAccept || 'Chưa xác định'}</Text>
+                        <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Number of Papers Accepted:</Text>
+                        <Text style={{ color: 'white', marginBottom: 12 }}>{researchConference.numberPaperAccept || 'Chưa xác định'}</Text>
 
-                    <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Ranking:</Text>
-                    <Text style={{ color: 'white' }}>{researchConference.rankingDescription || 'Chưa xác định'}</Text>
-                  </Surface>
+                        <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 8 }}>Ranking:</Text>
+                        <Text style={{ color: 'white' }}>{researchConference.rankingDescription || 'Chưa xác định'}</Text>
+                      </Surface>
 
-                  {/* Research phases */}
-                  {researchConference.researchPhase && (
-                    <Surface style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 16 }}>
-                      <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 12 }}>Important Deadlines:</Text>
-                      <View style={{ marginBottom: 8 }}>
-                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Registration:</Text>
-                        <Text style={{ color: 'white' }}>
-                          {formatDate(researchConference.researchPhase.registrationStartDate)} - {formatDate(researchConference.researchPhase.registrationEndDate)}
-                        </Text>
-                      </View>
-                      <View style={{ marginBottom: 8 }}>
-                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Full Paper:</Text>
-                        <Text style={{ color: 'white' }}>
-                          {formatDate(researchConference.researchPhase.fullPaperStartDate)} - {formatDate(researchConference.researchPhase.fullPaperEndDate)}
-                        </Text>
-                      </View>
-                      <View style={{ marginBottom: 8 }}>
-                        <Text style={{ color: 'white', fontWeight: 'bold' }}>Review:</Text>
-                        <Text style={{ color: 'white' }}>
-                          {formatDate(researchConference.researchPhase.reviewStartDate)} - {formatDate(researchConference.researchPhase.reviewEndDate)}
-                        </Text>
-                      </View>
-                    </Surface>
+                      {/* Research phases */}
+                      {researchConference.researchPhase && (
+                        <Surface style={{ backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: 8, padding: 16 }}>
+                          <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 12 }}>Important Deadlines:</Text>
+                          <View style={{ marginBottom: 8 }}>
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Registration:</Text>
+                            <Text style={{ color: 'white' }}>
+                              {formatDate(researchConference.researchPhase.registrationStartDate)} - {formatDate(researchConference.researchPhase.registrationEndDate)}
+                            </Text>
+                          </View>
+                          <View style={{ marginBottom: 8 }}>
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Full Paper:</Text>
+                            <Text style={{ color: 'white' }}>
+                              {formatDate(researchConference.researchPhase.fullPaperStartDate)} - {formatDate(researchConference.researchPhase.fullPaperEndDate)}
+                            </Text>
+                          </View>
+                          <View style={{ marginBottom: 8 }}>
+                            <Text style={{ color: 'white', fontWeight: 'bold' }}>Review:</Text>
+                            <Text style={{ color: 'white' }}>
+                              {formatDate(researchConference.researchPhase.reviewStartDate)} - {formatDate(researchConference.researchPhase.reviewEndDate)}
+                            </Text>
+                          </View>
+                        </Surface>
+                      )}
+                    </>
+                  ) : (
+                    <>
+                      {/* Technical Conference Details */}
+                      {conference.sponsors && conference.sponsors.length > 0 && (
+                        <View style={{ marginBottom: 20 }}>
+                          <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>
+                            Sponsors
+                          </Text>
+                          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                            {conference.sponsors.map((sponsor) => (
+                              <View key={sponsor.sponsorId} style={{
+                                backgroundColor: 'rgba(255,255,255,0.2)',
+                                borderRadius: 8,
+                                padding: 12,
+                                marginRight: 12,
+                                alignItems: 'center',
+                                width: 120
+                              }}>
+                                <Image
+                                  source={{ uri: sponsor.imageUrl || 'https://via.placeholder.com/60x60' }}
+                                  style={{ width: 60, height: 60, borderRadius: 8, marginBottom: 8 }}
+                                  resizeMode="contain"
+                                />
+                                <Text style={{ color: 'white', fontSize: 12, textAlign: 'center' }}>
+                                  {sponsor.name}
+                                </Text>
+                              </View>
+                            ))}
+                          </ScrollView>
+                        </View>
+                      )}
+
+                      {/* Policies */}
+                      {conference.policies && conference.policies.length > 0 && (
+                        <View>
+                          <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 12 }}>
+                            Conference Policy
+                          </Text>
+                          {conference.policies.map((policy) => (
+                            <Surface key={policy.policyId} style={{
+                              backgroundColor: 'rgba(255,255,255,0.2)',
+                              borderRadius: 8,
+                              padding: 12,
+                              marginBottom: 8
+                            }}>
+                              <Text style={{ color: 'white', fontWeight: 'bold', marginBottom: 4 }}>
+                                {policy.policyName}
+                              </Text>
+                              <Text style={{ color: 'rgba(255,255,255,0.8)', fontSize: 12 }}>
+                                {policy.description}
+                              </Text>
+                            </Surface>
+                          ))}
+                        </View>
+                      )}
+                    </>
                   )}
                 </View>
               )}
@@ -654,7 +695,7 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
               {activeTab === 'feedback' && (
                 <View>
                   <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
-                    Đánh giá từ khách hàng
+                    Feedback
                   </Text>
                   <Text style={{ color: 'rgba(255,255,255,0.7)', textAlign: 'center', paddingVertical: 32 }}>
                     Tính năng đánh giá sẽ được bổ sung sau
@@ -662,7 +703,7 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
                 </View>
               )}
             </View>
-          </Surface>
+          </View>
         </View>
       </ScrollView>
 
