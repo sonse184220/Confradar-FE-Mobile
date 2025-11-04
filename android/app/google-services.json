@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "530552883525",
+    "project_id": "confradar-762ce",
+    "storage_bucket": "confradar-762ce.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:530552883525:android:0f899810d5d1ddb837d62c",
+        "android_client_info": {
+          "package_name": "confradar.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "530552883525-u99ph42meedfh2bpv9r5islcm3b0no4v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlRfnNrYH_KQ6wOQPVLWFGqUXZSxa6jmY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "530552883525-u99ph42meedfh2bpv9r5islcm3b0no4v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

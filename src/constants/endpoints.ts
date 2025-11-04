@@ -43,5 +43,10 @@ export const ENDPOINTS = {
     },
     TICKET: {
         GET_OWN_TICKET: '/Ticket/get-own-paid-ticket',
+    },
+    FAVOURITE_CONFERENCE: {
+        LIST_OWN: '/FavouriteConference/list-own-favourite-conferences',
+        ADD: '/FavouriteConference/add-to-favourite',
+        DELETE: '/FavouriteConference/delete-from-favourite',
     }
 } as const;

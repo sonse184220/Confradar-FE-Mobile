@@ -1,7 +1,7 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithReauth } from './baseApi';
 import { ENDPOINTS } from '../../constants/endpoints';
-import type { ConferenceResponse, ResearchConferenceDetailResponse, TechnicalConferenceDetailResponse } from "../../types/conference.type";
+import type { AddedFavouriteConferenceResponse, ConferenceResponse, DeletedFavouriteConferenceResponse, FavouriteConferenceDetailResponse, FavouriteConferenceRequest, ResearchConferenceDetailResponse, TechnicalConferenceDetailResponse } from "../../types/conference.type";
 import type { ApiResponse, ApiResponsePagination } from "../../types/api.type";
 
 export const conferenceApi = createApi({
@@ -95,6 +95,40 @@ export const conferenceApi = createApi({
                     : [{ type: "Conference", id: "LIST" }],
         }),
 
+        getOwnFavouriteConferences: builder.query<
+            ApiResponse<FavouriteConferenceDetailResponse[]>,
+            void
+        >({
+            query: () => ({
+                url: ENDPOINTS.FAVOURITE_CONFERENCE.LIST_OWN,
+                method: "GET",
+            }),
+            providesTags: ["Conference"],
+        }),
+        addToFavourite: builder.mutation<
+            ApiResponse<AddedFavouriteConferenceResponse>,
+            FavouriteConferenceRequest
+        >({
+            query: (body) => ({
+                url: ENDPOINTS.FAVOURITE_CONFERENCE.ADD,
+                method: "POST",
+                body,
+            }),
+            invalidatesTags: ["Conference"],
+        }),
+
+        // Remove conference from favourites
+        deleteFromFavourite: builder.mutation<
+            ApiResponse<DeletedFavouriteConferenceResponse>,
+            FavouriteConferenceRequest
+        >({
+            query: (body) => ({
+                url: ENDPOINTS.FAVOURITE_CONFERENCE.DELETE,
+                method: "DELETE",
+                body,
+            }),
+            invalidatesTags: ["Conference"],
+        }),
     }),
 });
 
@@ -107,6 +141,12 @@ export const {
     useLazyGetAllConferencesPaginationQuery,
     useLazyGetAllConferencesWithPricesPaginationQuery,
     useLazyGetConferencesByStatusQuery,
+
+    //favorite
+    useGetOwnFavouriteConferencesQuery,
+    useLazyGetOwnFavouriteConferencesQuery,
+    useAddToFavouriteMutation,
+    useDeleteFromFavouriteMutation,
 } = conferenceApi;
 
 

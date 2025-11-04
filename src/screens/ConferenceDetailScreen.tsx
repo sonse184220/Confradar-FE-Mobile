@@ -74,7 +74,13 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     researchConference,
     researchConferenceLoading,
     researchConferenceError,
-    refetchResearchConference
+    refetchResearchConference,
+    addFavourite,
+    removeFavourite,
+    addingToFavourite,
+    deletingFromFavourite,
+    addToFavouriteError,
+    deleteFromFavouriteError
   } = useConference({ id: conferenceId });
 
   // const {
@@ -143,6 +149,26 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     });
   };
 
+  const handleFavoriteToggle = async () => {
+    try {
+      if (isFavorite) {
+        await removeFavourite(conferenceId);
+        setIsFavorite(false);
+        Alert.alert('Thành công', 'Đã xóa khỏi danh sách yêu thích');
+      } else {
+        await addFavourite(conferenceId);
+        setIsFavorite(true);
+        Alert.alert('Thành công', 'Đã thêm vào danh sách yêu thích');
+      }
+    } catch (error) {
+      console.error('Favorite toggle error:', error);
+      const errorMessage = isFavorite ? 
+        (deleteFromFavouriteError?.data?.Message || 'Có lỗi xảy ra khi xóa khỏi danh sách yêu thích') :
+        (addToFavouriteError?.data?.Message || 'Có lỗi xảy ra khi thêm vào danh sách yêu thích');
+      Alert.alert('Lỗi', errorMessage);
+    }
+  };
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a2e' }}>
@@ -193,7 +219,8 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
         <IconButton
           icon={isFavorite ? "heart" : "heart-outline"}
           iconColor={isFavorite ? "#EF4444" : "white"}
-          onPress={() => setIsFavorite(!isFavorite)}
+          disabled={addingToFavourite || deletingFromFavourite}
+          onPress={handleFavoriteToggle}
         />
       </Appbar.Header>
 
