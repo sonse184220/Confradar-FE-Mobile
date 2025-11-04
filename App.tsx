@@ -6,6 +6,7 @@ import Svg, { Defs, RadialGradient, Path, Stop, LinearGradient, Line, Rect, Elli
 import { Dimensions } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider } from "react-redux";
+import { PaperProvider } from "react-native-paper";
 import { store } from "./src/store";
 
 const { width, height } = Dimensions.get("window");
@@ -13,11 +14,13 @@ const { width, height } = Dimensions.get("window");
 export default function App() {
   return (
     <Provider store={store}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <AppInner />
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
+      <PaperProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaProvider>
+            <AppInner />
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </PaperProvider>
     </Provider>
   );
   // const isDarkMode = useColorScheme() === "dark";

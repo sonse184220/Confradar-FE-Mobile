@@ -258,8 +258,8 @@ const ConferenceListScreen: React.FC = () => {
 
     const getCategoryName = (conference: ConferenceResponse) => {
         if (!categoriesData || !conference.conferenceCategoryId) return 'General';
-        const category = categoriesData.find(cat => cat.categoryId === conference.conferenceCategoryId);
-        return category?.categoryName || 'General';
+        const category = categoriesData.find(cat => cat.conferenceCategoryId === conference.conferenceCategoryId);
+        return category?.conferenceCategoryName || 'General';
     };
 
     const renderConferenceCard = ({ item: conference }: { item: ConferenceResponse }) => {
@@ -298,8 +298,8 @@ const ConferenceListScreen: React.FC = () => {
 
     const getCategoryLabel = () => {
         if (selectedCategory === 'all') return 'Tất cả';
-        const category = categoriesData?.find(c => c.categoryId === selectedCategory);
-        return category?.categoryName || 'Danh mục';
+        const category = categoriesData?.find(c => c.conferenceCategoryId === selectedCategory);
+        return category?.conferenceCategoryName || 'Danh mục';
     };
 
     const getBannerLabel = () => {

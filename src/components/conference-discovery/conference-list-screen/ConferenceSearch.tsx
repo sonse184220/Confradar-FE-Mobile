@@ -139,7 +139,7 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
             >
                 {/* Sort Menu */}
                 <Menu
-                    key="menu-sort"
+                    key={`menu-sort-${sortMenuVisible}`}
                     visible={sortMenuVisible}
                     onDismiss={() => setSortMenuVisible(false)}
                     anchor={
@@ -175,7 +175,7 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
 
                 {/* Status Menu */}
                 <Menu
-                    key="menu-status"
+                    key={`menu-status-${statusMenuVisible}`}
                     visible={statusMenuVisible}
                     onDismiss={() => setStatusMenuVisible(false)}
                     anchor={
@@ -210,7 +210,7 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
 
                 {/* Category Menu */}
                 <Menu
-                    key="menu-category"
+                    key={`menu-category-${categoryMenuVisible}`}
                     visible={categoryMenuVisible}
                     onDismiss={() => setCategoryMenuVisible(false)}
                     anchor={
@@ -240,9 +240,9 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
                     <Menu.Item onPress={() => { setSelectedCategory('all'); setCategoryMenuVisible(false); }} title="Tất cả" titleStyle={{ color: '#F6F1F1' }} />
                     {categoriesData?.map((category) => (
                         <Menu.Item
-                            key={category.categoryId}
+                            key={category.conferenceCategoryId}
                             onPress={() => {
-                                setSelectedCategory(category.categoryId);
+                                setSelectedCategory(category.conferenceCategoryId);
                                 setCategoryMenuVisible(false);
                             }}
                             title={category.categoryName}
@@ -253,7 +253,7 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
 
                 {/* Banner Type Menu */}
                 <Menu
-                    key="menu-banner-type"
+                    key={`menu-banner-${bannerMenuVisible}`}
                     visible={bannerMenuVisible}
                     onDismiss={() => setBannerMenuVisible(false)}
                     anchor={
@@ -286,6 +286,7 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
 
                 {/* Start Date Filter */}
                 <Menu
+                    key={`menu-date-${dateMenuVisible}`}
                     visible={dateMenuVisible}
                     onDismiss={() => setDateMenuVisible(false)}
                     anchor={

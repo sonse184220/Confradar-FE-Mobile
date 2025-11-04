@@ -1,20 +1,48 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { Appbar, Button, TextInput } from 'react-native-paper';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import PasswordRequirements from '../components/auth/PasswordRequirements';
 import Svg, { Defs, LinearGradient, Rect, Stop } from 'react-native-svg';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useAuth } from '../hooks/useAuth';
+import { goBack } from '../utils/navigationUtil';
 
 const ChangePasswordScreen = () => {
+  const { changePassword, isChanging, changePasswordError } = useAuth();
+  
+  const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const handleConfirm = () => {
-    if (newPassword === confirmPassword && newPassword.length >= 8) {
-      console.log('Password changed successfully');
-    } else {
-      console.log('Passwords do not match or requirements not met');
+  const handleConfirm = async () => {
+    if (!oldPassword.trim()) {
+      Alert.alert('Lỗi', 'Vui lòng nhập mật khẩu hiện tại.');
+      return;
+    }
+
+    if (!isPasswordValid()) {
+      Alert.alert('Lỗi', 'Mật khẩu mới không đáp ứng yêu cầu hoặc không khớp.');
+      return;
+    }
+
+    try {
+      await changePassword({
+        oldPassword: oldPassword,
+        newPassword: newPassword,
+        confirmNewPassword: confirmPassword
+      });
+      
+      Alert.alert('Thành công', 'Đổi mật khẩu thành công!', [
+        { text: 'OK', onPress: () => goBack() }
+      ]);
+    } catch (error: any) {
+      const errorMessage = changePasswordError ? 
+        (typeof changePasswordError === 'object' && 'data' in changePasswordError ? 
+          (changePasswordError.data as any)?.message || (changePasswordError.data as any)?.Message || 'Có lỗi xảy ra' 
+          : 'Có lỗi xảy ra') 
+        : 'Có lỗi xảy ra';
+      Alert.alert('Lỗi', errorMessage);
     }
   };
 
@@ -57,8 +85,8 @@ const ChangePasswordScreen = () => {
       </Svg>
 
       <Appbar.Header style={{ backgroundColor: 'transparent', elevation: 0, }}>
-        <Appbar.BackAction onPress={() => console.log('Go back')} />
-        <Appbar.Content title="Set Password" titleStyle={{ color: '#F6F1F1', fontWeight: 'bold', textAlign: 'center' }} />
+        <Appbar.BackAction onPress={() => goBack()} />
+        <Appbar.Content title="Change Password" titleStyle={{ color: '#F6F1F1', fontWeight: 'bold', textAlign: 'center' }} />
         <Appbar.Action icon="" onPress={() => { }} />
       </Appbar.Header>
 
@@ -90,6 +118,37 @@ const ChangePasswordScreen = () => {
           extraScrollHeight={20}
         >
           <View className="mb-4">
+            <Text className="text-white text-sm mb-2 font-medium">Current password</Text>
+            <TextInput
+              value={oldPassword}
+              onChangeText={setOldPassword}
+              placeholder="Enter current password"
+              secureTextEntry={true}
+              style={{
+                backgroundColor: 'transparent',
+              }}
+              contentStyle={{
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: '#F6F1F1',
+                backgroundColor: 'rgba(246, 241, 241, 0.1)',
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+              }}
+              theme={{
+                colors: {
+                  primary: '#F6F1F1',
+                  outline: '#F6F1F1',
+                  onSurfaceVariant: '#F6F1F1',
+                }
+              }}
+              textColor="#F6F1F1"
+              underlineStyle={{ display: 'none' }}
+              disabled={isChanging}
+            />
+          </View>
+
+          <View className="mb-4">
             <Text className="text-white text-sm mb-2 font-medium">New password</Text>
             <TextInput
               value={newPassword}
@@ -116,6 +175,7 @@ const ChangePasswordScreen = () => {
               }}
               textColor="#F6F1F1"
               underlineStyle={{ display: 'none' }}
+              disabled={isChanging}
             />
           </View>
 
@@ -146,6 +206,7 @@ const ChangePasswordScreen = () => {
               }}
               textColor="#F6F1F1"
               underlineStyle={{ display: 'none' }}
+              disabled={isChanging}
             />
           </View>
 
@@ -162,16 +223,17 @@ const ChangePasswordScreen = () => {
           <Button
             mode="contained"
             onPress={handleConfirm}
-            disabled={!isPasswordValid()}
+            disabled={!isPasswordValid() || isChanging}
             style={{
               borderRadius: 16,
               marginTop: 20,
-              backgroundColor: isPasswordValid() ? '#19A7CE' : '#cccccc'
+              backgroundColor: (isPasswordValid() && !isChanging) ? '#19A7CE' : '#cccccc'
             }}
             contentStyle={{ paddingVertical: 8 }}
             labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
+            loading={isChanging}
           >
-            Confirm
+            {isChanging ? 'Changing...' : 'Confirm'}
           </Button>
         </KeyboardAwareScrollView>
       </View>
