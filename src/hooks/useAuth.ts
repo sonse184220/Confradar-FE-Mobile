@@ -4,11 +4,13 @@ import {
     useLoginMutation,
     useRegisterMutation,
     useLogoutMutation,
-    useLazyGetCurrentUserQuery,
-    useForgotPasswordMutation
-} from '../store/api/authApi';
-import { setUser, clearAuth } from '../store/slices/authSlice';
-import type { LoginCredentials, RegisterData } from '../types/auth';
+    useForgotPasswordMutation,
+    useGetProfileByIdQuery,
+    useUpdateProfileMutation,
+    useChangePasswordMutation
+} from '@/store/api/authApi';
+import { setUser, clearAuth } from '@/store/slices/authSlice';
+import type { ChangePasswordRequest, LoginCredentials, ProfileUpdateRequest, RegisterData } from '@/types/auth';
 import { useAppDispatch, useAppSelector } from './useRedux';
 
 export const useAuth = () => {
@@ -19,8 +21,27 @@ export const useAuth = () => {
     const [loginMutation, { isLoading: loginLoading, error: loginRawError, data: loginData }] = useLoginMutation();
     const [registerMutation, { isLoading: registerLoading, error: registerRawError, data: registerData }] = useRegisterMutation();
     const [logoutMutation, { isLoading: logoutLoading }] = useLogoutMutation();
-    const [getCurrentUser, { isLoading: checkAuthLoading }] = useLazyGetCurrentUserQuery();
+    // const [getCurrentUser, { isLoading: checkAuthLoading }] = useLazyGetCurrentUserQuery();
     const [forgotPasswordMutation, { isLoading: forgotLoading, error: forgotRawError, data: forgotData }] = useForgotPasswordMutation();
+
+    const { data, error, isLoading, refetch } = useGetProfileByIdQuery(user?.id!, {
+        skip: !user?.id!,
+    })
+
+    const [updateProfileMutation, { isLoading: isUpdating, error: updateError }] = useUpdateProfileMutation();
+
+    const [changePasswordMutation, { isLoading: isChanging, error: changePasswordError, data: changePasswordData }] = useChangePasswordMutation();
+
+    const updateProfile = async (payload: ProfileUpdateRequest) => {
+        if (!user?.id!) throw new Error("User not logged in");
+        const result = await updateProfileMutation(payload).unwrap();
+        return result;
+    };
+
+    const changePassword = async (payload: ChangePasswordRequest) => {
+        const result = await changePasswordMutation(payload).unwrap();
+        return result;
+    };
 
     // Parse error function
     const parseError = (error: any): string => {
@@ -127,16 +148,16 @@ export const useAuth = () => {
     };
 
     // Check auth status
-    const checkAuth = async () => {
-        try {
-            const result = await getCurrentUser().unwrap();
-            // dispatch(setUser(result.user));
-            return result;
-        } catch (error) {
-            dispatch(clearAuth());
-            throw error;
-        }
-    };
+    // const checkAuth = async () => {
+    //     try {
+    //         const result = await getCurrentUser().unwrap();
+    //         // dispatch(setUser(result.user));
+    //         return result;
+    //     } catch (error) {
+    //         dispatch(clearAuth());
+    //         throw error;
+    //     }
+    // };
 
     return {
         user,
@@ -144,14 +165,28 @@ export const useAuth = () => {
         login,
         register,
         logout,
-        checkAuth,
+        // checkAuth,
         forgotPassword,
-        loading: loginLoading || registerLoading || logoutLoading || checkAuthLoading || forgotLoading,
+        loading: loginLoading || registerLoading || logoutLoading || forgotLoading,
         loginError,
         registerError,
         forgotError,
         loginResponse: loginData,
         registerResponse: registerData,
         forgotResponse: forgotData,
+
+        profile: data?.data || null,
+        isLoading,
+        error,
+        refetch,
+
+        updateProfile,
+        isUpdating,
+        updateError,
+
+        changePassword,
+        isChanging,
+        changePasswordError,
+        changePasswordData,
     };
 };

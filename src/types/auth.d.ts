@@ -18,7 +18,7 @@ export interface RegisterData {
     password: string;
     confirmPassword: string;
     fullName: string;
-    birthday?: string; // ISO date string
+    birthday?: string;
     phoneNumber?: string;
     gender?: 'Male' | 'Female' | 'Other';
     bioDescription?: string;
@@ -37,4 +37,32 @@ export interface AuthState {
     isAuthenticated: boolean;
     loading: boolean;
     error: string | null;
+}
+
+export interface UserProfileResponse {
+    userId: string;
+    email: string;
+    fullName: string;
+    birthDay: string | null;
+    phoneNumber: string | null;
+    gender: string | null;
+    avatarUrl: string | null;
+    bioDescription: string | null;
+    createdAt: string;
+    roles?: string[]
+}
+
+export interface ProfileUpdateRequest {
+    fullName?: string;
+    birthDay?: string;
+    phoneNumber?: string;
+    gender?: 'Male' | 'Female' | 'Other';
+    avatarFile?: File;
+    bioDescription?: string;
+}
+
+export interface ChangePasswordRequest {
+    oldPassword: string;
+    newPassword: string;
+    confirmNewPassword: string;
 }

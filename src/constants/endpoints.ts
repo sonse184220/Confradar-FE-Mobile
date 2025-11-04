@@ -6,6 +6,10 @@ export const ENDPOINTS = {
         REFRESH: '/auth/refresh',
         FORGOT_PASSWORD: '/Auth/forget-password',
         RESET_PASSWORD: '/auth/reset-password',
+
+        PROFILE: "/Auth/view-profile-by-id",
+        UPDATE_PROFILE: "/Auth/update-profile",
+        CHANGE_PASSWORD: "/Auth/change-password",
     },
     USER: {
         PROFILE: '/users',
