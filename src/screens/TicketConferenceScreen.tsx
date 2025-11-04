@@ -488,8 +488,18 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
   const renderTransactionItem = ({ item }: { item: CustomerTransactionDetailResponse }) => (
     <TouchableOpacity
       onPress={() => handleTransactionPress(item)}
-      className="bg-gray-800 rounded-2xl p-4 mr-3"
-      style={{ width: 250 }}
+      className="bg-gray-800 rounded-2xl p-4 mr-3 border border-gray-600"
+      style={{ 
+        width: 250,
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+      }}
     >
       <View className="flex-row items-center justify-between mb-2">
         <Text className="text-gray-400 text-sm">
@@ -516,8 +526,18 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
   const renderCheckInItem = ({ item }: { item: CustomerCheckInDetailResponse }) => (
     <TouchableOpacity
       onPress={() => handleCheckInPress(item)}
-      className="bg-gray-800 rounded-2xl p-4 mr-3"
-      style={{ width: 280 }}
+      className="bg-gray-800 rounded-2xl p-4 mr-3 border border-gray-600"
+      style={{ 
+        width: 280,
+        shadowColor: '#000',
+        shadowOffset: {
+          width: 0,
+          height: 4,
+        },
+        shadowOpacity: 0.3,
+        shadowRadius: 8,
+        elevation: 8,
+      }}
     >
       <Text className="text-white font-medium mb-1" numberOfLines={2}>
         {item.conferenceSessionDetail?.title || 'Session'}
