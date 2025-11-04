@@ -1,4 +1,5 @@
 import "./global.css"
+import React, { useEffect } from 'react';
 import { StatusBar, StyleSheet, useColorScheme, View } from "react-native";
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import RootNavigator from "./src/navigation/RootNavigator";
@@ -6,18 +7,28 @@ import Svg, { Defs, RadialGradient, Path, Stop, LinearGradient, Line, Rect, Elli
 import { Dimensions } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider } from "react-redux";
+import { PaperProvider } from "react-native-paper";
 import { store } from "./src/store";
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 const { width, height } = Dimensions.get("window");
 
 export default function App() {
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '530552883525-u99ph42meedfh2bpv9r5islcm3b0no4v.apps.googleusercontent.com',
+    });
+  }, []);
+
   return (
     <Provider store={store}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <AppInner />
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
+      <PaperProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaProvider>
+            <AppInner />
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </PaperProvider>
     </Provider>
   );
   // const isDarkMode = useColorScheme() === "dark";

@@ -53,7 +53,7 @@ const formatDate = (dateString?: string): string => {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  
+
   if (date >= today) {
     return 'Today';
   } else if (date >= yesterday) {
@@ -383,10 +383,10 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
       const transactionName = getTransactionName(transaction);
       const transactionCode = transaction.transactionCode || '';
       const paymentMethod = transaction.PaymentMethodName || '';
-      
+
       return transactionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             transactionCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             paymentMethod.toLowerCase().includes(searchQuery.toLowerCase());
+        transactionCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        paymentMethod.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
     // Sort based on active filter
@@ -490,7 +490,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
           ) : transactionsError ? (
             <View className="flex-1 items-center justify-center py-20">
               <Text className="text-red-400 text-base text-center px-4">
-                {transactionsError}
+                {transactionsError.data?.Message}
               </Text>
             </View>
           ) : filteredAndSortedTransactions.length === 0 ? (

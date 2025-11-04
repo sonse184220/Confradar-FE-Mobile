@@ -231,32 +231,31 @@ export interface RefundPolicyResponse {
   refundOrder?: number;
 }
 
-export interface RegisteredUserInConference {
-  ticketId: string;
-  userId: string;
-  userName: string;
-  avatarUrl: string;
-  email: string;
-  registeredDate: string;
+export interface FavouriteConferenceDetailResponse {
   conferenceId: string;
-  conferenceName: string;
+  favouriteCreatedAt?: string;
+  conferenceName?: string;
+  conferenceDescription?: string;
+  bannerImageUrl?: string;
+  conferenceStartDate?: string;
+  conferenceEndDate?: string;
+  ticketSaleStart?: string;
+  ticketSaleEnd?: string;
+  isInternalHosted?: boolean;
+  isResearchConference?: boolean;
+  availableSlot?: number;
 }
 
-//not in use
-export interface ConferenceBasicResponse {
+export interface DeletedFavouriteConferenceResponse {
   conferenceId: string;
-  conferenceName: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-  capacity: number;
-  address: string;
-  bannerImageUrl: string;
-  createdAt: string;
-  isInternalHosted: boolean;
-  isResearchConference: boolean;
-  isActive: boolean;
-  userId: string;
-  locationId: string | null;
-  categoryId: string;
+  isDeleted: boolean;
+}
+
+export interface AddedFavouriteConferenceResponse {
+  conferenceId: string;
+  isAdded: boolean;
+}
+
+export interface FavouriteConferenceRequest {
+  conferenceId: string;
 }

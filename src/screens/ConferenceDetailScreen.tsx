@@ -74,7 +74,13 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     researchConference,
     researchConferenceLoading,
     researchConferenceError,
-    refetchResearchConference
+    refetchResearchConference,
+    addFavourite,
+    removeFavourite,
+    addingToFavourite,
+    deletingFromFavourite,
+    addToFavouriteError,
+    deleteFromFavouriteError
   } = useConference({ id: conferenceId });
 
   // const {
@@ -143,6 +149,26 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     });
   };
 
+  const handleFavoriteToggle = async () => {
+    try {
+      if (isFavorite) {
+        await removeFavourite(conferenceId);
+        setIsFavorite(false);
+        Alert.alert('Thành công', 'Đã xóa khỏi danh sách yêu thích');
+      } else {
+        await addFavourite(conferenceId);
+        setIsFavorite(true);
+        Alert.alert('Thành công', 'Đã thêm vào danh sách yêu thích');
+      }
+    } catch (error) {
+      console.error('Favorite toggle error:', error);
+      const errorMessage = isFavorite ? 
+        (deleteFromFavouriteError?.data?.Message || 'Có lỗi xảy ra khi xóa khỏi danh sách yêu thích') :
+        (addToFavouriteError?.data?.Message || 'Có lỗi xảy ra khi thêm vào danh sách yêu thích');
+      Alert.alert('Lỗi', errorMessage);
+    }
+  };
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a2e' }}>
@@ -193,7 +219,8 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
         <IconButton
           icon={isFavorite ? "heart" : "heart-outline"}
           iconColor={isFavorite ? "#EF4444" : "white"}
-          onPress={() => setIsFavorite(!isFavorite)}
+          disabled={addingToFavourite || deletingFromFavourite}
+          onPress={handleFavoriteToggle}
         />
       </Appbar.Header>
 
@@ -362,12 +389,27 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
               Chỉ cho phép mua vé ở web
             </Button>
           ) : (
+            // <Button
+            //   mode="contained"
+            //   onPress={() => setIsDialogOpen(true)}
+            //   style={{ backgroundColor: '#3B82F6' }}
+            // >
+            //   Mở chọn vé
+            // </Button>
             <Button
               mode="contained"
-              onPress={() => setIsDialogOpen(true)}
-              style={{ backgroundColor: '#3B82F6' }}
+              onPress={() => {
+                // navigationTo.navigate('TicketSelection')
+                navigation.navigate('TicketSelection', {
+                  conferenceId: conference?.conferenceId,
+                });
+              }}
+              // onPress={handlePurchaseTicket}
+              // disabled={!selectedTicket || paymentLoading}
+              // loading={paymentLoading}
+              style={{ flex: 1, marginLeft: 8, backgroundColor: '#EF4444' }}
             >
-              Mở chọn vé
+              Đăng ký ngay
             </Button>
           )}
         </Surface>
@@ -526,7 +568,7 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
       </ScrollView>
 
       {/* Ticket Selection Modal */}
-      <Modal
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={isDialogOpen}
@@ -588,7 +630,6 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
               <Button
                 mode="contained"
                 onPress={() => {
-                  // console.log('Check In Event');
                   // navigationTo.navigate('TicketSelection')
                   navigation.navigate('TicketSelection', {
                     conferenceId: conference?.conferenceId,
@@ -599,43 +640,44 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
                 // loading={paymentLoading}
                 style={{ flex: 1, marginLeft: 8, backgroundColor: '#EF4444' }}
               >
-                {/* {paymentLoading ? 'Đang xử lý...' : 'Thanh toán'} */}
-                "Đăng ký"
-              </Button>
-            </View>
-          </Surface>
-        </View>
-      </Modal>
+      Đăng ký
+    </Button>
+            </View >
+          </Surface >
+        </View >
+      </Modal > */}
 
       {/* Image Modal */}
-      {selectedImage && (
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={!!selectedImage}
-          onRequestClose={() => setSelectedImage(null)}
-        >
-          <View style={{
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.9)',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
-            <TouchableOpacity
-              style={{ position: 'absolute', top: 40, right: 16, zIndex: 1 }}
-              onPress={() => setSelectedImage(null)}
-            >
-              <Icon name="close" size={30} color="white" />
-            </TouchableOpacity>
-            <Image
-              source={{ uri: selectedImage }}
-              style={{ width: screenWidth - 32, height: 400 }}
-              resizeMode="contain"
-            />
-          </View>
-        </Modal>
-      )}
-    </View>
+      {
+        selectedImage && (
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={!!selectedImage}
+            onRequestClose={() => setSelectedImage(null)}
+          >
+            <View style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.9)',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              <TouchableOpacity
+                style={{ position: 'absolute', top: 40, right: 16, zIndex: 1 }}
+                onPress={() => setSelectedImage(null)}
+              >
+                <Icon name="close" size={30} color="white" />
+              </TouchableOpacity>
+              <Image
+                source={{ uri: selectedImage }}
+                style={{ width: screenWidth - 32, height: 400 }}
+                resizeMode="contain"
+              />
+            </View>
+          </Modal>
+        )
+      }
+    </View >
   );
 };
 

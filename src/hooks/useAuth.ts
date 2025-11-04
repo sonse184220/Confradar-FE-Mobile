@@ -4,12 +4,26 @@ import {
     useLoginMutation,
     useRegisterMutation,
     useLogoutMutation,
-    useLazyGetCurrentUserQuery,
-    useForgotPasswordMutation
-} from '../store/api/authApi';
-import { setUser, clearAuth } from '../store/slices/authSlice';
-import type { LoginCredentials, RegisterData } from '../types/auth';
+    useForgotPasswordMutation,
+    useGetProfileByIdQuery,
+    useUpdateProfileMutation,
+    useChangePasswordMutation,
+    useFirebaseLoginMutation
+} from '@/store/api/authApi';
+import { setUser, clearAuth, setToken } from '@/store/slices/authSlice';
+import type { ChangePasswordRequest, LoginCredentials, ProfileUpdateRequest, RegisterData } from '@/types/auth';
 import { useAppDispatch, useAppSelector } from './useRedux';
+import { jwtDecode } from 'jwt-decode';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+interface JwtPayload {
+    sub: string;
+    email: string;
+    exp: number;
+    iss: string;
+    aud: string;
+    'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': string;
+}
 
 export const useAuth = () => {
     const dispatch = useAppDispatch();
@@ -19,8 +33,29 @@ export const useAuth = () => {
     const [loginMutation, { isLoading: loginLoading, error: loginRawError, data: loginData }] = useLoginMutation();
     const [registerMutation, { isLoading: registerLoading, error: registerRawError, data: registerData }] = useRegisterMutation();
     const [logoutMutation, { isLoading: logoutLoading }] = useLogoutMutation();
-    const [getCurrentUser, { isLoading: checkAuthLoading }] = useLazyGetCurrentUserQuery();
+    // const [getCurrentUser, { isLoading: checkAuthLoading }] = useLazyGetCurrentUserQuery();
     const [forgotPasswordMutation, { isLoading: forgotLoading, error: forgotRawError, data: forgotData }] = useForgotPasswordMutation();
+
+    const { data, error, isLoading, refetch } = useGetProfileByIdQuery(user?.id!, {
+        skip: !user?.id!,
+    })
+
+    const [updateProfileMutation, { isLoading: isUpdating, error: updateError }] = useUpdateProfileMutation();
+
+    const [changePasswordMutation, { isLoading: isChanging, error: changePasswordError, data: changePasswordData }] = useChangePasswordMutation();
+
+    const [firebaseLoginMutation, { isLoading: googleLoading, error: googleRawError, data: googleData }] = useFirebaseLoginMutation();
+
+    const updateProfile = async (payload: ProfileUpdateRequest) => {
+        if (!user?.id!) throw new Error("User not logged in");
+        const result = await updateProfileMutation(payload).unwrap();
+        return result;
+    };
+
+    const changePassword = async (payload: ChangePasswordRequest) => {
+        const result = await changePasswordMutation(payload).unwrap();
+        return result;
+    };
 
     // Parse error function
     const parseError = (error: any): string => {
@@ -36,34 +71,52 @@ export const useAuth = () => {
         return 'Có lỗi xảy ra. Vui lòng thử lại.';
     };
 
-    // const parseSuccess = (data: any): string | null => {
-    //     if (data?.Message) {
-    //         return data.Message;
-    //     }
-    //     if (data?.message) {
-    //         return data.message;
-    //     }
-    //     return null;
-    // };
-
     const loginError = loginRawError ? parseError(loginRawError) : null;
     const registerError = registerRawError ? parseError(registerRawError) : null;
     const forgotError = forgotRawError ? parseError(forgotRawError) : null;
 
-    // const loginSuccess = loginData?.Success ? parseSuccess(loginData) : null;
-    // const registerSuccess = registerData?.Success ? parseSuccess(registerData) : null;
-    // const forgotSuccess = forgotData?.Success ? parseSuccess(forgotData) : null;
+    const googleLoginError = googleRawError ? parseError(googleRawError) : null;
 
     // Login handler
     const login = async (credentials: LoginCredentials) => {
         try {
             const result = await loginMutation(credentials).unwrap();
-            // dispatch(setUser(result.Data.user));
+            const { accessToken, refreshToken } = result.data;
+
+            const decoded = jwtDecode<JwtPayload>(accessToken);
+            const user = {
+                id: decoded.sub,
+                email: decoded.email,
+                name: decoded.email.split('@')[0],
+                role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+                avatar: undefined,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            };
+
+            await AsyncStorage.multiSet([
+                ['access_token', accessToken],
+                ['refresh_token', refreshToken],
+                ['user', JSON.stringify(user)],
+            ]);
+
+            dispatch(setToken({ accessToken, refreshToken }));
+            dispatch(setUser(user));
+
             return result;
         } catch (error) {
             throw error;
         }
     };
+    // const login = async (credentials: LoginCredentials) => {
+    //     try {
+    //         const result = await loginMutation(credentials).unwrap();
+    //         // dispatch(setUser(result.Data.user));
+    //         return result;
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // };
 
     // Register handler
     const register = async (data: RegisterData) => {
@@ -126,17 +179,48 @@ export const useAuth = () => {
         }
     };
 
-    // Check auth status
-    const checkAuth = async () => {
+    const googleLogin = async (token: string) => {
         try {
-            const result = await getCurrentUser().unwrap();
-            // dispatch(setUser(result.user));
+            const result = await firebaseLoginMutation(token).unwrap();
+            const { accessToken, refreshToken } = result.data;
+
+            const decoded = jwtDecode<JwtPayload>(accessToken);
+            const user = {
+                id: decoded.sub,
+                email: decoded.email,
+                name: decoded.email.split('@')[0],
+                role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+                avatar: undefined,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            };
+
+            await AsyncStorage.multiSet([
+                ['access_token', accessToken],
+                ['refresh_token', refreshToken],
+                ['user', JSON.stringify(user)],
+            ]);
+
+            dispatch(setToken({ accessToken, refreshToken }));
+            dispatch(setUser(user));
+
             return result;
         } catch (error) {
-            dispatch(clearAuth());
             throw error;
         }
     };
+
+    // Check auth status
+    // const checkAuth = async () => {
+    //     try {
+    //         const result = await getCurrentUser().unwrap();
+    //         // dispatch(setUser(result.user));
+    //         return result;
+    //     } catch (error) {
+    //         dispatch(clearAuth());
+    //         throw error;
+    //     }
+    // };
 
     return {
         user,
@@ -144,14 +228,35 @@ export const useAuth = () => {
         login,
         register,
         logout,
-        checkAuth,
+        // checkAuth,
         forgotPassword,
-        loading: loginLoading || registerLoading || logoutLoading || checkAuthLoading || forgotLoading,
+        loading: loginLoading || registerLoading || logoutLoading || forgotLoading,
+
         loginError,
         registerError,
         forgotError,
+
         loginResponse: loginData,
         registerResponse: registerData,
         forgotResponse: forgotData,
+
+        profile: data?.data || null,
+        isLoading,
+        error,
+        refetch,
+
+        updateProfile,
+        isUpdating,
+        updateError,
+
+        changePassword,
+        isChanging,
+        changePasswordError,
+        changePasswordData,
+
+        googleLogin,
+        googleLoading,
+        googleLoginError,
+        googleResponse: googleData,
     };
 };

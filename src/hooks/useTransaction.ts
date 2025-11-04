@@ -1,14 +1,16 @@
+import { parseApiError } from '@/utils/api';
 import {
     useGetOwnTransactionsQuery,
     useLazyGetOwnTransactionsQuery,
-    useGetTransactionByIdQuery,
-    useLazyGetTransactionByIdQuery,
-    // useCreateTransactionMutation,
-    type Transaction
-} from '../store/api/transactionApi';
-import { useAppSelector } from './useRedux';
+    useCreatePaymentForTechMutation
+} from '@/store/api/transactionApi';
+import { CreateTechPaymentRequest } from '@/store/api/ticketApi';
 
 export const useTransaction = () => {
+    const [
+        createTechPayment,
+        { isLoading: techPaymentLoading, error: techPaymentRawError, data: techPaymentData },
+    ] = useCreatePaymentForTechMutation();
 
     const {
         data: transactionsData,
@@ -22,38 +24,20 @@ export const useTransaction = () => {
         error: lazyTransactionsRawError
     }] = useLazyGetOwnTransactionsQuery();
 
-    const [getTransactionById, {
-        isLoading: transactionByIdLoading,
-        error: transactionByIdRawError
-    }] = useLazyGetTransactionByIdQuery();
+    // Parse errors
+    const techPaymentError = parseApiError<string>(techPaymentRawError);
+    const transactionsError = parseApiError<string>(transactionsRawError);
+    const lazyTransactionsError = parseApiError<string>(lazyTransactionsRawError);
 
-    // const [createTransactionMutation, {
-    //     isLoading: createLoading,
-    //     error: createRawError,
-    //     data: createData
-    // }] = useCreateTransactionMutation();
-
-    // Parse error function
-    const parseError = (error: any): string => {
-        if (error?.data?.Message) {
-            return error.data.Message;
+    const purchaseTechTicket = async (request: CreateTechPaymentRequest) => {
+        try {
+            const result = await createTechPayment(request).unwrap();
+            return result;
+        } catch (error) {
+            throw error;
         }
-        if (error?.data?.message) {
-            return error.data.message;
-        }
-        if (typeof error?.data === 'string') {
-            return error.data;
-        }
-        return 'Có lỗi xảy ra. Vui lòng thử lại.';
     };
 
-    // Parse errors
-    const transactionsError = transactionsRawError ? parseError(transactionsRawError) : null;
-    const lazyTransactionsError = lazyTransactionsRawError ? parseError(lazyTransactionsRawError) : null;
-    const transactionByIdError = transactionByIdRawError ? parseError(transactionByIdRawError) : null;
-    // const createError = createRawError ? parseError(createRawError) : null;
-
-    // Get own transactions handler
     const fetchOwnTransactions = async () => {
         try {
             const result = await getOwnTransactions().unwrap();
@@ -63,47 +47,25 @@ export const useTransaction = () => {
         }
     };
 
-    // Get transaction by ID handler
-    const fetchTransactionById = async (id: string) => {
-        try {
-            const result = await getTransactionById(id).unwrap();
-            return result;
-        } catch (error) {
-            throw error;
-        }
-    };
-
-    // Create transaction handler
-    // const createTransaction = async (data: Partial<Transaction>) => {
-    //     try {
-    //         const result = await createTransactionMutation(data).unwrap();
-    //         return result;
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // };
-
     return {
         // Data
+        techPaymentResponse: techPaymentData,
         transactions: transactionsData?.data || [],
         transactionsResponse: transactionsData,
-        // createResponse: createData,
 
         // Methods
+        purchaseTechTicket,
         fetchOwnTransactions,
-        fetchTransactionById,
-        // createTransaction,
         refetchTransactions,
 
         // Loading states
-        // loading: transactionsLoading || lazyTransactionsLoading || transactionByIdLoading || createLoading,
-        loading: transactionsLoading || lazyTransactionsLoading || transactionByIdLoading,
+        loading: techPaymentLoading || transactionsLoading || lazyTransactionsLoading,
         transactionsLoading,
-        // createLoading,
 
         // Errors
-        transactionsError: transactionsError || lazyTransactionsError,
-        transactionByIdError,
-        // createError,
+        techPaymentError,
+
+        transactionsError,
+        // paymentMethodsError,
     };
 };

@@ -12,8 +12,8 @@ export interface ConferenceCategoryResponse {
 }
 
 export interface ConferenceCategoryListResponse {
-    categoryId: string;
-    categoryName: string;
+    conferenceCategoryId: string;
+    conferenceCategoryName: string;
     description?: string;
     conferenceCount: number;
     createdAt?: string;
@@ -33,9 +33,9 @@ export const conferenceCategoryApi = createApi({
             providesTags: (result) =>
                 result?.data
                     ? [
-                        ...result.data.map(({ categoryId }) => ({
+                        ...result.data.map(({ conferenceCategoryId }) => ({
                             type: 'ConferenceCategory' as const,
-                            id: categoryId,
+                            id: conferenceCategoryId,
                         })),
                         { type: 'ConferenceCategory', id: 'LIST' },
                     ]

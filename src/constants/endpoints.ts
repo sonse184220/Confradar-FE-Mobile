@@ -6,6 +6,12 @@ export const ENDPOINTS = {
         REFRESH: '/auth/refresh',
         FORGOT_PASSWORD: '/Auth/forget-password',
         RESET_PASSWORD: '/auth/reset-password',
+
+        PROFILE: "/Auth/view-profile-by-id",
+        UPDATE_PROFILE: "/Auth/update-profile",
+        CHANGE_PASSWORD: "/Auth/change-password",
+
+        GOOGLE: "/Auth/firebase-login",
     },
     USER: {
         PROFILE: '/users',
@@ -39,6 +45,14 @@ export const ENDPOINTS = {
     TRANSACTION: {
         GET_OWN: '/Payment/get-own-transaction',
         GET_BY_ID: '/transaction',
-        PAY_TECH: '/Payment/pay-tech-with-momo',
+        CREATE_TECH_PAYMENT: '/Payment/pay-tech-with-momo',
+    },
+    TICKET: {
+        GET_OWN_TICKET: '/Ticket/get-own-paid-ticket',
+    },
+    FAVOURITE_CONFERENCE: {
+        LIST_OWN: '/FavouriteConference/list-own-favourite-conferences',
+        ADD: '/FavouriteConference/add-to-favourite',
+        DELETE: '/FavouriteConference/delete-from-favourite',
     }
 } as const;

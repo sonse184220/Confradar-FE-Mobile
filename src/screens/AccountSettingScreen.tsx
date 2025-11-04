@@ -72,11 +72,20 @@ const AccountSettingScreen = () => {
     },
     {
       id: '4',
-      title: 'Event History',
-      description: 'View your past events and bookings',
+      title: 'Favorite Conferences',
+      description: 'View your favorite events',
       icon: 'history',
       hasArrow: true,
-      onPress: () => console.log('Event History')
+      onPress: () => navigation.navigate('FavoriteConferences')
+    },
+
+    {
+      id: '4',
+      title: 'My Tickets',
+      description: 'View your successfully registered tickets',
+      icon: 'history',
+      hasArrow: true,
+      onPress: () => navigation.navigate('TicketConference')
     }
   ];
 

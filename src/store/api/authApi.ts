@@ -1,21 +1,14 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { baseQueryWithReauth } from './baseApi';
-import type { LoginCredentials, RegisterData, LoginResponse, User } from '../../types/auth';
-import { setError, setLoading, setToken, setUser } from '../slices/authSlice';
+import type { LoginCredentials, RegisterData, LoginResponse, User, ProfileUpdateRequest, UserProfileResponse, ChangePasswordRequest } from '@/types/auth';
+import { setError, setLoading, setToken, setUser } from '@/store/slices/authSlice';
 import type { AppDispatch } from '../index';
-import { ENDPOINTS } from '../../constants/endpoints';
-import { ApiResponse } from '../../types/api';
+import { ENDPOINTS } from '@/constants/endpoints';
+import { ApiResponse } from '@/types/api';
 import { jwtDecode } from 'jwt-decode';
 
-interface JwtPayload {
-    sub: string;
-    email: string;
-    exp: number;
-    iss: string;
-    aud: string;
-    'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': string;
-}
+
 
 export const authApi = createApi({
     reducerPath: 'authApi',
@@ -29,45 +22,45 @@ export const authApi = createApi({
                 method: 'POST',
                 body: credentials,
             }),
-            async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-                dispatch(setLoading(true));
-                try {
-                    const { data } = await queryFulfilled;
+            // async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+            //     dispatch(setLoading(true));
+            //     try {
+            //         const { data } = await queryFulfilled;
 
-                    if (data.data) {
-                        const { accessToken, refreshToken } = data.data;
+            //         if (data.data) {
+            //             const { accessToken, refreshToken } = data.data;
 
-                        // ✅ Decode token using jwt-decode
-                        const decoded = jwtDecode<JwtPayload>(accessToken);
+            //             // ✅ Decode token using jwt-decode
+            //             const decoded = jwtDecode<JwtPayload>(accessToken);
 
-                        const user: User = {
-                            id: decoded.sub,
-                            email: decoded.email,
-                            name: decoded.email.split('@')[0], // fallback name
-                            role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
-                            avatar: undefined,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString(),
-                        };
+            //             const user: User = {
+            //                 id: decoded.sub,
+            //                 email: decoded.email,
+            //                 name: decoded.email.split('@')[0],
+            //                 role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+            //                 avatar: undefined,
+            //                 createdAt: new Date().toISOString(),
+            //                 updatedAt: new Date().toISOString(),
+            //             };
 
-                        // Save to AsyncStorage
-                        await AsyncStorage.multiSet([
-                            ['access_token', accessToken],
-                            ['refresh_token', refreshToken],
-                            ['user', JSON.stringify(user)],
-                        ]);
+            //             // Save to AsyncStorage
+            //             await AsyncStorage.multiSet([
+            //                 ['access_token', accessToken],
+            //                 ['refresh_token', refreshToken],
+            //                 ['user', JSON.stringify(user)],
+            //             ]);
 
-                        // Dispatch to Redux
-                        dispatch(setToken({ accessToken, refreshToken }));
-                        dispatch(setUser(user));
-                    }
-                } catch (err: any) {
-                    // dispatch(setError(err?.error?.data?.message || 'Login failed'));
-                }
-                finally {
-                    dispatch(setLoading(false));
-                }
-            },
+            //             // Dispatch to Redux
+            //             dispatch(setToken({ accessToken, refreshToken }));
+            //             dispatch(setUser(user));
+            //         }
+            //     } catch (err: any) {
+            //         // dispatch(setError(err?.error?.data?.message || 'Login failed'));
+            //     }
+            //     finally {
+            //         dispatch(setLoading(false));
+            //     }
+            // },
             //   async onQueryStarted(arg, { queryFulfilled }) {
             //     try {
             //       const { data } = await queryFulfilled;
@@ -126,12 +119,6 @@ export const authApi = createApi({
         //     invalidatesTags: ['Auth'],
         // }),
 
-        // Get current user (Me)
-        getCurrentUser: builder.query<LoginResponse, void>({
-            query: () => '/auth/me',
-            providesTags: ['Auth'],
-        }),
-
         // Logout
         logout: builder.mutation<{ message: string }, void>({
             query: () => ({
@@ -175,29 +162,6 @@ export const authApi = createApi({
                 method: 'POST',
             }),
         }),
-        //         forgotPassword: builder.mutation<{ message: string }, string>({
-        //     query: (email) => ({
-        //         url: `${ENDPOINTS.AUTH.FORGOT_PASSWORD}?email=${encodeURIComponent(email)}`,
-        //         method: 'POST',
-        //     }),
-        //     async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-        //         dispatch(setLoading(true));
-        //         try {
-        //             await queryFulfilled;
-        //         } catch (err: any) {
-        //             dispatch(setError(err?.error?.data?.message || 'Failed to send reset email'));
-        //         } finally {
-        //             dispatch(setLoading(false));
-        //         }
-        //     },
-        // }),
-        // forgotPassword: builder.mutation<{ message: string }, { email: string }>({
-        //     query: (data) => ({
-        //         url: ENDPOINTS.AUTH.RESET_PASSWORD,
-        //         method: 'POST',
-        //         body: data,
-        //     }),
-        // }),
 
         // Reset Password
         resetPassword: builder.mutation<
@@ -210,16 +174,61 @@ export const authApi = createApi({
                 body: data,
             }),
         }),
+
+        getProfileById: builder.query<ApiResponse<UserProfileResponse>, string>({
+            query: (userId) => ({
+                url: `${ENDPOINTS.AUTH.PROFILE}?userId=${userId}`,
+                method: "GET",
+            }),
+        }),
+
+        updateProfile: builder.mutation<ApiResponse<number>, ProfileUpdateRequest>({
+            query: (data) => {
+                const formData = new FormData();
+                if (data.fullName) formData.append("FullName", data.fullName);
+                if (data.birthDay) formData.append("BirthDay", data.birthDay);
+                if (data.phoneNumber) formData.append("PhoneNumber", data.phoneNumber);
+                if (data.gender) formData.append("Gender", data.gender);
+                if (data.avatarFile) formData.append("AvatarFile", data.avatarFile);
+                if (data.bioDescription) formData.append("BioDescription", data.bioDescription);
+
+                return {
+                    url: ENDPOINTS.AUTH.UPDATE_PROFILE,
+                    method: "PUT",
+                    body: formData,
+                };
+            },
+        }),
+
+        changePassword: builder.mutation<ApiResponse<null>, ChangePasswordRequest>({
+            query: (data) => ({
+                url: ENDPOINTS.AUTH.CHANGE_PASSWORD,
+                method: "PUT",
+                body: data,
+            }),
+        }),
+
+        firebaseLogin: builder.mutation({
+            query: (token) => ({
+                url: ENDPOINTS.AUTH.GOOGLE,
+                method: "POST",
+                body: { token },
+            }),
+        }),
     }),
 });
 
 export const {
     useLoginMutation,
     useRegisterMutation,
-    useGetCurrentUserQuery,
     useLogoutMutation,
     useRefreshTokenMutation,
     useForgotPasswordMutation,
     useResetPasswordMutation,
-    useLazyGetCurrentUserQuery,
+
+    useGetProfileByIdQuery,
+    useUpdateProfileMutation,
+    useChangePasswordMutation,
+
+    useFirebaseLoginMutation,
 } = authApi;
