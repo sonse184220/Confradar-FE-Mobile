@@ -7,6 +7,35 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:530552883525:android:d10d157129f10a4737d62c",
+        "android_client_info": {
+          "package_name": "com.confradar"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "530552883525-u99ph42meedfh2bpv9r5islcm3b0no4v.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDlRfnNrYH_KQ6wOQPVLWFGqUXZSxa6jmY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "530552883525-u99ph42meedfh2bpv9r5islcm3b0no4v.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:530552883525:android:0f899810d5d1ddb837d62c",
         "android_client_info": {
           "package_name": "confradar.android"
