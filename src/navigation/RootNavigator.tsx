@@ -8,6 +8,7 @@ import ChangePasswordScreen from "../screens/ChangePasswordScreen";
 import ConferenceDetailScreen from "../screens/ConferenceDetailScreen";
 import TransactionHistoryScreen from "../screens/TransactionHistoryScreen";
 import FavoriteConferencesScreen from "@/screens/FavoriteConferencesScreen";
+import TicketConferenceScreen from "@/screens/TicketConferenceScreen";
 
 const navTheme = {
     ...DefaultTheme,
@@ -24,6 +25,7 @@ export type RootStackParamList = {
     ChangePassword: undefined;
     TransactionHistory: undefined;
     FavoriteConferences: undefined;
+    TicketConference: undefined;
     BookingFlow: { confId: number };
     HistoryDetail: { historyId: number };
 };
@@ -47,6 +49,7 @@ const RootNavigator = () => {
                         <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
                         <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
                         <Stack.Screen name="FavoriteConferences" component={FavoriteConferencesScreen} />
+                        <Stack.Screen name="TicketConference" component={TicketConferenceScreen} />
                     </>
                 ) : (
                     <Stack.Screen name="Auth" component={AuthStack} />

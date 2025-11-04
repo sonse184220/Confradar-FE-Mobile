@@ -77,6 +77,15 @@ const AccountSettingScreen = () => {
       icon: 'history',
       hasArrow: true,
       onPress: () => navigation.navigate('FavoriteConferences')
+    },
+
+    {
+      id: '4',
+      title: 'My Tickets',
+      description: 'View your successfully registered tickets',
+      icon: 'history',
+      hasArrow: true,
+      onPress: () => navigation.navigate('TicketConference')
     }
   ];
 
