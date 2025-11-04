@@ -10,6 +10,8 @@ export const ENDPOINTS = {
         PROFILE: "/Auth/view-profile-by-id",
         UPDATE_PROFILE: "/Auth/update-profile",
         CHANGE_PASSWORD: "/Auth/change-password",
+
+        GOOGLE: "/Auth/firebase-login",
     },
     USER: {
         PROFILE: '/users',

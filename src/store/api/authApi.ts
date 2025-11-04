@@ -8,14 +8,7 @@ import { ENDPOINTS } from '@/constants/endpoints';
 import { ApiResponse } from '@/types/api';
 import { jwtDecode } from 'jwt-decode';
 
-interface JwtPayload {
-    sub: string;
-    email: string;
-    exp: number;
-    iss: string;
-    aud: string;
-    'http://schemas.microsoft.com/ws/2008/06/identity/claims/role': string;
-}
+
 
 export const authApi = createApi({
     reducerPath: 'authApi',
@@ -29,45 +22,45 @@ export const authApi = createApi({
                 method: 'POST',
                 body: credentials,
             }),
-            async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-                dispatch(setLoading(true));
-                try {
-                    const { data } = await queryFulfilled;
+            // async onQueryStarted(arg, { queryFulfilled, dispatch }) {
+            //     dispatch(setLoading(true));
+            //     try {
+            //         const { data } = await queryFulfilled;
 
-                    if (data.data) {
-                        const { accessToken, refreshToken } = data.data;
+            //         if (data.data) {
+            //             const { accessToken, refreshToken } = data.data;
 
-                        // ✅ Decode token using jwt-decode
-                        const decoded = jwtDecode<JwtPayload>(accessToken);
+            //             // ✅ Decode token using jwt-decode
+            //             const decoded = jwtDecode<JwtPayload>(accessToken);
 
-                        const user: User = {
-                            id: decoded.sub,
-                            email: decoded.email,
-                            name: decoded.email.split('@')[0], // fallback name
-                            role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
-                            avatar: undefined,
-                            createdAt: new Date().toISOString(),
-                            updatedAt: new Date().toISOString(),
-                        };
+            //             const user: User = {
+            //                 id: decoded.sub,
+            //                 email: decoded.email,
+            //                 name: decoded.email.split('@')[0],
+            //                 role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+            //                 avatar: undefined,
+            //                 createdAt: new Date().toISOString(),
+            //                 updatedAt: new Date().toISOString(),
+            //             };
 
-                        // Save to AsyncStorage
-                        await AsyncStorage.multiSet([
-                            ['access_token', accessToken],
-                            ['refresh_token', refreshToken],
-                            ['user', JSON.stringify(user)],
-                        ]);
+            //             // Save to AsyncStorage
+            //             await AsyncStorage.multiSet([
+            //                 ['access_token', accessToken],
+            //                 ['refresh_token', refreshToken],
+            //                 ['user', JSON.stringify(user)],
+            //             ]);
 
-                        // Dispatch to Redux
-                        dispatch(setToken({ accessToken, refreshToken }));
-                        dispatch(setUser(user));
-                    }
-                } catch (err: any) {
-                    // dispatch(setError(err?.error?.data?.message || 'Login failed'));
-                }
-                finally {
-                    dispatch(setLoading(false));
-                }
-            },
+            //             // Dispatch to Redux
+            //             dispatch(setToken({ accessToken, refreshToken }));
+            //             dispatch(setUser(user));
+            //         }
+            //     } catch (err: any) {
+            //         // dispatch(setError(err?.error?.data?.message || 'Login failed'));
+            //     }
+            //     finally {
+            //         dispatch(setLoading(false));
+            //     }
+            // },
             //   async onQueryStarted(arg, { queryFulfilled }) {
             //     try {
             //       const { data } = await queryFulfilled;
@@ -214,6 +207,14 @@ export const authApi = createApi({
                 body: data,
             }),
         }),
+
+        firebaseLogin: builder.mutation({
+            query: (token) => ({
+                url: ENDPOINTS.AUTH.GOOGLE,
+                method: "POST",
+                body: { token },
+            }),
+        }),
     }),
 });
 
@@ -228,4 +229,6 @@ export const {
     useGetProfileByIdQuery,
     useUpdateProfileMutation,
     useChangePasswordMutation,
+
+    useFirebaseLoginMutation,
 } = authApi;

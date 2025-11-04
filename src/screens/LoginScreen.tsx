@@ -10,6 +10,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '../navigation/AuthStack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useAuth } from '../hooks/useAuth';
+import { signInWithGoogle } from '@/modules/authProviders/firebaseGoogleProvider';
 
 const { height } = Dimensions.get('window');
 
@@ -23,8 +24,15 @@ const LoginScreen = () => {
   const [password, setPassword] = useState('');
   const [cl, setCL] = useState('');
 
-  // Use useAuth hook
-  const { login, loading, loginError, loginResponse } = useAuth();
+  const {
+    login,
+    loading,
+    loginError,
+    loginResponse,
+    googleLogin,
+    googleLoading,
+    googleLoginError,
+  } = useAuth();
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -47,7 +55,21 @@ const LoginScreen = () => {
   };
   const handleForgotPassword = () => { navigation.navigate('ForgotPassword1'); };
   const handleSignUp = () => { navigation.navigate('Register'); };
-  const handleGoogleLogin = () => { };
+  const handleGoogleLogin = async () => {
+    try {
+      const googleResult = await signInWithGoogle();
+
+      const result = await googleLogin(googleResult.firebaseIdToken);
+
+      console.log('Google login success:', result);
+
+      if (result.success) {
+        navigation2.replace('App');
+      }
+    } catch (error) {
+      console.log('Google login failed:', error);
+    }
+  };
   const handleFacebookLogin = () => { };
 
   return (
@@ -176,6 +198,14 @@ const LoginScreen = () => {
               </View>
             )}
 
+            {googleLoginError && (
+              <View style={{ backgroundColor: '#FEE2E2', padding: 12, borderRadius: 8, marginBottom: 16 }}>
+                <Text style={{ color: '#DC2626', fontSize: 14 }}>
+                  {googleLoginError}
+                </Text>
+              </View>
+            )}
+
             {/* <Button
               title="Đăng Nhập"
               buttonStyle={{ backgroundColor: '#7C3AED', borderRadius: 16, paddingVertical: 12 }}
@@ -190,8 +220,8 @@ const LoginScreen = () => {
               textColor="#FFF"
               style={{ borderRadius: 16, marginBottom: 16 }}
               onPress={handleLogin}
-              loading={loading}
-              disabled={loading || !email || !password}
+              loading={loading || googleLoading}
+              disabled={loading || googleLoading || !email || !password}
             >
               {loading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
             </Button>

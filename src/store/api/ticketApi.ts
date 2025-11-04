@@ -128,11 +128,6 @@ export const ticketApi = createApi({
                     ]
                     : [{ type: "Ticket", id: "LIST" }],
         }),
-
-        // getOwnTransaction: builder.query<ApiResponse<Transaction[]>, void>({
-        //     query: () => '/payment/get-own-transaction',
-        //     providesTags: ['Transaction'],
-        // }),
     }),
 });
 
