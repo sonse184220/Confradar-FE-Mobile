@@ -39,6 +39,9 @@ export const ENDPOINTS = {
     TRANSACTION: {
         GET_OWN: '/Payment/get-own-transaction',
         GET_BY_ID: '/transaction',
-        PAY_TECH: '/Payment/pay-tech-with-momo',
+        CREATE_TECH_PAYMENT: '/Payment/pay-tech-with-momo',
+    },
+    TICKET: {
+        GET_OWN_TICKET: '/Ticket/get-own-paid-ticket',
     }
 } as const;

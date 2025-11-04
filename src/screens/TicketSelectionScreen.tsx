@@ -21,6 +21,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useTicket } from '../hooks/useTicket';
 import { useConference } from '../hooks/useConference';
 import { ConferencePriceResponse, ConferenceResponse, TechnicalConferenceDetailResponse } from '../types/conference.type';
+import { useTransaction } from '@/hooks/useTransaction';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -297,17 +298,19 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
   const conferenceId = route?.params?.conferenceId || '';
 
   // Get hooks
-  const { purchaseTicket, loading: ticketLoading, paymentError } = useTicket();
+  // const { purchaseTicket, loading: ticketLoading, paymentError } = useTicket();
+
+  const {
+    purchaseTechTicket,
+    loading: paymentLoading,
+    techPaymentError,
+    techPaymentResponse,
+  } = useTransaction();
   // const { fetchConference, loading: conferenceLoading, error: conferenceError } = useConference();
   const {
     technicalConference,
     technicalConferenceLoading,
     technicalConferenceError,
-    refetchTechnicalConference,
-    researchConference,
-    researchConferenceLoading,
-    researchConferenceError,
-    refetchResearchConference
   } = useConference({ id: conferenceId });
 
   // Fetch conference data on component mount
@@ -380,7 +383,7 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
         conferencePriceId: selectedTicket.conferencePriceId
       };
 
-      const response = await purchaseTicket(paymentRequest);
+      const response = await purchaseTechTicket(paymentRequest);
       console.log(response);
 
       // Check if response contains payment URL
@@ -438,7 +441,7 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
       // Show retry option
       Alert.alert(
         'Lỗi thanh toán',
-        paymentError || 'Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.',
+        techPaymentError?.data?.Message || 'Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.',
         [
           { text: 'Hủy', style: 'cancel' },
           { text: 'Thử lại', onPress: handleBuyTickets }
@@ -580,7 +583,7 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
             <BuyTicketsButton
               onPress={handleBuyTickets}
               disabled={!selectedTicketId || technicalConferenceLoading}
-              loading={ticketLoading}
+              loading={paymentLoading}
             />
           )}
         </ScrollView>

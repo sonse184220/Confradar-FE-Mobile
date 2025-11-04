@@ -362,12 +362,27 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
               Chỉ cho phép mua vé ở web
             </Button>
           ) : (
+            // <Button
+            //   mode="contained"
+            //   onPress={() => setIsDialogOpen(true)}
+            //   style={{ backgroundColor: '#3B82F6' }}
+            // >
+            //   Mở chọn vé
+            // </Button>
             <Button
               mode="contained"
-              onPress={() => setIsDialogOpen(true)}
-              style={{ backgroundColor: '#3B82F6' }}
+              onPress={() => {
+                // navigationTo.navigate('TicketSelection')
+                navigation.navigate('TicketSelection', {
+                  conferenceId: conference?.conferenceId,
+                });
+              }}
+              // onPress={handlePurchaseTicket}
+              // disabled={!selectedTicket || paymentLoading}
+              // loading={paymentLoading}
+              style={{ flex: 1, marginLeft: 8, backgroundColor: '#EF4444' }}
             >
-              Mở chọn vé
+              Đăng ký ngay
             </Button>
           )}
         </Surface>
@@ -526,7 +541,7 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
       </ScrollView>
 
       {/* Ticket Selection Modal */}
-      <Modal
+      {/* <Modal
         animationType="slide"
         transparent={true}
         visible={isDialogOpen}
@@ -588,7 +603,6 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
               <Button
                 mode="contained"
                 onPress={() => {
-                  // console.log('Check In Event');
                   // navigationTo.navigate('TicketSelection')
                   navigation.navigate('TicketSelection', {
                     conferenceId: conference?.conferenceId,
@@ -599,43 +613,44 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
                 // loading={paymentLoading}
                 style={{ flex: 1, marginLeft: 8, backgroundColor: '#EF4444' }}
               >
-                {/* {paymentLoading ? 'Đang xử lý...' : 'Thanh toán'} */}
-                "Đăng ký"
-              </Button>
-            </View>
-          </Surface>
-        </View>
-      </Modal>
+      Đăng ký
+    </Button>
+            </View >
+          </Surface >
+        </View >
+      </Modal > */}
 
       {/* Image Modal */}
-      {selectedImage && (
-        <Modal
-          animationType="fade"
-          transparent={true}
-          visible={!!selectedImage}
-          onRequestClose={() => setSelectedImage(null)}
-        >
-          <View style={{
-            flex: 1,
-            backgroundColor: 'rgba(0,0,0,0.9)',
-            justifyContent: 'center',
-            alignItems: 'center'
-          }}>
-            <TouchableOpacity
-              style={{ position: 'absolute', top: 40, right: 16, zIndex: 1 }}
-              onPress={() => setSelectedImage(null)}
-            >
-              <Icon name="close" size={30} color="white" />
-            </TouchableOpacity>
-            <Image
-              source={{ uri: selectedImage }}
-              style={{ width: screenWidth - 32, height: 400 }}
-              resizeMode="contain"
-            />
-          </View>
-        </Modal>
-      )}
-    </View>
+      {
+        selectedImage && (
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={!!selectedImage}
+            onRequestClose={() => setSelectedImage(null)}
+          >
+            <View style={{
+              flex: 1,
+              backgroundColor: 'rgba(0,0,0,0.9)',
+              justifyContent: 'center',
+              alignItems: 'center'
+            }}>
+              <TouchableOpacity
+                style={{ position: 'absolute', top: 40, right: 16, zIndex: 1 }}
+                onPress={() => setSelectedImage(null)}
+              >
+                <Icon name="close" size={30} color="white" />
+              </TouchableOpacity>
+              <Image
+                source={{ uri: selectedImage }}
+                style={{ width: screenWidth - 32, height: 400 }}
+                resizeMode="contain"
+              />
+            </View>
+          </Modal>
+        )
+      }
+    </View >
   );
 };
 

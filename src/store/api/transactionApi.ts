@@ -36,7 +36,6 @@ export interface Transaction {
     PaymentMethodName?: string;
 }
 
-
 export const transactionApi = createApi({
     reducerPath: 'transactionApi',
     baseQuery: baseQueryWithReauth,
@@ -44,7 +43,7 @@ export const transactionApi = createApi({
     endpoints: (builder) => ({
         createPaymentForTech: builder.mutation<ApiResponse<string>, CreateTechPaymentRequest>({
             query: (request) => ({
-                url: ENDPOINTS.TRANSACTION.GET_OWN,
+                url: ENDPOINTS.TRANSACTION.CREATE_TECH_PAYMENT,
                 method: 'POST',
                 body: request,
             }),
@@ -76,20 +75,11 @@ export const transactionApi = createApi({
                     ]
                     : [{ type: 'Transaction', id: 'LIST' }],
         }),
-
-        getTransactionById: builder.query<ApiResponse<Transaction>, string>({
-            query: (id) => ({
-                url: `${ENDPOINTS.TRANSACTION.GET_BY_ID}/${id}`,
-                method: 'GET',
-            }),
-            providesTags: (result, error, id) => [{ type: 'Transaction', id }],
-        }),
     }),
 });
 
 export const {
+    useCreatePaymentForTechMutation,
     useGetOwnTransactionsQuery,
     useLazyGetOwnTransactionsQuery,
-    useGetTransactionByIdQuery,
-    useLazyGetTransactionByIdQuery,
 } = transactionApi;
