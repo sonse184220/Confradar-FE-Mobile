@@ -34,61 +34,84 @@ interface TicketSelectionScreenProps {
   };
 }
 
-// Use ConferencePriceResponse directly instead of custom TicketType
-
 // Reusable Components
 const ConferenceHeader: React.FC<{
-  title: string;
-  image: string;
-  date: string;
-  venue: string;
-  time: string;
-}> = ({ title, image, date, venue, time }) => {
+  conference: TechnicalConferenceDetailResponse;
+}> = ({ conference }) => {
   const imageMap: Record<string, any> = {
     conf1: require('../assets/conf1.jpg'),
     conf2: require('../assets/conf2.jpg'),
     taylorswift: require('../assets/taylorswift.jpg'),
   };
 
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleDateString('en-US', { month: 'short' });
+    const year = date.getFullYear();
+    return `${day}. ${month}. ${year}`;
+  };
+
+  const formatTime = (startDate?: string, endDate?: string) => {
+    if (!startDate || !endDate) return 'Thời gian không xác định';
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return `${start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+  };
+
   return (
     <View className="px-4 pb-6 mt-5">
       <View className="bg-white rounded-3xl p-6 shadow-sm">
         {/* Conference Logo/Icon */}
-        <View
-          className="items-center mb-4"
-        // style={{ transform: [{ translateY: -50 }] }}
-        >
-          {/* <View className="items-center mb-4"> */}
+        <View className="items-center mb-4">
           <View className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-100">
             <Image
-              source={imageMap[image]}
+              source={{ uri: conference.bannerImageUrl }}
               className="w-full h-full"
               resizeMode="cover"
             />
           </View>
-          {/* </View> */}
         </View>
 
         {/* Conference Title */}
         <Text className="text-xl font-bold text-gray-900 text-center mb-4">
-          {title}
+          {conference.conferenceName || 'N/A'}
         </Text>
 
         {/* Date and Time */}
         <View className="flex-row items-center justify-center mb-2">
           <View className="w-2 h-2 rounded-full bg-gray-400 mr-3" />
-          <Text className="text-base text-gray-700 font-medium">{date}</Text>
+          <Text className="text-base text-gray-700 font-medium">
+            {formatDate(conference.startDate)}
+          </Text>
         </View>
 
         {/* Venue */}
         <Text className="text-sm text-blue-600 text-center mb-2">
-          {venue}
+          {conference.address || 'Địa điểm không xác định'}
         </Text>
 
         {/* Time */}
         <View className="flex-row items-center justify-center">
           <Icon name="access-time" size={16} color="#6B7280" />
-          <Text className="text-sm text-gray-600 ml-1">{time}</Text>
+          <Text className="text-sm text-gray-600 ml-1">
+            {formatTime(conference.startDate, conference.endDate)}
+          </Text>
+        </View>
+
+        <View className="flex-row items-center justify-center">
+          <Icon name="people" size={16} color="#6B7280" />
+          <Text className="text-sm text-gray-600 ml-1">
+            Tổng số chỗ: {conference.totalSlot}
+          </Text>
+        </View>
+
+        <View className="flex-row items-center justify-center">
+          <Icon name="access-time" size={16} color="#6B7280" />
+          <Text className="text-sm text-gray-600 ml-1">
+            Số chỗ còn trống để đăng ký : {conference.availableSlot}
+          </Text>
         </View>
       </View>
     </View>
@@ -122,6 +145,15 @@ const TicketTypeCard: React.FC<{
   isSelected: boolean;
   onSelect: () => void;
 }> = ({ ticket, isSelected, onSelect }) => {
+  const now = new Date();
+  const currentPhase = ticket.pricePhases?.find((phase) => {
+    const startDate = new Date(phase.startDate || "");
+    const endDate = new Date(phase.endDate || "");
+    return now >= startDate && now <= endDate;
+  });
+  const currentPrice = getCurrentPrice(ticket);
+  const basePrice = ticket.ticketPrice ?? 0;
+
   return (
     <TouchableOpacity
       onPress={onSelect}
@@ -133,13 +165,13 @@ const TicketTypeCard: React.FC<{
           {/* Thông tin vé */}
           <View className="flex-1">
             <Text className="text-lg font-semibold text-gray-900 mb-1">
-              {ticket.ticketName || 'Vé hội nghị'}
+              {ticket.ticketName || 'Loại vé không xác định'}
             </Text>
             <Text className="text-sm text-gray-600 mb-1">
-              {ticket.ticketDescription || 'Mô tả vé hội nghị'}
+              {ticket.ticketDescription || 'Mô tả không có'}
             </Text>
             <Text className="text-xs text-gray-500">
-              Tổng số vé: {ticket.totalSlot ?? 0} | Còn lại: {ticket.availableSlot ?? 0}
+              Tổng số vé: {ticket.totalSlot ?? 'N/A'} | Còn lại: {ticket.availableSlot ?? 'N/A'}
             </Text>
             {ticket.isAuthor && (
               <Text className="text-xs text-emerald-600 mt-1 font-medium">
@@ -150,87 +182,52 @@ const TicketTypeCard: React.FC<{
 
           {/* Phần giá */}
           <View className="ml-4 items-end">
-            {(() => {
-              // const currentPhase = getCurrentPhase(ticket);
-              const now = new Date();
-              const currentPhase = ticket.pricePhases?.find((phase) => {
-                const startDate = new Date(phase.startDate || "");
-                const endDate = new Date(phase.endDate || "");
-                return now >= startDate && now <= endDate;
-              });
-              const currentPrice = getCurrentPrice(ticket);
-              const basePrice = ticket.ticketPrice ?? 0;
-
-              return (
-                <>
-                  {/* Giá hiện tại */}
-                  <Text className="text-lg font-bold text-gray-900">
-                    {currentPrice.toLocaleString('vi-VN')}₫
-                  </Text>
-
-                  {/* Nếu có phase đang áp dụng và khác giá gốc */}
-                  {currentPhase && currentPrice !== basePrice && (
-                    <Text className="text-sm text-gray-500 line-through">
-                      {basePrice.toLocaleString('vi-VN')}₫
-                    </Text>
-                  )}
-
-                  {/* Tên phase */}
-                  {currentPhase ? (
-                    <Text className="text-xs text-blue-600 font-medium mt-1">
-                      {currentPhase.phaseName} ({currentPhase.applyPercent}%)
-                    </Text>
-                  ) : (
-                    <Text className="text-xs text-gray-500 mt-1">Chưa có giai đoạn áp dụng</Text>
-                  )}
-                </>
-              );
-            })()}
-          </View>
-        </View>
-      </View>
-      <View className="p-4">
-        <View className="flex-row items-center justify-between mb-3">
-          <View className="flex-1">
-            <Text className="text-lg font-semibold text-gray-900 mb-1">
-              {ticket.ticketName || 'Vé hội nghị'}
-            </Text>
-            <Text className="text-sm text-gray-600">
-              {ticket.ticketDescription || 'Mô tả vé hội nghị'}
-            </Text>
-          </View>
-
-          <View className="ml-4 items-end">
+            {/* Giá hiện tại */}
             <Text className="text-lg font-bold text-gray-900">
-              {ticket.ticketPrice?.toLocaleString('vi-VN')}₫
+              {ticket.ticketPrice !== undefined ? `${currentPrice.toLocaleString('vi-VN')}₫` : 'Giá không xác định'}
             </Text>
-            {/* {ticket.actualPrice && ticket.actualPrice !== ticket.ticketPrice && (
+
+            {/* Nếu có phase đang áp dụng và khác giá gốc */}
+            {currentPhase && currentPrice !== basePrice && ticket.ticketPrice !== undefined && (
               <Text className="text-sm text-gray-500 line-through">
-                {ticket.actualPrice.toLocaleString('vi-VN')}₫
+                {basePrice.toLocaleString('vi-VN')}₫
               </Text>
-            )} */}
-            {/* {ticket.currentPhase && (
-              <Text className="text-xs text-blue-600 font-medium">
-                {ticket.currentPhase}
+            )}
+
+            {/* Tên phase */}
+            {currentPhase ? (
+              <Text className="text-xs text-blue-600 font-medium mt-1">
+                {currentPhase.phaseName || 'Phase N/A'} ({currentPhase.applyPercent ?? 'N/A'}%)
               </Text>
-            )} */}
+            ) : (
+              <Text className="text-xs text-gray-500 mt-1">Chưa có giai đoạn áp dụng</Text>
+            )}
           </View>
         </View>
 
-        {/* Benefits - Using default benefits since API doesn't provide them */}
-        <View className="mb-3">
-          {[
-            'Tham dự tất cả các phiên chính',
-            'Tài liệu hội nghị',
-            'Coffee break',
-            'Certificate tham dự'
-          ].map((benefit, index) => (
-            <View key={index} className="flex-row items-center mb-1">
-              <Icon name="check-circle" size={16} color="#10B981" />
-              <Text className="text-sm text-gray-600 ml-2">{benefit}</Text>
-            </View>
-          ))}
-        </View>
+        {/* Thông tin phase chi tiết */}
+        {currentPhase && (
+          <View className="mb-3 p-3 bg-blue-50 rounded-lg">
+            <Text className="text-sm font-medium text-blue-800 mb-1">
+              Giai đoạn hiện tại: {currentPhase.phaseName || 'N/A'}
+            </Text>
+            {currentPhase.startDate && (
+              <Text className="text-xs text-blue-600">
+                Bắt đầu: {new Date(currentPhase.startDate).toLocaleDateString('vi-VN')}
+              </Text>
+            )}
+            {currentPhase.endDate && (
+              <Text className="text-xs text-blue-600">
+                Kết thúc: {new Date(currentPhase.endDate).toLocaleDateString('vi-VN')}
+              </Text>
+            )}
+            {currentPhase.totalSlot !== undefined && (
+              <Text className="text-xs text-blue-600">
+                Số vé phase: {currentPhase.totalSlot} | Còn lại: {currentPhase.availableSlot ?? 'N/A'}
+              </Text>
+            )}
+          </View>
+        )}
 
         {/* Radio Button */}
         <View className="flex-row items-center justify-end">
@@ -292,76 +289,48 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
   route,
 }) => {
   const [selectedTicketId, setSelectedTicketId] = useState<string>('');
-  const [conferenceDataState, setConferenceDataState] = useState<TechnicalConferenceDetailResponse | null>(null);
 
   // Get conferenceId from route params
   const conferenceId = route?.params?.conferenceId || '';
 
   // Get hooks
-  // const { purchaseTicket, loading: ticketLoading, paymentError } = useTicket();
-
   const {
     purchaseTechTicket,
     loading: paymentLoading,
     techPaymentError,
     techPaymentResponse,
   } = useTransaction();
-  // const { fetchConference, loading: conferenceLoading, error: conferenceError } = useConference();
+
   const {
     technicalConference,
     technicalConferenceLoading,
     technicalConferenceError,
   } = useConference({ id: conferenceId });
 
-  // Fetch conference data on component mount
-  useEffect(() => {
-    if (conferenceId) {
-      loadConferenceData();
+  const getCurrentPrice = (price: ConferencePriceResponse) => {
+    const basePrice = price.ticketPrice ?? 0;
+
+    if (!price.pricePhases || price.pricePhases.length === 0) {
+      return basePrice;
     }
-  }, [conferenceId]);
 
-  const loadConferenceData = async () => {
-    try {
-      // const response = await fetchConference(conferenceId);
-      console.log('conferenceDataState:', conferenceDataState);
-      setConferenceDataState(technicalConference ?? null);
-    } catch (err) {
-      console.error('Error loading conference data:', err);
+    const now = new Date();
+    const currentPhase = price.pricePhases.find(phase => {
+      const startDate = new Date(phase.startDate || '');
+      const endDate = new Date(phase.endDate || '');
+      return now >= startDate && now <= endDate;
+    });
+
+    if (!currentPhase || !currentPhase.applyPercent) {
+      return basePrice;
     }
+
+    const finalPrice = Math.round(basePrice * (currentPhase.applyPercent / 100));
+    return finalPrice;
   };
 
-  // Helper functions to format API data
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '23. Nov. 2024';
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = date.toLocaleDateString('en-US', { month: 'short' });
-    const year = date.getFullYear();
-    return `${day}. ${month}. ${year}`;
-  };
-
-  const formatTime = (startDate?: string, endDate?: string) => {
-    if (!startDate || !endDate) return '8:00 - 17:30';
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    return `${start.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - ${end.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
-  };
-
-  // Transform API data to match UI expectations
-  const conferenceData = {
-    title: conferenceDataState?.conferenceName || 'Hội thảo Khoa học Quốc tế về Trí tuệ Nhân tạo và Ứng dụng',
-    shortTitle: conferenceDataState?.conferenceName || 'AI & Applications Conference',
-    date: formatDate(conferenceDataState?.startDate),
-    venue: conferenceDataState?.address || 'Đại học FPT, TP. HCM',
-    time: formatTime(conferenceDataState?.startDate, conferenceDataState?.endDate),
-    image: conferenceDataState?.bannerImageUrl ? 'conf1' : 'conf1', // Use default for now
-  };
-
-  // Get conference prices from API data
-  const conferencePrices = conferenceDataState?.conferencePrices || [];
-
-  // Use conference prices directly from API
-  const ticketTypes: ConferencePriceResponse[] = conferencePrices;
+  // Use conference prices directly from TechnicalConferenceDetailResponse
+  const ticketTypes: ConferencePriceResponse[] = technicalConference?.conferencePrices || [];
 
   // Set first ticket as default selection
   useEffect(() => {
@@ -469,7 +438,8 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
   };
 
   const handleRetryConference = () => {
-    loadConferenceData();
+    // Retry is handled automatically by the hook when component re-renders
+    console.log('Retrying conference data fetch...');
   };
 
   return (
@@ -522,13 +492,11 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
           contentContainerStyle={{ flexGrow: 1 }}
         >
           {/* Conference Information Header */}
-          <ConferenceHeader
-            title={conferenceData.shortTitle}
-            image={conferenceData.image}
-            date={conferenceData.date}
-            venue={conferenceData.venue}
-            time={conferenceData.time}
-          />
+          {technicalConference && (
+            <ConferenceHeader
+              conference={technicalConference}
+            />
+          )}
 
           {/* Ticket Selection Section */}
           <View className="px-4 pb-4">
@@ -537,12 +505,12 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
             </Text>
 
             {/* Loading state for conference data */}
-            {technicalConferenceLoading && !conferenceDataState ? (
+            {technicalConferenceLoading && !technicalConference ? (
               <View className="items-center py-8">
                 <ActivityIndicator size="large" color="#6B7280" />
                 <Text className="text-gray-600 mt-2">Đang tải thông tin vé...</Text>
               </View>
-            ) : technicalConferenceError && !conferenceDataState ? (
+            ) : technicalConferenceError && !technicalConference ? (
               <View className="items-center py-8">
                 <Icon name="error-outline" size={48} color="#EF4444" />
                 <Text className="text-gray-900 text-lg font-semibold mt-2">Có lỗi xảy ra</Text>
