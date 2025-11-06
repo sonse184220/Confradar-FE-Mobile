@@ -137,22 +137,51 @@ const StatusChip: React.FC<{
 
 // Abstract Tab Component
 const AbstractTab: React.FC<{ abstract?: any }> = ({ abstract }) => (
-  <View className="p-4">
-    <Text className="text-lg font-semibold text-gray-900 mb-4">
+  <View
+    className="m-4 p-4 rounded-xl"
+    style={{ backgroundColor: '#1F2937', borderColor: '#374151', borderWidth: 1 }}
+  >
+    <Text className="text-lg font-semibold text-white mb-4">
       Abstract
     </Text>
 
     {abstract ? (
       <View className="space-y-4">
-        <View>
-          <Text className="text-sm font-medium text-gray-700 mb-2">
+        {/* Abstract ID */}
+        {abstract.abstractId && (
+          <View className="mb-4">
+            <Text className="text-sm font-medium text-gray-400 mb-2">
+              Abstract ID
+            </Text>
+            <Text className="text-white text-base">
+              {abstract.abstractId}
+            </Text>
+          </View>
+        )}
+
+        {/* Created Date */}
+        {abstract.createdAt && (
+          <View className="mb-4">
+            <Text className="text-sm font-medium text-gray-400 mb-2">
+              Ngày tạo
+            </Text>
+            <Text className="text-white text-base">
+              {new Date(abstract.createdAt).toLocaleDateString('vi-VN')} {new Date(abstract.createdAt).toLocaleTimeString('vi-VN')}
+            </Text>
+          </View>
+        )}
+
+        {/* Status */}
+        <View className="mb-4">
+          <Text className="text-sm font-medium text-gray-400 mb-2">
             Trạng thái
           </Text>
           <StatusChip status={abstract.globalStatusId} type="global" />
         </View>
 
+        {/* File Abstract */}
         <View>
-          <Text className="text-sm font-medium text-gray-700 mb-2">
+          <Text className="text-sm font-medium text-gray-400 mb-2">
             File Abstract
           </Text>
           <FileLink
@@ -163,8 +192,8 @@ const AbstractTab: React.FC<{ abstract?: any }> = ({ abstract }) => (
       </View>
     ) : (
       <View className="items-center py-8">
-        <Icon name="description" size={48} color="#E5E7EB" />
-        <Text className="text-gray-500 mt-2">
+        <Icon name="description" size={48} color="#6B7280" />
+        <Text className="text-gray-400 mt-2">
           Abstract chưa được nộp
         </Text>
       </View>
@@ -428,31 +457,104 @@ const PaperDetailScreen: React.FC<PaperDetailScreenProps> = ({
   };
 
   return (
-    <View className="flex-1 bg-white">
-      <Appbar.Header>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title={`Paper #${paperId.slice(-6)}`} />
-      </Appbar.Header>
+    <View className="flex-1 bg-gray-600">
+      <View className="bg-black">
+        <Appbar.Header
+          mode="center-aligned"
+          style={{ backgroundColor: 'transparent', elevation: 0 }}
+        >
+          <Appbar.BackAction onPress={() => navigation.goBack()} color="#FFFFFF" />
+          <Appbar.Content
+            title={`Paper #${paperId.slice(-6)}`}
+            titleStyle={{ color: '#FFFFFF', fontWeight: 'bold' }}
+          />
+        </Appbar.Header>
+      </View>
+
+      {/* Paper Basic Info */}
+      <View className="mx-4 mt-4">
+        <View
+          style={{
+            backgroundColor: '#1F2937',
+            borderColor: '#374151',
+            borderWidth: 1,
+            borderRadius: 16,
+            padding: 16,
+          }}
+        >
+          {/* Paper Title */}
+          <Text className="text-white font-bold text-lg mb-2">
+            {paperDetail.title || `Paper #${paperId.slice(-6)}`}
+          </Text>
+
+          {/* Paper Description */}
+          {paperDetail.description && (
+            <Text className="text-gray-300 text-sm mb-4" numberOfLines={3}>
+              {paperDetail.description}
+            </Text>
+          )}
+
+          {/* Paper Info Row */}
+          <View className="flex-row justify-between items-center mb-3">
+            <View className="flex-1">
+              <Text className="text-gray-500 text-xs mb-1">Created At</Text>
+              <Text className="text-white text-sm">
+                {paperDetail.createdAt
+                  ? new Date(paperDetail.createdAt).toLocaleDateString('vi-VN')
+                  : 'N/A'
+                }
+              </Text>
+            </View>
+
+            {/* {paperDetail.reviewedAt && (
+              <View className="flex-1 ml-4">
+                <Text className="text-gray-500 text-xs mb-1">Reviewed At</Text>
+                <Text className="text-white text-sm">
+                  {new Date(paperDetail.reviewedAt).toLocaleDateString('vi-VN')}
+                </Text>
+              </View>
+            )} */}
+          </View>
+
+          {/* Current Phase */}
+          <View className="flex-row justify-between items-center">
+            <View className="flex-1">
+              <Text className="text-gray-500 text-xs mb-1">Current Phase</Text>
+              <Text className="text-green-400 text-sm font-medium">
+                {paperDetail.currentPhase?.phaseName || 'Unknown Phase'}
+              </Text>
+            </View>
+
+            {/* Conference ID */}
+            {/* <View className="flex-1 ml-4">
+              <Text className="text-gray-500 text-xs mb-1">Conference ID</Text>
+              <Text className="text-white text-sm">
+                {paperDetail.conferenceId || 'N/A'}
+              </Text>
+            </View> */}
+          </View>
+        </View>
+      </View>
 
       {/* Notice Banner */}
-      <View className="bg-blue-50 border-l-4 border-blue-400 p-4 mx-4 mt-4 rounded-r-lg">
+      <View className="bg-gray-800 border-l-4 border-green-400 p-4 mx-4 mt-4 rounded-r-lg">
         <View className="flex-row items-start">
-          <Icon name="info" size={20} color="#3B82F6" />
+          <Icon name="info" size={20} color="#10B981" />
           <View className="ml-3 flex-1">
-            <Text className="text-blue-800 font-medium text-sm">
+            <Text className="text-green-400 font-medium text-sm">
               Thông báo
             </Text>
-            <Text className="text-blue-700 text-sm mt-1">
+            <Text className="text-gray-300 text-sm mt-1">
               Bạn chỉ có thể theo dõi trạng thái paper tại đây. Để thao tác cập nhật, tạo hoặc nộp paper, vui lòng lên web.
             </Text>
           </View>
         </View>
       </View>
 
-      <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1" showsVerticalScrollIndicator={false} style={{ backgroundColor: 'transparent' }}>
         {/* Progress Steps */}
         <View className="px-4 py-6">
-          <Text className="text-lg font-semibold text-gray-900 mb-4">
+          <Text className="text-lg font-semibold text-white mb-4">
             Tiến trình Paper
           </Text>
 
