@@ -43,9 +43,12 @@ export const ENDPOINTS = {
         GET_BY_ID: '/api/conferencecategory',
     },
     TRANSACTION: {
-        GET_OWN: '/Payment/get-own-transaction',
+        GET_OWN: '/payment/get-own-transaction',
         GET_BY_ID: '/transaction',
-        CREATE_TECH_PAYMENT: '/Payment/pay-tech-with-momo',
+        CREATE_TECH_PAYMENT: '/payment/pay-tech',
+    },
+    PAYMENT_METHOD: {
+        GET_ALL: "/PaymentMethod/list-all-payment-methods",
     },
     TICKET: {
         GET_OWN_TICKET: '/Ticket/get-own-paid-ticket',

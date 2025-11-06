@@ -2,9 +2,11 @@ import { parseApiError } from '@/utils/api';
 import {
     useGetOwnTransactionsQuery,
     useLazyGetOwnTransactionsQuery,
-    useCreatePaymentForTechMutation
+    useCreatePaymentForTechMutation,
+    useGetAllPaymentMethodsQuery,
+    useLazyGetAllPaymentMethodsQuery
 } from '@/store/api/transactionApi';
-import { CreateTechPaymentRequest } from '@/store/api/ticketApi';
+import { CreateTechPaymentRequest, PaymentMethod } from '@/types/transaction.type';
 
 export const useTransaction = () => {
     const [
@@ -24,10 +26,15 @@ export const useTransaction = () => {
         error: lazyTransactionsRawError
     }] = useLazyGetOwnTransactionsQuery();
 
+    const { data, isLoading, error } = useGetAllPaymentMethodsQuery();
+    const [fetchPaymentMethods, { isLoading: lazyLoading, data: lazyData, error: lazyError }] =
+        useLazyGetAllPaymentMethodsQuery();
+
     // Parse errors
     const techPaymentError = parseApiError<string>(techPaymentRawError);
     const transactionsError = parseApiError<string>(transactionsRawError);
     const lazyTransactionsError = parseApiError<string>(lazyTransactionsRawError);
+    const paymentMethodsError = parseApiError<string>(error || lazyError);
 
     const purchaseTechTicket = async (request: CreateTechPaymentRequest) => {
         try {
@@ -47,16 +54,27 @@ export const useTransaction = () => {
         }
     };
 
+    const fetchAllPaymentMethods = async (): Promise<PaymentMethod[]> => {
+        try {
+            const result = await fetchPaymentMethods().unwrap();
+            return result.data || [];
+        } catch (err) {
+            throw err;
+        }
+    };
+
     return {
         // Data
         techPaymentResponse: techPaymentData,
         transactions: transactionsData?.data || [],
         transactionsResponse: transactionsData,
+        paymentMethods: data?.data || lazyData?.data || [],
 
         // Methods
         purchaseTechTicket,
         fetchOwnTransactions,
         refetchTransactions,
+        fetchAllPaymentMethods,
 
         // Loading states
         loading: techPaymentLoading || transactionsLoading || lazyTransactionsLoading,
@@ -66,6 +84,6 @@ export const useTransaction = () => {
         techPaymentError,
 
         transactionsError,
-        // paymentMethodsError,
+        paymentMethodsError,
     };
 };

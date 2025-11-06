@@ -6,61 +6,6 @@ import { ENDPOINTS } from '@/constants/endpoints';
 import { ApiResponsePagination } from '@/types/api.type';
 import { CustomerPaidTicketResponse } from '@/types/ticket.type';
 
-export interface CreateTechPaymentRequest {
-    conferencePriceId: string;
-}
-
-// export interface UserCheckIn {
-//     userCheckInId: string;
-//     isPresenter?: boolean;
-//     hasCheckIn?: boolean;
-//     checkInTime?: string;
-//     conferenceSessionId?: string;
-//     userId?: string;
-//     ticketId?: string;
-//     conferenceSession?: ConferenceSession;
-//     ticket?: Ticket;
-//     user?: User;
-// }
-
-export interface Ticket {
-    ticketId: string;
-    userId?: string;
-    conferencePriceId?: string;
-    transactionId?: string;
-    registeredDate?: string;
-    isRefunded?: boolean;
-    actualPrice?: number;
-}
-
-// export interface MomoPaymentCallBackResponse {
-//     partnerCode?: string;
-//     orderId?: string;
-//     requestId?: string;
-//     amount?: number;
-//     orderInfo?: string;
-//     orderType?: string;
-//     transId?: string;
-//     resultCode?: number;
-//     message?: string;
-//     payType?: string;
-//     responseTime?: number;
-//     extraData?: string;
-//     signature?: string;
-// }
-
-export interface Transaction {
-    id: string;
-    userId: string;
-    amount: number;
-    status: string;
-    paymentMethod: string;
-    orderId: string;
-    transactionDate: string;
-    description?: string;
-    conferencePriceId: string;
-}
-
 export const ticketApi = createApi({
     reducerPath: 'ticketApi',
     baseQuery: baseQueryWithReauth,

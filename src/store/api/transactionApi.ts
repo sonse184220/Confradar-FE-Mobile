@@ -2,46 +2,14 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseApi';
 import { ApiResponse } from '../../types/api';
 import { ENDPOINTS } from '../../constants/endpoints';
-import { CreateTechPaymentRequest } from './ticketApi';
-
-export interface PaymentMethod {
-    paymentMethodId: string;
-    name?: string;
-    description?: string;
-}
-
-export interface TransactionStatus {
-    transactionStatusId: string;
-    statusName?: string;
-    description?: string;
-}
-
-export interface TransactionType {
-    transactionTypeId: string;
-    typeName?: string;
-    description?: string;
-}
-
-export interface Transaction {
-    transactionId: string;
-    userId?: string;
-    currency?: string;
-    amount?: number;
-    transactionCode?: string;
-    createdAt?: string;
-    transactionStatusId?: string;
-    transactionTypeId?: string;
-    paymentMethodId?: string;
-    PaymentStatusName?: string;
-    PaymentMethodName?: string;
-}
+import { CreateTechPaymentRequest, GeneralPaymentResultResponse, PaymentMethod, Transaction } from '@/types/transaction.type';
 
 export const transactionApi = createApi({
     reducerPath: 'transactionApi',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['Transaction'],
+    tagTypes: ['Transaction', 'PaymentMethod'],
     endpoints: (builder) => ({
-        createPaymentForTech: builder.mutation<ApiResponse<string>, CreateTechPaymentRequest>({
+        createPaymentForTech: builder.mutation<ApiResponse<GeneralPaymentResultResponse>, CreateTechPaymentRequest>({
             query: (request) => ({
                 url: ENDPOINTS.TRANSACTION.CREATE_TECH_PAYMENT,
                 method: 'POST',
@@ -75,6 +43,11 @@ export const transactionApi = createApi({
                     ]
                     : [{ type: 'Transaction', id: 'LIST' }],
         }),
+
+        getAllPaymentMethods: builder.query<ApiResponse<PaymentMethod[]>, void>({
+            query: () => ENDPOINTS.PAYMENT_METHOD.GET_ALL,
+            providesTags: ["PaymentMethod"],
+        }),
     }),
 });
 
@@ -82,4 +55,6 @@ export const {
     useCreatePaymentForTechMutation,
     useGetOwnTransactionsQuery,
     useLazyGetOwnTransactionsQuery,
+    useGetAllPaymentMethodsQuery,
+    useLazyGetAllPaymentMethodsQuery,
 } = transactionApi;
