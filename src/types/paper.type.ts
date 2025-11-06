@@ -22,11 +22,15 @@ export interface PaperCustomer {
 
 export interface PaperDetailResponse {
     paperId: string;
+    title?: string;
+    description?: string;
+
     currentPhase: PaperPhase;
     abstract?: Abstract | null;
     fullPaper?: FullPaper | null;
     revisionPaper?: RevisionPaper | null;
     cameraReady?: CameraReady | null;
+    createdAt?: string;
 }
 
 export interface PaperPhase {
@@ -35,23 +39,34 @@ export interface PaperPhase {
 }
 
 export interface Abstract {
+    title?: string;
+    description?: string;
     abstractId: string;
     globalStatusId?: string | null;
     fileUrl?: string | null;
+    createdAt?: string;
+    reviewedAt?: string;
 }
 
 export interface FullPaper {
     fullPaperId: string;
-
+    title?: string;
+    description?: string;
     reviewStatusId?: string | null;
     fileUrl?: string | null;
+    createdAt?: string;
+    reviewedAt?: string;
 }
 
 export interface RevisionPaper {
     revisionPaperId: string;
+    title?: string;
+    description?: string;
     revisionRound?: number | null;
     overallStatus?: string | null;
     submissions: RevisionSubmission[];
+    createdAt?: string;
+    reviewedAt?: string;
     // reviews: RevisionReview[];
     // revisionPaperId: string;
     // revisionRound?: number | null;
@@ -60,6 +75,8 @@ export interface RevisionPaper {
 
 export interface RevisionSubmission {
     submissionId: string;
+    title?: string;
+    description?: string;
     fileUrl: string;
     revisionDeadline: {
         roundNumher: number;
@@ -84,18 +101,22 @@ export interface RevisionSubmissionFeedback {
 
 
 
-export interface RevisionReview {
-    reviewId: string;
-    note?: string;
-    feedBackToAuthor?: string;
-    feedbackMaterialURL?: string;
-    reviewedAt?: string;
-}
+// export interface RevisionReview {
+//     reviewId: string;
+//     note?: string;
+//     feedBackToAuthor?: string;
+//     feedbackMaterialURL?: string;
+//     reviewedAt?: string;
+// }
 
 export interface CameraReady {
     cameraReadyId: string;
+    title?: string;
+    description?: string;
     globalStatusId?: string | null;
     fileUrl?: string | null;
+    createdAt?: string;
+    reviewedAt?: string;
 }
 
 export interface CreateAbstractRequest {

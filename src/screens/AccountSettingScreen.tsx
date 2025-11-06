@@ -80,12 +80,21 @@ const AccountSettingScreen = () => {
     },
 
     {
-      id: '4',
+      id: '5',
       title: 'My Tickets',
       description: 'View your successfully registered tickets',
       icon: 'history',
       hasArrow: true,
       onPress: () => navigation.navigate('TicketConference')
+    },
+
+    {
+      id: '6',
+      title: 'My Paper',
+      description: 'View your successfully registered tickets',
+      icon: 'history',
+      hasArrow: true,
+      onPress: () => navigation.navigate('PaperList')
     }
   ];
 
