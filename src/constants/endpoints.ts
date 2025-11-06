@@ -57,5 +57,32 @@ export const ENDPOINTS = {
         LIST_OWN: '/FavouriteConference/list-own-favourite-conferences',
         ADD: '/FavouriteConference/add-to-favourite',
         DELETE: '/FavouriteConference/delete-from-favourite',
-    }
+    },
+
+    PAPER: {
+        LIST_ALL_PAPERS: "/Paper/list-all-papers",
+
+        //ABSTRACT
+        SUBMIT_ABSTRACT: "/Paper/submit-abstract",
+
+        // FULL PAPER
+        SUBMIT_FULLPAPER: "/Paper/submit-fullpaper",
+
+        // REVISION PAPER
+        SUBMIT_PAPER_REVISION: "/Paper/submit-paper-revision",
+        SUBMIT_PAPER_REVISION_RESPONSE: "/Paper/submit-paper-revision-response",
+
+        // CAMERA READY
+        SUBMIT_CAMERA_READY: "/Paper/submit-camera-ready",
+
+        LIST_SUBMITTED_PAPERS_CUSTOMER: "/Paper/get-all-submitted-papers-for-customer",
+        GET_PAPER_DETAIL_CUSTOMER: "/Paper/get-paper-detail-customer",
+        LIST_PAPER_PHASES: "/Paper/list-paper-phases",
+        LIST_AVAILABLE_CUSTOMERS: "/Paper/list-available-customers",
+
+        //WAITLIST
+        LIST_CUSTOMER_WAITLIST: "/Paper/list-customer-waitlist",
+        LEAVE_WAITLIST: "/Paper/leave-waitlist",
+    },
+
 } as const;

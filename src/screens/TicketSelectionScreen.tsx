@@ -22,6 +22,7 @@ import { useTicket } from '../hooks/useTicket';
 import { useConference } from '../hooks/useConference';
 import { ConferencePriceResponse, ConferenceResponse, TechnicalConferenceDetailResponse } from '../types/conference.type';
 import { useTransaction } from '@/hooks/useTransaction';
+import { PaymentMethod } from '@/types/transaction.type';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -74,12 +75,10 @@ const ConferenceHeader: React.FC<{
           </View>
         </View>
 
-        {/* Conference Title */}
         <Text className="text-xl font-bold text-gray-900 text-center mb-4">
           {conference.conferenceName || 'N/A'}
         </Text>
 
-        {/* Date and Time */}
         <View className="flex-row items-center justify-center mb-2">
           <View className="w-2 h-2 rounded-full bg-gray-400 mr-3" />
           <Text className="text-base text-gray-700 font-medium">
@@ -87,12 +86,10 @@ const ConferenceHeader: React.FC<{
           </Text>
         </View>
 
-        {/* Venue */}
         <Text className="text-sm text-blue-600 text-center mb-2">
           {conference.address || 'Địa điểm không xác định'}
         </Text>
 
-        {/* Time */}
         <View className="flex-row items-center justify-center">
           <Icon name="access-time" size={16} color="#6B7280" />
           <Text className="text-sm text-gray-600 ml-1">
@@ -162,7 +159,6 @@ const TicketTypeCard: React.FC<{
     >
       <View className="p-4">
         <View className="flex-row items-center justify-between mb-3">
-          {/* Thông tin vé */}
           <View className="flex-1">
             <Text className="text-lg font-semibold text-gray-900 mb-1">
               {ticket.ticketName || 'Loại vé không xác định'}
@@ -180,21 +176,17 @@ const TicketTypeCard: React.FC<{
             )}
           </View>
 
-          {/* Phần giá */}
           <View className="ml-4 items-end">
-            {/* Giá hiện tại */}
             <Text className="text-lg font-bold text-gray-900">
               {ticket.ticketPrice !== undefined ? `${currentPrice.toLocaleString('vi-VN')}₫` : 'Giá không xác định'}
             </Text>
 
-            {/* Nếu có phase đang áp dụng và khác giá gốc */}
             {currentPhase && currentPrice !== basePrice && ticket.ticketPrice !== undefined && (
               <Text className="text-sm text-gray-500 line-through">
                 {basePrice.toLocaleString('vi-VN')}₫
               </Text>
             )}
 
-            {/* Tên phase */}
             {currentPhase ? (
               <Text className="text-xs text-blue-600 font-medium mt-1">
                 {currentPhase.phaseName || 'Phase N/A'} ({currentPhase.applyPercent ?? 'N/A'}%)
@@ -205,7 +197,6 @@ const TicketTypeCard: React.FC<{
           </View>
         </View>
 
-        {/* Thông tin phase chi tiết */}
         {currentPhase && (
           <View className="mb-3 p-3 bg-blue-50 rounded-lg">
             <Text className="text-sm font-medium text-blue-800 mb-1">
@@ -229,7 +220,6 @@ const TicketTypeCard: React.FC<{
           </View>
         )}
 
-        {/* Radio Button */}
         <View className="flex-row items-center justify-end">
           <RadioButton
             value={ticket.conferencePriceId}
@@ -238,6 +228,38 @@ const TicketTypeCard: React.FC<{
             color="#3B82F6"
           />
         </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
+
+const PaymentMethodCard: React.FC<{
+  paymentMethod: PaymentMethod;
+  isSelected: boolean;
+  onSelect: () => void;
+}> = ({ paymentMethod, isSelected, onSelect }) => {
+  return (
+    <TouchableOpacity
+      onPress={onSelect}
+      className={`mb-3 rounded-xl border-2 ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}
+    >
+      <View className="p-4 flex-row items-center justify-between">
+        <View className="flex-1">
+          <Text className="text-base font-semibold text-gray-900">
+            {paymentMethod.methodName || 'Phương thức thanh toán'}
+          </Text>
+          {paymentMethod.methodDescription && (
+            <Text className="text-sm text-gray-600 mt-1">
+              {paymentMethod.methodDescription}
+            </Text>
+          )}
+        </View>
+        <RadioButton
+          value={paymentMethod.paymentMethodId}
+          status={isSelected ? 'checked' : 'unchecked'}
+          onPress={onSelect}
+          color="#3B82F6"
+        />
       </View>
     </TouchableOpacity>
   );
@@ -289,16 +311,18 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
   route,
 }) => {
   const [selectedTicketId, setSelectedTicketId] = useState<string>('');
+  const [selectedPaymentMethodId, setSelectedPaymentMethodId] = useState<string>('');
 
-  // Get conferenceId from route params
   const conferenceId = route?.params?.conferenceId || '';
 
-  // Get hooks
   const {
     purchaseTechTicket,
     loading: paymentLoading,
     techPaymentError,
     techPaymentResponse,
+    paymentMethods,
+    fetchAllPaymentMethods,
+    paymentMethodsError,
   } = useTransaction();
 
   const {
@@ -339,6 +363,35 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
     }
   }, [ticketTypes, selectedTicketId]);
 
+  // Load payment methods and set default selection
+  useEffect(() => {
+    const loadPaymentMethods = async () => {
+      try {
+        await fetchAllPaymentMethods();
+      } catch (error) {
+        console.error('Failed to load payment methods:', error);
+      }
+    };
+    loadPaymentMethods();
+  }, []);
+
+  useEffect(() => {
+    if (paymentMethods.length > 0 && !selectedPaymentMethodId) {
+      setSelectedPaymentMethodId(paymentMethods[0].paymentMethodId);
+    }
+  }, [paymentMethods, selectedPaymentMethodId]);
+
+  useEffect(() => {
+    if (techPaymentError) Alert.alert(
+      'Lỗi thanh toán',
+      techPaymentError?.data?.Message || 'Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        { text: 'Thử lại', onPress: handleBuyTickets }
+      ]
+    );
+  }, [techPaymentError]);
+
   const handleBuyTickets = async () => {
     const selectedTicket = ticketTypes.find(ticket => ticket.conferencePriceId === selectedTicketId);
 
@@ -347,75 +400,52 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
       return;
     }
 
+    if (!selectedPaymentMethodId) {
+      Alert.alert('Lỗi', 'Vui lòng chọn phương thức thanh toán');
+      return;
+    }
+
     try {
       const paymentRequest = {
-        conferencePriceId: selectedTicket.conferencePriceId
+        conferencePriceId: selectedTicket.conferencePriceId,
+        paymentMethodId: selectedPaymentMethodId
       };
 
       const response = await purchaseTechTicket(paymentRequest);
       console.log(response);
 
-      // Check if response contains payment URL
-      if (response?.data && typeof response.data === 'string') {
-        const paymentUrl = response.data;
-        // const text = response.data;
-        // const urlMatch = text.match(/https?:\/\/[^\s]+/);
+      if (response?.data) {
+        const paymentResult = response.data;
 
-        // if (!urlMatch) {
-        //   Alert.alert('Lỗi', 'Không tìm thấy liên kết thanh toán trong dữ liệu');
-        //   return;
-        // }
+        if (paymentResult.checkOutUrl) {
+          console.log('Payment URL from checkOutUrl:', paymentResult.checkOutUrl);
 
-        // const paymentUrl = urlMatch[0];
+          const isValidUrl = paymentResult.checkOutUrl.startsWith('http://') ||
+            paymentResult.checkOutUrl.startsWith('https://');
 
-        console.log('url ne: ', paymentUrl);
-
-        // Check if URL is valid
-        const isValidUrl = paymentUrl.startsWith('http://') || paymentUrl.startsWith('https://');
-
-        if (isValidUrl) {
-          // Try to open payment URL
-          const supported = await Linking.canOpenURL(paymentUrl);
-
-          await openUrlDirectly(paymentUrl);
-
-          // if (supported) {
-          //   await Linking.openURL(paymentUrl);
-          // } else {
-          //   Alert.alert(
-          //     'Lỗi',
-          //     'Không thể mở liên kết thanh toán. Vui lòng sao chép liên kết và mở trong trình duyệt.',
-          //     [
-          //       { text: 'OK', style: 'default' },
-          //       {
-          //         text: 'Sao chép',
-          //         onPress: () => {
-          //           // Note: Would need to import Clipboard from @react-native-clipboard/clipboard
-          //           Alert.alert('URL thanh toán', paymentUrl);
-          //         }
-          //       }
-          //     ]
-          //   );
-          // }
+          if (isValidUrl) {
+            await openUrlDirectly(paymentResult.checkOutUrl);
+          } else {
+            Alert.alert('Lỗi', 'Liên kết thanh toán không hợp lệ');
+          }
         } else {
-          Alert.alert('Lỗi', 'Liên kết thanh toán không hợp lệ');
+          const message = paymentResult.paymentMessage || 'Thanh toán đã được xử lý';
+          Alert.alert('Thông báo thanh toán', message);
         }
       } else {
-        Alert.alert('Lỗi', 'Không nhận được liên kết thanh toán từ máy chủ');
+        Alert.alert('Lỗi', 'Không nhận được phản hồi thanh toán từ máy chủ');
       }
 
     } catch (error: any) {
-      console.error('Purchase ticket error:', error);
-
-      // Show retry option
-      Alert.alert(
-        'Lỗi thanh toán',
-        techPaymentError?.data?.Message || 'Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.',
-        [
-          { text: 'Hủy', style: 'cancel' },
-          { text: 'Thử lại', onPress: handleBuyTickets }
-        ]
-      );
+      // console.error('Purchase ticket error:', error);
+      // Alert.alert(
+      //   'Lỗi thanh toán',
+      //   techPaymentError?.data?.Message || 'Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.',
+      //   [
+      //     { text: 'Hủy', style: 'cancel' },
+      //     { text: 'Thử lại', onPress: handleBuyTickets }
+      //   ]
+      // );
     }
   };
 
@@ -544,13 +574,45 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
             )}
           </View>
 
+          {/* Payment Methods Section */}
+          {ticketTypes.length > 0 && (
+            <View className="px-4 pb-4">
+              <Text className="text-lg font-semibold text-gray-900 mb-4">
+                Chọn phương thức thanh toán
+              </Text>
+
+              {paymentMethodsError ? (
+                <View className="items-center py-4">
+                  <Icon name="error-outline" size={32} color="#EF4444" />
+                  <Text className="text-red-600 text-center mt-2">
+                    Không thể tải phương thức thanh toán
+                  </Text>
+                </View>
+              ) : paymentMethods.length === 0 ? (
+                <View className="items-center py-4">
+                  <ActivityIndicator size="small" color="#6B7280" />
+                  <Text className="text-gray-600 mt-2">Đang tải phương thức thanh toán...</Text>
+                </View>
+              ) : (
+                paymentMethods.map((method) => (
+                  <PaymentMethodCard
+                    key={method.paymentMethodId}
+                    paymentMethod={method}
+                    isSelected={selectedPaymentMethodId === method.paymentMethodId}
+                    onSelect={() => setSelectedPaymentMethodId(method.paymentMethodId)}
+                  />
+                ))
+              )}
+            </View>
+          )}
+
           <View className="flex-1" />
 
           {/* Buy Tickets Button */}
           {ticketTypes.length > 0 && (
             <BuyTicketsButton
               onPress={handleBuyTickets}
-              disabled={!selectedTicketId || technicalConferenceLoading}
+              disabled={!selectedTicketId || !selectedPaymentMethodId || technicalConferenceLoading}
               loading={paymentLoading}
             />
           )}
