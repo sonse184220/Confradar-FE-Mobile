@@ -30,7 +30,7 @@ export interface PaperDetailResponse {
     fullPaper?: FullPaper | null;
     revisionPaper?: RevisionPaper | null;
     cameraReady?: CameraReady | null;
-    createdAt?: string;
+    created?: string;
 }
 
 export interface PaperPhase {
@@ -44,7 +44,7 @@ export interface Abstract {
     abstractId: string;
     globalStatusId?: string | null;
     fileUrl?: string | null;
-    createdAt?: string;
+    created?: string;
     reviewedAt?: string;
 }
 
@@ -54,7 +54,7 @@ export interface FullPaper {
     description?: string;
     reviewStatusId?: string | null;
     fileUrl?: string | null;
-    createdAt?: string;
+    created?: string;
     reviewedAt?: string;
 }
 
@@ -65,7 +65,7 @@ export interface RevisionPaper {
     revisionRound?: number | null;
     overallStatus?: string | null;
     submissions: RevisionSubmission[];
-    createdAt?: string;
+    created?: string;
     reviewedAt?: string;
     // reviews: RevisionReview[];
     // revisionPaperId: string;
@@ -115,7 +115,7 @@ export interface CameraReady {
     description?: string;
     globalStatusId?: string | null;
     fileUrl?: string | null;
-    createdAt?: string;
+    created?: string;
     reviewedAt?: string;
 }
 

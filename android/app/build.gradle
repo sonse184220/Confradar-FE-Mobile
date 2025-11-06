@@ -55,9 +55,12 @@ react {
     autolinkLibrariesWithApp()
     //
     // Added by install-expo-modules
-    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", rootDir.getAbsoluteFile().getParentFile().getAbsolutePath(), "android", "absolute"].execute(null, rootDir).text.trim())
-    cliFile = new File(["node", "--print", "require.resolve('@expo/cli')"].execute(null, rootDir).text.trim())
-    bundleCommand = "export:embed"
+    // entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", rootDir.getAbsoluteFile().getParentFile().getAbsolutePath(), "android", "absolute"].execute(null, rootDir).text.trim())
+    // cliFile = new File(["node", "--print", "require.resolve('@expo/cli')"].execute(null, rootDir).text.trim())
+    // bundleCommand = "export:embed"
+    entryFile = file("../../index.js")
+    cliFile = file("../../node_modules/react-native/cli.js")
+    autolinkLibrariesWithApp()
 }
 
 /**
@@ -99,12 +102,10 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
                 storeFile file(CONFRADAR_UPLOAD_STORE_FILE)
                 storePassword CONFRADAR_UPLOAD_STORE_PASSWORD
                 keyAlias CONFRADAR_UPLOAD_KEY_ALIAS
                 keyPassword CONFRADAR_UPLOAD_KEY_PASSWORD
-            }
         }
     }
     buildTypes {

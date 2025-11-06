@@ -499,8 +499,8 @@ const PaperDetailScreen: React.FC<PaperDetailScreenProps> = ({
             <View className="flex-1">
               <Text className="text-gray-500 text-xs mb-1">Created At</Text>
               <Text className="text-white text-sm">
-                {paperDetail.createdAt
-                  ? new Date(paperDetail.createdAt).toLocaleDateString('vi-VN')
+                {paperDetail.created
+                  ? new Date(paperDetail.created).toLocaleDateString('vi-VN')
                   : 'N/A'
                 }
               </Text>
