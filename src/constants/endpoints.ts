@@ -25,12 +25,12 @@ export const ENDPOINTS = {
         LIST_WITH_PRICES: "/Conference/conferences-with-prices",
         LIST_BY_STATUS: "/Conference/by-status",
 
-        GET_TECH_BY_ID: (conferenceId: string) => `/Conference/technical-detail/${conferenceId}`,
-        GET_RESEARCH_BY_ID: (conferenceId: string) => `/Conference/research-detail/${conferenceId}`,
+        GET_TECH_BY_ID: (conferenceId: string) => `/Conference/technical-detail-for-anon/${conferenceId}`,
+        GET_RESEARCH_BY_ID: (conferenceId: string) => `/Conference/research-detail-for-anon/${conferenceId}`,
 
         DETAIL: "/Conference",
-        TECHNICAL_DETAIL: "/Conference/technical-detail",
-        RESEARCH_DETAIL: "/Conference/research-detail",
+        TECHNICAL_DETAIL: "/Conference/technical-detail-for-anon",
+        RESEARCH_DETAIL: "/Conference/research-detail-for-anon",
         CREATE: "/Conference",
         UPDATE: "/Conference",
         DELETE: "/Conference",
@@ -83,6 +83,10 @@ export const ENDPOINTS = {
         //WAITLIST
         LIST_CUSTOMER_WAITLIST: "/Paper/list-customer-waitlist",
         LEAVE_WAITLIST: "/Paper/leave-waitlist",
+    },
+
+    CITY: {
+        LIST: "/City/cities",
     },
 
 } as const;

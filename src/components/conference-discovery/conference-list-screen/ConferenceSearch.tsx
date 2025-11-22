@@ -4,8 +4,10 @@ import {
     Chip,
     Searchbar,
     Menu,
-    Icon
+    Icon,
+    Button
 } from 'react-native-paper';
+import Slider from '@react-native-community/slider';
 
 interface ConferenceSearchProps {
     searchInput: string;
@@ -17,12 +19,18 @@ interface ConferenceSearchProps {
     setSelectedStatus: (value: string) => void;
     selectedCategory: string;
     setSelectedCategory: (value: string) => void;
+    selectedCity: string;  // THÊM
+    setSelectedCity: (value: string) => void;  // THÊM
     bannerFilter: 'technical' | 'research' | 'all';
     setBannerFilter: (value: 'technical' | 'research' | 'all') => void;
     startDateFilter: Date | null;
     setStartDateFilter: (value: Date | null) => void;
     endDateFilter: Date | null;
     setEndDateFilter: (value: Date | null) => void;
+    priceRange: [number, number];  // THÊM
+    setPriceRange: (range: [number, number]) => void;  // THÊM
+    absoluteMaxPrice: number;  // THÊM
+    allPrices: number[];  // THÊM
     sortMenuVisible: boolean;
     setSortMenuVisible: (value: boolean) => void;
     statusMenuVisible: boolean;
@@ -31,13 +39,20 @@ interface ConferenceSearchProps {
     setCategoryMenuVisible: (value: boolean) => void;
     bannerMenuVisible: boolean;
     setBannerMenuVisible: (value: boolean) => void;
+    cityMenuVisible: boolean;  // THÊM
+    setCityMenuVisible: (value: boolean) => void;  // THÊM
+    priceMenuVisible: boolean;  // THÊM
+    setPriceMenuVisible: (value: boolean) => void;  // THÊM
     dateMenuVisible: boolean;
     setDateMenuVisible: (value: boolean) => void;
+    setDatePickerVisible: (value: boolean) => void;
     categoriesData: any[] | undefined;
+    citiesData: any[] | undefined;  // THÊM
     getSortLabel: () => string;
     getStatusLabel: () => string;
     getCategoryLabel: () => string;
     getBannerLabel: () => string;
+    getCityLabel: () => string;  // THÊM
 }
 
 const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
@@ -50,12 +65,18 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
     setSelectedStatus,
     selectedCategory,
     setSelectedCategory,
+    selectedCity,  // THÊM
+    setSelectedCity,  // THÊM
     bannerFilter,
     setBannerFilter,
     startDateFilter,
     setStartDateFilter,
     endDateFilter,
     setEndDateFilter,
+    priceRange,  // THÊM
+    setPriceRange,  // THÊM
+    absoluteMaxPrice,  // THÊM
+    allPrices,  // THÊM
     sortMenuVisible,
     setSortMenuVisible,
     statusMenuVisible,
@@ -64,13 +85,20 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
     setCategoryMenuVisible,
     bannerMenuVisible,
     setBannerMenuVisible,
+    cityMenuVisible,  // THÊM
+    setCityMenuVisible,  // THÊM
+    priceMenuVisible,  // THÊM
+    setPriceMenuVisible,  // THÊM
     dateMenuVisible,
     setDateMenuVisible,
+    setDatePickerVisible,
     categoriesData,
+    citiesData,  // THÊM
     getSortLabel,
     getStatusLabel,
     getCategoryLabel,
-    getBannerLabel
+    getBannerLabel,
+    getCityLabel  // THÊM
 }) => {
     const FilterChip = ({ label, isSelected, onPress }: { label: string; isSelected: boolean; onPress: () => void }) => (
         <Chip
@@ -174,7 +202,7 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
                 </Menu>
 
                 {/* Status Menu */}
-                <Menu
+                {/* <Menu
                     key={`menu-status-${statusMenuVisible}`}
                     visible={statusMenuVisible}
                     onDismiss={() => setStatusMenuVisible(false)}
@@ -206,7 +234,7 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
                     <Menu.Item onPress={() => { setSelectedStatus('upcoming'); setStatusMenuVisible(false); }} title="Sắp diễn ra" titleStyle={{ color: '#F6F1F1' }} />
                     <Menu.Item onPress={() => { setSelectedStatus('current'); setStatusMenuVisible(false); }} title="Đang diễn ra" titleStyle={{ color: '#F6F1F1' }} />
                     <Menu.Item onPress={() => { setSelectedStatus('past'); setStatusMenuVisible(false); }} title="Đã kết thúc" titleStyle={{ color: '#F6F1F1' }} />
-                </Menu>
+                </Menu> */}
 
                 {/* Category Menu */}
                 <Menu
@@ -325,17 +353,165 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
                     <Menu.Item
                         onPress={() => {
                             setDateMenuVisible(false);
-                            // TODO: Open date picker modal
-                            console.log('Open date picker');
+                            setDatePickerVisible(true);
                         }}
                         title="Chọn khoảng thời gian"
                         titleStyle={{ color: '#F6F1F1' }}
                     />
                 </Menu>
+
+                <Menu
+                    key={`menu-city-${cityMenuVisible}`}
+                    visible={cityMenuVisible}
+                    onDismiss={() => setCityMenuVisible(false)}
+                    anchor={
+                        <TouchableOpacity
+                            onPress={() => setCityMenuVisible(true)}
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                backgroundColor: 'rgba(255,255,255,0.1)',
+                                paddingHorizontal: 12,
+                                paddingVertical: 8,
+                                borderRadius: 8,
+                                borderWidth: 1,
+                                borderColor: 'rgba(255,255,255,0.2)',
+                                marginRight: 8
+                            }}
+                        >
+                            <Icon source="map-marker" size={16} color="#19A7CE" />
+                            <Text style={{ color: '#F6F1F1', marginLeft: 8, marginRight: 4, fontSize: 14 }}>
+                                {getCityLabel()}
+                            </Text>
+                            <Icon source="chevron-down" size={16} color="#19A7CE" />
+                        </TouchableOpacity>
+                    }
+                    contentStyle={{ backgroundColor: 'rgba(20, 108, 148, 0.95)' }}
+                >
+                    <Menu.Item
+                        onPress={() => {
+                            setSelectedCity('all');
+                            setCityMenuVisible(false);
+                        }}
+                        title="Tất cả thành phố"
+                        titleStyle={{ color: '#F6F1F1' }}
+                    />
+                    {citiesData?.map((city) => (
+                        <Menu.Item
+                            key={city.cityId}
+                            onPress={() => {
+                                setSelectedCity(city.cityId);
+                                setCityMenuVisible(false);
+                            }}
+                            title={city.cityName ?? 'Không xác định'}
+                            titleStyle={{ color: '#F6F1F1' }}
+                        />
+                    ))}
+                </Menu>
+
+                {/* Price Menu - THÊM */}
+                <Menu
+                    key={`menu-price-${priceMenuVisible}`}
+                    visible={priceMenuVisible}
+                    onDismiss={() => setPriceMenuVisible(false)}
+                    anchor={
+                        <TouchableOpacity
+                            onPress={() => setPriceMenuVisible(true)}
+                            disabled={!allPrices.length}
+                            style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                backgroundColor: !allPrices.length ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.1)',
+                                paddingHorizontal: 12,
+                                paddingVertical: 8,
+                                borderRadius: 8,
+                                borderWidth: 1,
+                                borderColor: 'rgba(255,255,255,0.2)',
+                                marginRight: 8
+                            }}
+                        >
+                            <Icon source="currency-usd" size={16} color={!allPrices.length ? 'rgba(25, 167, 206, 0.5)' : "#19A7CE"} />
+                            <Text style={{ color: !allPrices.length ? 'rgba(246, 241, 241, 0.5)' : '#F6F1F1', marginLeft: 8, marginRight: 4, fontSize: 14 }}>
+                                Giá
+                            </Text>
+                            <Icon source="chevron-down" size={16} color={!allPrices.length ? 'rgba(25, 167, 206, 0.5)' : "#19A7CE"} />
+                        </TouchableOpacity>
+                    }
+                    contentStyle={{ backgroundColor: 'rgba(20, 108, 148, 0.95)', width: 300 }}
+                >
+                    <View style={{ padding: 16 }}>
+                        {allPrices.length > 0 ? (
+                            <>
+                                <Text style={{ color: '#F6F1F1', marginBottom: 12, fontWeight: '600' }}>
+                                    Khoảng giá (VND)
+                                </Text>
+
+                                <Text style={{ color: 'rgba(246, 241, 241, 0.7)', fontSize: 12, marginBottom: 8 }}>
+                                    Từ: {priceRange[0].toLocaleString()}đ
+                                </Text>
+
+                                {/* Note: Bạn cần cài @react-native-community/slider */}
+                                <Slider
+                                    style={{ width: '100%', height: 40 }}
+                                    minimumValue={0}
+                                    maximumValue={absoluteMaxPrice}
+                                    step={50000}
+                                    value={priceRange[0]}
+                                    onValueChange={(value) => setPriceRange([value, priceRange[1]])}
+                                    minimumTrackTintColor="#19A7CE"
+                                    maximumTrackTintColor="rgba(255,255,255,0.3)"
+                                    thumbTintColor="#19A7CE"
+                                />
+
+                                <Text style={{ color: 'rgba(246, 241, 241, 0.7)', fontSize: 12, marginBottom: 8, marginTop: 16 }}>
+                                    Đến: {priceRange[1].toLocaleString()}đ
+                                </Text>
+
+                                <Slider
+                                    style={{ width: '100%', height: 40 }}
+                                    minimumValue={0}
+                                    maximumValue={absoluteMaxPrice}
+                                    step={50000}
+                                    value={priceRange[1]}
+                                    onValueChange={(value) => setPriceRange([priceRange[0], value])}
+                                    minimumTrackTintColor="#19A7CE"
+                                    maximumTrackTintColor="rgba(255,255,255,0.3)"
+                                    thumbTintColor="#19A7CE"
+                                />
+
+                                <Button
+                                    mode="contained"
+                                    onPress={() => setPriceMenuVisible(false)}
+                                    style={{ marginTop: 16 }}
+                                    buttonColor="#19A7CE"
+                                    textColor="#000000"
+                                >
+                                    Áp dụng
+                                </Button>
+
+                                <Button
+                                    mode="text"
+                                    onPress={() => {
+                                        setPriceRange([0, absoluteMaxPrice]);
+                                        setPriceMenuVisible(false);
+                                    }}
+                                    style={{ marginTop: 8 }}
+                                    textColor="#F6F1F1"
+                                >
+                                    Đặt lại
+                                </Button>
+                            </>
+                        ) : (
+                            <Text style={{ color: '#EF4444', fontSize: 12, fontStyle: 'italic' }}>
+                                Bộ lọc giá hiện không khả dụng
+                            </Text>
+                        )}
+                    </View>
+                </Menu>
             </ScrollView>
 
             {/* Quick Filter Chips */}
-            <ScrollView
+            {/* <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={{ paddingRight: 16 }}
@@ -348,7 +524,32 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
                         onPress={() => setSelectedStatus(filter.value)}
                     />
                 ))}
-            </ScrollView>
+            </ScrollView> */}
+
+            <View style={{ marginTop: 12 }}>
+                <Button
+                    mode="outlined"
+                    onPress={() => {
+                        setSearchInput('');
+                        setSelectedCategory('all');
+                        setSelectedCity('all');
+                        setSelectedStatus('all');
+                        setBannerFilter('all');
+                        setStartDateFilter(null);
+                        setEndDateFilter(null);
+                        setPriceRange([0, absoluteMaxPrice]);
+                        setSortBy('date');
+                    }}
+                    style={{
+                        borderColor: '#EF4444',
+                        borderWidth: 1
+                    }}
+                    textColor="#EF4444"
+                    icon="close-circle"
+                >
+                    Xóa tất cả bộ lọc
+                </Button>
+            </View>
         </View>
     );
 };
