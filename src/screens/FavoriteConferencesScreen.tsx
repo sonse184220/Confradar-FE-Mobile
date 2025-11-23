@@ -48,7 +48,7 @@ const formatDate = (dateString?: string): string => {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  
+
   if (date >= today) {
     return 'Today';
   } else if (date >= yesterday) {
@@ -180,8 +180,8 @@ const ConferenceItem = ({
               </View>
               <Chip
                 mode="flat"
-                style={{ 
-                  backgroundColor: isResearch ? '#EF4444' : '#3B82F6', 
+                style={{
+                  backgroundColor: isResearch ? '#EF4444' : '#3B82F6',
                   alignSelf: 'flex-start',
                   height: 24,
                 }}
@@ -193,7 +193,7 @@ const ConferenceItem = ({
           </View>
 
           {/* Remove Favorite Button */}
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={onRemoveFavorite}
             className="ml-2 p-2"
           >
@@ -221,14 +221,14 @@ const ConferenceItem = ({
   );
 };
 
-const ConferenceDetailModal = ({ 
-  visible, 
-  conference, 
+const ConferenceDetailModal = ({
+  visible,
+  conference,
   onClose,
   onNavigateToDetail
-}: { 
-  visible: boolean; 
-  conference: FavouriteConferenceDetailResponse | null; 
+}: {
+  visible: boolean;
+  conference: FavouriteConferenceDetailResponse | null;
   onClose: () => void;
   onNavigateToDetail: () => void;
 }) => {
@@ -333,7 +333,7 @@ const ConferenceDetailModal = ({
           </View>
 
           {/* View Full Details Button */}
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={onNavigateToDetail}
             className="bg-blue-600 rounded-2xl p-4 mb-6 flex-row items-center justify-center"
           >
@@ -425,9 +425,9 @@ const FavoriteConferencesScreen: React.FC<FavoriteConferencesScreenProps> = ({
   const navigationTo = useNavigation<NavigationProp>();
 
   // Use conference hook to get favorite conferences
-  const { 
-    favouriteConferencesData, 
-    favouriteConferencesLoading, 
+  const {
+    favouriteConferencesData,
+    favouriteConferencesLoading,
     favouriteConferencesError,
     refetchFavouriteConferences,
     removeFavourite,
@@ -442,9 +442,9 @@ const FavoriteConferencesScreen: React.FC<FavoriteConferencesScreenProps> = ({
     let filtered = favoriteConferences.filter(conference => {
       const conferenceName = conference.conferenceName || '';
       const conferenceDescription = conference.conferenceDescription || '';
-      
+
       return conferenceName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-             conferenceDescription.toLowerCase().includes(searchQuery.toLowerCase());
+        conferenceDescription.toLowerCase().includes(searchQuery.toLowerCase());
     });
 
     // Sort based on active filter
@@ -491,8 +491,8 @@ const FavoriteConferencesScreen: React.FC<FavoriteConferencesScreenProps> = ({
         `Bạn có chắc muốn xóa "${conference.conferenceName}" khỏi danh sách yêu thích?`,
         [
           { text: 'Hủy', style: 'cancel' },
-          { 
-            text: 'Xóa', 
+          {
+            text: 'Xóa',
             style: 'destructive',
             onPress: async () => {
               try {
@@ -501,7 +501,7 @@ const FavoriteConferencesScreen: React.FC<FavoriteConferencesScreenProps> = ({
                 Alert.alert('Thành công', 'Đã xóa khỏi danh sách yêu thích');
               } catch (error) {
                 console.error('Remove favorite error:', error);
-                Alert.alert('Lỗi', deleteFromFavouriteError?.data?.Message || 'Có lỗi xảy ra khi xóa khỏi danh sách yêu thích');
+                Alert.alert('Lỗi', deleteFromFavouriteError?.data?.message || 'Có lỗi xảy ra khi xóa khỏi danh sách yêu thích');
               }
             }
           }
@@ -516,7 +516,7 @@ const FavoriteConferencesScreen: React.FC<FavoriteConferencesScreenProps> = ({
     if (selectedConference) {
       setModalVisible(false);
       setSelectedConference(null);
-      navigationTo.navigate('ConferenceDetail', {
+      navigationTo.navigate('ConferenceDetails', {
         conferenceId: selectedConference.conferenceId,
         type: selectedConference.isResearchConference ? 'research' : 'technical'
       });
@@ -594,7 +594,7 @@ const FavoriteConferencesScreen: React.FC<FavoriteConferencesScreenProps> = ({
           ) : favouriteConferencesError ? (
             <View className="flex-1 items-center justify-center py-20">
               <Text className="text-red-400 text-base text-center px-4 mb-4">
-                {favouriteConferencesError.data?.Message || 'Có lỗi xảy ra khi tải danh sách yêu thích'}
+                {favouriteConferencesError.data?.message || 'Có lỗi xảy ra khi tải danh sách yêu thích'}
               </Text>
               <TouchableOpacity
                 onPress={refetchFavouriteConferences}

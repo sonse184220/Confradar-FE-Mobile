@@ -382,7 +382,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
     let filtered = transactions.filter(transaction => {
       const transactionName = getTransactionName(transaction);
       const transactionCode = transaction.transactionCode || '';
-      const paymentMethod = transaction.PaymentMethodName || '';
+      const paymentMethod = transaction.paymentMethodName || '';
 
       return transactionName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         transactionCode.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -405,14 +405,14 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
         });
       case 'Type':
         return filtered.sort((a, b) => {
-          const statusA = a.PaymentStatusName || '';
-          const statusB = b.PaymentStatusName || '';
+          const statusA = a.paymentStatusName || '';
+          const statusB = b.paymentStatusName || '';
           return statusA.localeCompare(statusB);
         });
       case 'Product':
         return filtered.sort((a, b) => {
-          const methodA = a.PaymentMethodName || '';
-          const methodB = b.PaymentMethodName || '';
+          const methodA = a.paymentMethodName || '';
+          const methodB = b.paymentMethodName || '';
           return methodA.localeCompare(methodB);
         });
       default:
@@ -490,7 +490,7 @@ const TransactionHistoryScreen: React.FC<TransactionHistoryScreenProps> = ({
           ) : transactionsError ? (
             <View className="flex-1 items-center justify-center py-20">
               <Text className="text-red-400 text-base text-center px-4">
-                {transactionsError.data?.Message}
+                {transactionsError.data?.message}
               </Text>
             </View>
           ) : filteredAndSortedTransactions.length === 0 ? (

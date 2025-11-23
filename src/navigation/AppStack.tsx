@@ -13,6 +13,7 @@ import HomeStack from "./HomeStack";
 import CurrentStack, { CurrentStackParamList } from "./CurrentStack";
 import NotificationScreen from "../screens/NotificationScreen";
 import AccountSettingScreen from "../screens/AccountSettingScreen";
+import TicketConferenceScreen from "@/screens/TicketConferenceScreen";
 
 export type AppStackParamList = {
     HomeStack: undefined;
@@ -93,7 +94,7 @@ const AppStack = () => {
             // }}
             >
                 <Tab.Screen name="HomeStack" component={HomeStack} />
-                <Tab.Screen name="CurrentStack" component={CurrentStack} />
+                <Tab.Screen name="CurrentStack" component={TicketConferenceScreen} />
                 <Tab.Screen name="UpcomingStack" component={UpcomingStack} />
                 <Tab.Screen name="MoreStack" component={MoreStack} />
             </Tab.Navigator>

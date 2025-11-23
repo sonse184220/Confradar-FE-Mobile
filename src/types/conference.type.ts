@@ -47,7 +47,9 @@ export interface TechnicalConferenceDetailResponse {
   policies?: ConferencePolicyResponse[];
   sponsors?: SponsorResponse[];
   sessions?: TechnicalConferenceSessionResponse[];
-  conferencePrices?: ConferencePriceResponse[]; // 
+  conferencePrices?: ConferencePriceResponse[];
+
+  purchasedInfo?: PurchasedInfo;
 }
 
 export interface ResearchConferenceDetailResponse {
@@ -231,6 +233,12 @@ export interface RefundPolicyResponse {
   refundOrder?: number;
 }
 
+export interface PurchasedInfo {
+  ticketId: string | null;
+  conferencePriceId: string | null;
+  pricePhaseId: string | null;
+}
+
 export interface FavouriteConferenceDetailResponse {
   conferenceId: string;
   favouriteCreatedAt?: string;
@@ -258,4 +266,78 @@ export interface AddedFavouriteConferenceResponse {
 
 export interface FavouriteConferenceRequest {
   conferenceId: string;
+}
+
+export interface ConferenceDetailForScheduleResponse {
+  conferenceId: string;
+
+  conferenceName?: string;
+  description?: string;
+
+  startDate?: string;
+  endDate?: string;
+
+  totalSlot?: number;
+  availableSlot?: number;
+  address?: string;
+  bannerImageUrl?: string;
+  createdAt?: string;
+  ticketSaleStart?: string;
+  ticketSaleEnd?: string;
+
+  isInternalHosted?: boolean;
+  isResearchConference?: boolean;
+
+  cityId?: string;
+  cityName?: string;
+  conferenceCategoryId?: string;
+  conferenceCategoryName?: string;
+  conferenceStatusId?: string;
+  conferenceStatusName?: string;
+
+  sessions: SessionDetailForScheduleResponse[];
+}
+
+export interface SessionDetailForScheduleResponse {
+  conferenceSessionId: string;
+  title?: string;
+  description?: string;
+  startTime?: string;
+  endTime?: string;
+  sessionDate?: string;
+  conferenceId?: string;
+  roomId?: string;
+  roomNumber?: string;
+  roomDisplayName?: string;
+  destinationId?: string;
+  destinationName?: string;
+  destinationDistrict?: string;
+  destinationStreet?: string;
+  cityId?: string;
+  cityName?: string;
+
+  presenterAuthor?: PresenterAuthor[];
+}
+
+export interface PresenterAuthor {
+  conferenceSessionId: string;
+  paperId: string;
+  assignedAt?: string;
+  conferenceId?: string;
+  paperPhaseId?: string;
+  paperPhaseName?: string;
+  researchConferencePhaseId?: string;
+  createdAt?: string;
+  paperTitle?: string;
+  paperDescription?: string;
+  paperAuthor?: PaperAuthor[];
+}
+
+export interface PaperAuthor {
+  userId: string;
+  fullName: string;
+  avatarUrl?: string | null;
+  paperId: string;
+  isPresenter?: boolean;
+  isRootAuthor?: boolean;
 }

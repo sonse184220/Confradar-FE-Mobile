@@ -35,6 +35,7 @@ import ConferencePriceTab from '@/components/conference-discovery/conference-det
 import ResearchPaperInformationTab from '@/components/conference-discovery/conference-detail/ResearchPaperInformationTab';
 import FeedbackTab from '@/components/conference-discovery/conference-detail/FeedbackTab';
 import { BlurView } from '@react-native-community/blur';
+import { formatDate } from '@/utils/helper';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -131,15 +132,60 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   //   }
   // };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '';
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+  const canPurchaseTicket = () => {
+    const now = new Date();
+
+    const prices = (conference as TechnicalConferenceDetailResponse)?.conferencePrices;
+
+    if (!prices || prices.length === 0) {
+      return {
+        canPurchase: false,
+        message: 'Chưa có thông tin bán vé',
+      };
+    }
+
+    // 🔽 Nếu có prices rồi, mới flatten phase
+    const allPhases = prices.flatMap(ticket => ticket.pricePhases || []);
+
+    if (allPhases.length === 0) {
+      return {
+        canPurchase: false,
+        message: 'Chưa có thông tin bán vé',
+      };
+    }
+
+    // Phase hiện tại
+    const currentPhase = allPhases.find(phase => {
+      const start = new Date(phase.startDate || "");
+      const end = new Date(phase.endDate || "");
+      return now >= start && now <= end && (phase.availableSlot ?? 0) > 0;
     });
+
+    // Phase tương lai
+    const futurePhases = allPhases
+      .filter(phase => new Date(phase.startDate || "") > now)
+      .sort((a, b) => new Date(a.startDate || "").getTime() - new Date(b.startDate || "").getTime());
+
+    const nextPhaseStart = futurePhases.length > 0 ? new Date(futurePhases[0].startDate || "") : null;
+
+    // Check các trạng thái
+    const hasCurrentPhase = !!currentPhase;
+    const hasFuturePhase = futurePhases.length > 0;
+    const isSoldOutAll = allPhases.every(p => (p.availableSlot ?? 0) <= 0);
+    const isEndedAll = allPhases.every(p => new Date(p.endDate || "") < now);
+
+    return {
+      canPurchase: hasCurrentPhase,   // dùng cái này để disable/enable button
+      hasCurrentPhase,
+      hasFuturePhase,
+      isSoldOutAll,
+      isEndedAll,
+      nextPhaseStart,
+      currentPhase,
+    };
   };
+
+  const phaseInfo = canPurchaseTicket();
 
   const formatTime = (timeString?: string) => {
     if (!timeString) return '';
@@ -162,9 +208,9 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
       }
     } catch (error) {
       console.error('Favorite toggle error:', error);
-      const errorMessage = isFavorite ? 
-        (deleteFromFavouriteError?.data?.Message || 'Có lỗi xảy ra khi xóa khỏi danh sách yêu thích') :
-        (addToFavouriteError?.data?.Message || 'Có lỗi xảy ra khi thêm vào danh sách yêu thích');
+      const errorMessage = isFavorite ?
+        (deleteFromFavouriteError?.data?.message || 'Có lỗi xảy ra khi xóa khỏi danh sách yêu thích') :
+        (addToFavouriteError?.data?.message || 'Có lỗi xảy ra khi thêm vào danh sách yêu thích');
       Alert.alert('Lỗi', errorMessage);
     }
   };
@@ -182,7 +228,7 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#1a1a2e' }}>
         <Text style={{ color: '#EF4444', marginBottom: 16, textAlign: 'center' }}>Có lỗi xảy ra khi tải thông tin hội nghị</Text>
-        <Text style={{ color: 'white', fontSize: 12, marginBottom: 16, textAlign: 'center' }}>{error.data?.Message}</Text>
+        <Text style={{ color: 'white', fontSize: 12, marginBottom: 16, textAlign: 'center' }}>{error.data?.message}</Text>
         <Button mode="contained" onPress={() => isResearch ? refetchResearchConference() : refetchTechnicalConference()}>
           Thử lại
         </Button>
@@ -380,6 +426,65 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
           <Text style={{ color: 'white', marginBottom: 16, opacity: 0.8 }}>
             Nhấn để chọn khung giá vé và thanh toán
           </Text>
+
+          {isResearch ? (
+            // Nếu conference là Research
+            <View
+              style={{
+                paddingVertical: 12,
+                borderRadius: 8,
+                backgroundColor: '#6B7280',
+              }}
+            >
+              <Text style={{ color: 'white', textAlign: 'center' }}>
+                Chỉ cho phép mua vé ở web
+              </Text>
+            </View>
+          ) : !phaseInfo.canPurchase ? (
+            // Không có phase đang mở => disable + thông báo lý do
+            <View
+              style={{
+                paddingVertical: 12,
+                borderRadius: 8,
+                backgroundColor: '#6B7280',
+              }}
+            >
+              <Text style={{ color: 'white', textAlign: 'center', fontWeight: '600' }}>
+                {phaseInfo.hasFuturePhase
+                  ? `Vé sẽ bán từ: ${formatDate(phaseInfo.nextPhaseStart?.toISOString())}`
+                  : phaseInfo.isEndedAll
+                    ? 'Đã kết thúc bán vé'
+                    : phaseInfo.isSoldOutAll
+                      ? 'Đã bán hết vé'
+                      : 'Chưa có thông tin bán vé'}
+              </Text>
+            </View>
+          ) : (
+            // Mua được => show button
+            <Button
+              mode="contained"
+              onPress={() =>
+                navigation.navigate('TicketSelection', {
+                  conferenceId: conference?.conferenceId,
+                })
+              }
+              style={{
+                flex: 1,
+                marginLeft: 8,
+                backgroundColor: '#EF4444',
+              }}
+            >
+              Đăng ký ngay
+            </Button>
+          )}
+        </Surface>
+        {/* <Surface style={{ margin: 16, padding: 16, backgroundColor: 'rgba(255,255,255,0.1)' }}>
+          <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>
+            Đăng ký ngay
+          </Text>
+          <Text style={{ color: 'white', marginBottom: 16, opacity: 0.8 }}>
+            Nhấn để chọn khung giá vé và thanh toán
+          </Text>
           {isResearch ? (
             <Button
               mode="contained"
@@ -412,7 +517,7 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
               Đăng ký ngay
             </Button>
           )}
-        </Surface>
+        </Surface> */}
 
         {/* Description */}
         <Surface style={{ margin: 16, padding: 16, backgroundColor: 'rgba(255,255,255,0.1)' }}>

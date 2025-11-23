@@ -11,6 +11,7 @@ import FavoriteConferencesScreen from "@/screens/FavoriteConferencesScreen";
 import TicketConferenceScreen from "@/screens/TicketConferenceScreen";
 import PaperListScreen from "@/screens/PaperListScreen";
 import PaperDetailScreen from "@/screens/PaperDetailScreen";
+import ConferenceCalendarScreen from "@/screens/ConferenceCalendarScreen";
 
 const navTheme = {
     ...DefaultTheme,
@@ -30,6 +31,7 @@ export type RootStackParamList = {
     TicketConference: undefined;
     PaperList: undefined;
     PaperDetail: { paperId: string };
+    ConferenceCalendar: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -54,6 +56,7 @@ const RootNavigator = () => {
                         <Stack.Screen name="TicketConference" component={TicketConferenceScreen} />
                         <Stack.Screen name="PaperList" component={PaperListScreen} />
                         <Stack.Screen name="PaperDetail" component={PaperDetailScreen} />
+                        <Stack.Screen name="ConferenceCalendar" component={ConferenceCalendarScreen} />
                     </>
                 ) : (
                     <Stack.Screen name="Auth" component={AuthStack} />

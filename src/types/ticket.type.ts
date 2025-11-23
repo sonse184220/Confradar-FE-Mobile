@@ -27,6 +27,7 @@ export interface CustomerCheckInDetailResponse {
     ticketId?: string;
     conferenceSessionId?: string;
     conferenceSessionDetail: CustomerSessionDetailResponse;
+    qrUrl?: string;
 }
 
 export interface CustomerSessionDetailResponse {

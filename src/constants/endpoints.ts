@@ -37,6 +37,8 @@ export const ENDPOINTS = {
 
         // GET_ALL: '/Conference',
         // GET_BY_ID: '/Conference',
+
+        GET_OWN_CONFERENCES_FOR_SCHEDULE: "/Conference/own-conferences-for-schedule",
     },
     CONFERENCE_CATEGORY: {
         GET_ALL: '/ConferenceCategory',
