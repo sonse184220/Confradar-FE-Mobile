@@ -20,9 +20,10 @@ import LinearGradient from 'react-native-linear-gradient';
 // import { ConferencePriceResponse, ConferenceResponse } from '../store/api/conferenceApi';
 import { useTicket } from '../hooks/useTicket';
 import { useConference } from '../hooks/useConference';
-import { ConferencePriceResponse, ConferenceResponse, TechnicalConferenceDetailResponse } from '../types/conference.type';
+import { ConferencePriceResponse, ConferenceResponse, PurchasedInfo, TechnicalConferenceDetailResponse } from '../types/conference.type';
 import { useTransaction } from '@/hooks/useTransaction';
 import { PaymentMethod } from '@/types/transaction.type';
+import { formatDate } from '@/utils/helper';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -139,9 +140,10 @@ export const getCurrentPrice = (price: ConferencePriceResponse) => {
 
 const TicketTypeCard: React.FC<{
   ticket: ConferencePriceResponse;
+  purchasedInfo?: PurchasedInfo;
   isSelected: boolean;
   onSelect: () => void;
-}> = ({ ticket, isSelected, onSelect }) => {
+}> = ({ ticket, purchasedInfo, isSelected, onSelect }) => {
   const now = new Date();
   const currentPhase = ticket.pricePhases?.find((phase) => {
     const startDate = new Date(phase.startDate || "");
@@ -151,11 +153,50 @@ const TicketTypeCard: React.FC<{
   const currentPrice = getCurrentPrice(ticket);
   const basePrice = ticket.ticketPrice ?? 0;
 
+  const futurePhases = ticket.pricePhases
+    ?.filter((phase) => {
+      const startDate = new Date(phase.startDate || "");
+      return startDate > now;
+    })
+    .sort(
+      (a, b) =>
+        new Date(a.startDate || "").getTime() -
+        new Date(b.startDate || "").getTime(),
+    );
+
+  const nextPhase =
+    futurePhases && futurePhases.length > 0
+      ? futurePhases[0]
+      : null;
+
+  // const isBeforeSale = !currentPhase && nextPhase;
+  const isBeforeSale = !currentPhase && !!nextPhase;
+
+  const currentPhaseSoldOut = currentPhase && currentPhase.availableSlot === 0;
+  const isLastPhase = !nextPhase;
+  const isTicketSoldOut = (!currentPhase || currentPhase.availableSlot === 0) &&
+    (!futurePhases || futurePhases.every(phase => phase.availableSlot === 0));
+
+  const hasDiscount =
+    currentPrice < (ticket.ticketPrice ?? 0) &&
+    currentPhase?.applyPercent !== undefined;
+
+  const isPurchasedTicket = purchasedInfo?.conferencePriceId === ticket.conferencePriceId;
+
+  const isDisabled = currentPhaseSoldOut || isTicketSoldOut || isBeforeSale || isPurchasedTicket;
+
   return (
     <TouchableOpacity
+      disabled={isDisabled}
+      activeOpacity={isDisabled ? 1 : 0.7}
       onPress={onSelect}
-      className={`mb-4 rounded-2xl border-2 ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
-        }`}
+      className={`
+        rounded-xl p-4 mb-3 bg-white
+        ${isDisabled ? "opacity-50" : "shadow-lg"}
+        ${isSelected && !isDisabled ? "border-2 border-blue-500" : ""}
+      `}
+    // className={`mb-4 rounded-2xl border-2 ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'
+    // }`} 
     >
       <View className="p-4">
         <View className="flex-row items-center justify-between mb-3">
@@ -229,6 +270,35 @@ const TicketTypeCard: React.FC<{
           />
         </View>
       </View>
+
+      {/* Status Messages */}
+      {isBeforeSale && nextPhase && (
+        <View className="mt-3 rounded-md p-2 bg-yellow-100">
+          <Text className="text-yellow-700 text-sm">
+            Vé sẽ mở bán từ {formatDate(nextPhase.startDate)} → {formatDate(nextPhase.endDate)}
+          </Text>
+        </View>
+      )}
+
+      {currentPhaseSoldOut && nextPhase && (
+        <View className="mt-3 rounded-md p-2 bg-yellow-100">
+          <Text className="text-yellow-700 text-sm">
+            Giai đoạn hiện tại hết vé – đợi giai đoạn tiếp theo ({formatDate(nextPhase.startDate)})
+          </Text>
+        </View>
+      )}
+
+      {isTicketSoldOut && (
+        <View className="mt-3 rounded-md p-2 bg-red-100">
+          <Text className="text-red-600 font-medium text-sm">Đã bán hết vé</Text>
+        </View>
+      )}
+
+      {isPurchasedTicket && (
+        <View className="mt-3 rounded-md p-2 bg-green-100">
+          <Text className="text-green-600 font-medium text-sm">Đã mua vé này</Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 };
@@ -241,7 +311,7 @@ const PaymentMethodCard: React.FC<{
   return (
     <TouchableOpacity
       onPress={onSelect}
-      className={`mb-3 rounded-xl border-2 ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'}`}
+      className={`mb-3 rounded-xl border - 2 ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-200 bg-white'} `}
     >
       <View className="p-4 flex-row items-center justify-between">
         <View className="flex-1">
@@ -275,7 +345,7 @@ const BuyTicketsButton: React.FC<{
       <TouchableOpacity
         onPress={onPress}
         disabled={disabled || loading}
-        className={`rounded-2xl overflow-hidden ${disabled || loading ? 'opacity-50' : ''}`}
+        className={`rounded-2xl overflow-hidden ${disabled || loading ? 'opacity-50' : ''} `}
       >
         <LinearGradient
           colors={['#8B5CF6', '#3B82F6']}
@@ -356,6 +426,15 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
   // Use conference prices directly from TechnicalConferenceDetailResponse
   const ticketTypes: ConferencePriceResponse[] = technicalConference?.conferencePrices || [];
 
+  useEffect(() => {
+    console.log('=== DEBUG TICKET DATA ===');
+    console.log('technicalConference:', technicalConference);
+    console.log('conferencePrices:', technicalConference?.conferencePrices);
+    console.log('ticketTypes length:', ticketTypes.length);
+    console.log('selectedTicketId:', selectedTicketId);
+    console.log('selectedPaymentMethodId:', selectedPaymentMethodId);
+  }, [technicalConference, ticketTypes, selectedTicketId, selectedPaymentMethodId]);
+
   // Set first ticket as default selection
   useEffect(() => {
     if (ticketTypes.length > 0 && !selectedTicketId) {
@@ -384,7 +463,7 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
   useEffect(() => {
     if (techPaymentError) Alert.alert(
       'Lỗi thanh toán',
-      techPaymentError?.data?.Message || 'Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.',
+      techPaymentError?.data?.message || 'Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại.',
       [
         { text: 'Hủy', style: 'cancel' },
         { text: 'Thử lại', onPress: handleBuyTickets }
@@ -545,7 +624,7 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
                 <Icon name="error-outline" size={48} color="#EF4444" />
                 <Text className="text-gray-900 text-lg font-semibold mt-2">Có lỗi xảy ra</Text>
                 <Text className="text-gray-600 text-center mt-1 mb-4">
-                  {technicalConferenceError.data?.Message || 'Không thể tải thông tin hội nghị'}
+                  {technicalConferenceError.data?.message || 'Không thể tải thông tin hội nghị'}
                 </Text>
                 <TouchableOpacity
                   onPress={handleRetryConference}
@@ -567,6 +646,7 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
                 <TicketTypeCard
                   key={ticket.conferencePriceId}
                   ticket={ticket}
+                  purchasedInfo={technicalConference?.purchasedInfo}
                   isSelected={selectedTicketId === ticket.conferencePriceId}
                   onSelect={() => setSelectedTicketId(ticket.conferencePriceId)}
                 />
@@ -606,16 +686,24 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
             </View>
           )}
 
-          <View className="flex-1" />
+          {/* <View className="flex-1" /> */}
 
           {/* Buy Tickets Button */}
-          {ticketTypes.length > 0 && (
-            <BuyTicketsButton
-              onPress={handleBuyTickets}
-              disabled={!selectedTicketId || !selectedPaymentMethodId || technicalConferenceLoading}
-              loading={paymentLoading}
-            />
+          {/* {ticketTypes.length > 0 && ( */}
+          {ticketTypes.length === 0 ? (
+            <View className="items-center py-8">
+              <Text className="text-gray-600">Không có vé khả dụng</Text>
+            </View>
+          ) : (
+            <>
+              <BuyTicketsButton
+                onPress={handleBuyTickets}
+                disabled={!selectedTicketId || !selectedPaymentMethodId || technicalConferenceLoading}
+                loading={paymentLoading}
+              />
+            </>
           )}
+          {/* )} */}
         </ScrollView>
       </View>
     </View>

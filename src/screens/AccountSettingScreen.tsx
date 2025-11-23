@@ -95,6 +95,15 @@ const AccountSettingScreen = () => {
       icon: 'history',
       hasArrow: true,
       onPress: () => navigation.navigate('PaperList')
+    },
+
+    {
+      id: '7',
+      title: 'My Calendar',
+      description: 'View your successfully registered conferences',
+      icon: 'history',
+      hasArrow: true,
+      onPress: () => navigation.navigate('ConferenceCalendar')
     }
   ];
 

@@ -7,6 +7,7 @@ import { conferenceCategoryApi } from './api/conferenceCategoryApi';
 import { ticketApi } from './api/ticketApi';
 import { transactionApi } from './api/transactionApi';
 import { paperApi } from './api/paperApi';
+import { cityApi } from './api/cityApi';
 
 export const store = configureStore({
     reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
         [ticketApi.reducerPath]: ticketApi.reducer,
         [transactionApi.reducerPath]: transactionApi.reducer,
         [paperApi.reducerPath]: paperApi.reducer,
+        [cityApi.reducerPath]: cityApi.reducer,
 
         // Slice reducers (cho local state)
         auth: authReducer,
@@ -29,7 +31,7 @@ export const store = configureStore({
             ticketApi.middleware,
             transactionApi.middleware,
             paperApi.middleware,
-            //   userApi.middleware
+            cityApi.middleware,
         ),
 });
 

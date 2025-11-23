@@ -6,18 +6,23 @@ import {
     PaperProvider,
     Icon
 } from 'react-native-paper';
+import { DatePickerModal } from 'react-native-paper-dates';
+import { en, registerTranslation } from 'react-native-paper-dates';
 import { useConference } from '@/hooks/useConference';
 import { useConferenceCategory } from '@/hooks/useConferenceCategory';
-import { ConferenceResponse } from '@/types/conference.type';
+import { ConferencePriceResponse, ConferenceResponse } from '@/types/conference.type';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { HomeStackParamList } from '@/navigation/HomeStack';
 import ConferenceListWithPagination from '@/components/conference-discovery/conference-list-screen/ConferenceListWithPagination';
 import ConferenceSearch from '@/components/conference-discovery/conference-list-screen/ConferenceSearch';
 import ConferenceCard from '@/components/conference-discovery/conference-list-screen/ConferenceCard';
+import { useGetAllCitiesQuery } from '@/store/api/cityApi';
 
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList>;
+
+registerTranslation('en', en);
 
 const ConferenceListScreen: React.FC = () => {
     const navigation = useNavigation<NavigationProp>();
@@ -39,6 +44,11 @@ const ConferenceListScreen: React.FC = () => {
     const [cityMenuVisible, setCityMenuVisible] = useState(false);
     const [priceMenuVisible, setPriceMenuVisible] = useState(false);
     const [dateMenuVisible, setDateMenuVisible] = useState(false);
+    const [datePickerVisible, setDatePickerVisible] = useState(false);
+
+    const [priceRange, setPriceRange] = useState<[number, number]>([0, 0]);
+    const [absoluteMaxPrice, setAbsoluteMaxPrice] = useState(0);
+    const [allPrices, setAllPrices] = useState<number[]>([]);
 
     const itemsPerPage = 12;
 
@@ -59,6 +69,12 @@ const ConferenceListScreen: React.FC = () => {
         error: categoriesError,
         fetchCategories,
     } = useConferenceCategory();
+
+    const {
+        data: citiesData,
+        isLoading: citiesLoading,
+        error: citiesError,
+    } = useGetAllCitiesQuery();
 
     useEffect(() => {
         const loadCategories = async () => {
@@ -88,28 +104,28 @@ const ConferenceListScreen: React.FC = () => {
     }, [searchInput]);
 
     useEffect(() => {
-        if (selectedStatus !== 'all') {
-            const params = {
-                page: currentPage,
-                pageSize: itemsPerPage,
-                ...(searchQuery && { searchKeyword: searchQuery }),
-                ...(selectedCity !== 'all' && { cityId: selectedCity }),
-                ...(startDateFilter && { startDate: startDateFilter.toISOString().split('T')[0] }),
-                ...(endDateFilter && { endDate: endDateFilter.toISOString().split('T')[0] })
-            };
-            fetchConferencesByStatus(selectedStatus, params);
-        } else {
-            const params = {
-                page: currentPage,
-                pageSize: itemsPerPage,
-                ...(searchQuery && { searchKeyword: searchQuery }),
-                ...(selectedCity !== 'all' && { cityId: selectedCity }),
-                ...(startDateFilter && { startDate: startDateFilter.toISOString().split('T')[0] }),
-                ...(endDateFilter && { endDate: endDateFilter.toISOString().split('T')[0] })
-            };
-            fetchConferencesWithPrices(params);
-        }
-    }, [currentPage, searchQuery, selectedCity, selectedStatus, startDateFilter, endDateFilter, fetchConferencesWithPrices, fetchConferencesByStatus]);
+        // if (selectedStatus !== 'all') {
+        //     const params = {
+        //         page: currentPage,
+        //         pageSize: itemsPerPage,
+        //         ...(searchQuery && { searchKeyword: searchQuery }),
+        //         ...(selectedCity !== 'all' && { cityId: selectedCity }),
+        //         ...(startDateFilter && { startDate: startDateFilter.toISOString().split('T')[0] }),
+        //         ...(endDateFilter && { endDate: endDateFilter.toISOString().split('T')[0] })
+        //     };
+        //     fetchConferencesByStatus(selectedStatus, params);
+        // } else {
+        const params = {
+            page: currentPage,
+            pageSize: itemsPerPage,
+            ...(searchQuery && { searchKeyword: searchQuery }),
+            ...(selectedCity !== 'all' && { cityId: selectedCity }),
+            ...(startDateFilter && { startDate: startDateFilter.toISOString().split('T')[0] }),
+            ...(endDateFilter && { endDate: endDateFilter.toISOString().split('T')[0] })
+        };
+        fetchConferencesWithPrices(params);
+        // }
+    }, [currentPage, searchQuery, selectedCity, startDateFilter, endDateFilter, fetchConferencesWithPrices]);
 
     const getCurrentConferences = (): ConferenceResponse[] => {
         if (selectedStatus !== 'all') {
@@ -119,7 +135,28 @@ const ConferenceListScreen: React.FC = () => {
         }
     };
 
+    const getCurrentPrice = (priceObj: ConferencePriceResponse) => {
+        return priceObj?.ticketPrice || 0;
+    };
+
     const currentConferences = getCurrentConferences();
+
+    useEffect(() => {
+        const prices = currentConferences.flatMap((conf) =>
+            (conf?.conferencePrices ?? [])
+                .map((p) => getCurrentPrice(p))
+                .filter((price) => typeof price === "number" && price > 0)
+        );
+
+        setAllPrices(prices);
+
+        const maxPrice = prices.length ? Math.max(...prices) : 0;
+        setAbsoluteMaxPrice(maxPrice);
+
+        if (maxPrice > 0) {
+            setPriceRange([0, maxPrice]);
+        }
+    }, [currentConferences]);
 
     const getMinPrice = (conf: ConferenceResponse) => {
         if (!conf.conferencePrices || conf.conferencePrices.length === 0) return null;
@@ -131,14 +168,37 @@ const ConferenceListScreen: React.FC = () => {
         return Math.max(...conf.conferencePrices.map(p => p.ticketPrice || 0));
     };
 
+
+
     const filteredConferences = currentConferences.filter((conf: ConferenceResponse) => {
         const confType = conf.isResearchConference ? 'research' : 'technical';
         const matchesBannerFilter = bannerFilter === 'all' || confType === bannerFilter;
+        // const now = new Date();
+        // const start = new Date(conf.startDate || '');
+        // const end = new Date(conf.endDate || '');
+
+        // const matchesStatus =
+        //     selectedStatus === 'all' ||
+        //     (selectedStatus === 'upcoming' && start > now) ||
+        //     (selectedStatus === 'current' && start <= now && end >= now) ||
+        //     (selectedStatus === 'past' && end < now);
+
         const matchesCategory = selectedCategory === 'all' || conf.conferenceCategoryId === selectedCategory;
 
-        return matchesBannerFilter && matchesCategory;
-    });
+        // Thêm city filter
+        const matchesCity = selectedCity === 'all' || conf.cityId === selectedCity;
 
+        // Price filter logic
+        const minPrice = getMinPrice(conf);
+        const maxPrice = getMaxPrice(conf);
+
+        const priceRangeActive = priceRange[0] > 0 || priceRange[1] < absoluteMaxPrice;
+        const matchesPrice = minPrice !== null && maxPrice !== null
+            ? minPrice <= priceRange[1] && maxPrice >= priceRange[0]
+            : !priceRangeActive;
+
+        return matchesBannerFilter && matchesCategory && matchesCity && matchesPrice;
+    });
     const sortedConferences = [...filteredConferences].sort((a, b) => {
         switch (sortBy) {
             case 'price-low': {
@@ -160,6 +220,14 @@ const ConferenceListScreen: React.FC = () => {
                 return new Date(a.startDate || '').getTime() - new Date(b.startDate || '').getTime();
         }
     });
+
+    const cities = [
+        { value: 'all', label: 'Tất cả thành phố' },
+        ...(citiesData?.data?.map((city) => ({
+            value: city.cityId,
+            label: city.cityName ?? 'Thành phố không xác định',
+        })) || []),
+    ];
 
     const getPaginationData = () => {
         const filteredCount = sortedConferences.length;
@@ -195,6 +263,12 @@ const ConferenceListScreen: React.FC = () => {
             pageSize: itemsPerPage,
             paginatedConferences: sortedConferences
         };
+    };
+
+    const getCityLabel = () => {
+        if (selectedCity === 'all') return 'Tất cả';
+        const city = citiesData?.data?.find(c => c.cityId === selectedCity);
+        return city?.cityName || 'Thành phố';
     };
 
     const { totalPages, totalCount, paginatedConferences } = getPaginationData();
@@ -311,6 +385,16 @@ const ConferenceListScreen: React.FC = () => {
         }
     };
 
+    const onDateConfirm = ({ startDate, endDate }: { startDate?: Date; endDate?: Date }) => {
+        setDatePickerVisible(false);
+        setStartDateFilter(startDate || null);
+        setEndDateFilter(endDate || null);
+    };
+
+    const onDateDismiss = () => {
+        setDatePickerVisible(false);
+    };
+
     return (
         <PaperProvider>
             <View style={{ flex: 1, backgroundColor: '#000000' }}>
@@ -325,12 +409,18 @@ const ConferenceListScreen: React.FC = () => {
                     setSelectedStatus={setSelectedStatus}
                     selectedCategory={selectedCategory}
                     setSelectedCategory={setSelectedCategory}
+                    selectedCity={selectedCity}  // Thêm
+                    setSelectedCity={setSelectedCity}
                     bannerFilter={bannerFilter}
                     setBannerFilter={setBannerFilter}
                     startDateFilter={startDateFilter}
                     setStartDateFilter={setStartDateFilter}
                     endDateFilter={endDateFilter}
                     setEndDateFilter={setEndDateFilter}
+                    priceRange={priceRange}  // Thêm
+                    setPriceRange={setPriceRange}
+                    absoluteMaxPrice={absoluteMaxPrice}  // Thêm
+                    allPrices={allPrices}
                     sortMenuVisible={sortMenuVisible}
                     setSortMenuVisible={setSortMenuVisible}
                     statusMenuVisible={statusMenuVisible}
@@ -339,13 +429,20 @@ const ConferenceListScreen: React.FC = () => {
                     setCategoryMenuVisible={setCategoryMenuVisible}
                     bannerMenuVisible={bannerMenuVisible}
                     setBannerMenuVisible={setBannerMenuVisible}
+                    cityMenuVisible={cityMenuVisible}  // Thêm
+                    setCityMenuVisible={setCityMenuVisible}  // Thêm
+                    priceMenuVisible={priceMenuVisible}  // Thêm
+                    setPriceMenuVisible={setPriceMenuVisible}
                     dateMenuVisible={dateMenuVisible}
                     setDateMenuVisible={setDateMenuVisible}
+                    setDatePickerVisible={setDatePickerVisible}
                     categoriesData={categoriesData}
+                    citiesData={citiesData?.data}
                     getSortLabel={getSortLabel}
                     getStatusLabel={getStatusLabel}
                     getCategoryLabel={getCategoryLabel}
                     getBannerLabel={getBannerLabel}
+                    getCityLabel={getCityLabel}
                 />
 
                 {/* Conference List with Pagination Component */}
@@ -355,6 +452,20 @@ const ConferenceListScreen: React.FC = () => {
                     totalPages={totalPages}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
+                />
+
+                <DatePickerModal
+                    locale="vi"
+                    mode="range"
+                    visible={datePickerVisible}
+                    onDismiss={onDateDismiss}
+                    startDate={startDateFilter || undefined}
+                    endDate={endDateFilter || undefined}
+                    onConfirm={onDateConfirm}
+                    saveLabel="Áp dụng"
+                    label="Chọn khoảng thời gian"
+                    startLabel="Từ ngày"
+                    endLabel="Đến ngày"
                 />
             </View>
         </PaperProvider>

@@ -9,6 +9,7 @@ import {
   Dimensions,
   StyleSheet,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import {
   Appbar,
@@ -269,11 +270,15 @@ const TransactionDetailModal = ({
 const CheckInDetailModal = ({
   checkIn,
   visible,
-  onClose
+  onClose,
+  setSelectedQrUrl,
+  setQrDialogVisible
 }: {
   checkIn: CustomerCheckInDetailResponse | null;
   visible: boolean;
   onClose: () => void;
+  setSelectedQrUrl: (url: string | null) => void;
+  setQrDialogVisible: (visible: boolean) => void;
 }) => {
   const sheetRef = useRef<BottomSheet>(null);
   const snapPoints = useMemo(() => ['80%'], []);
@@ -321,14 +326,36 @@ const CheckInDetailModal = ({
           <Text className="text-white text-lg font-semibold">
             Check-in Details
           </Text>
-          <TouchableOpacity
+          <View className="flex-row items-center gap-2">
+            {/* Nút xem QR */}
+            {checkIn?.qrUrl && (
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedQrUrl(checkIn.qrUrl ?? null);
+                  setQrDialogVisible(true);
+                }}
+                className="bg-purple-600 rounded-xl px-3 py-2 mr-2"
+              >
+                <Text className="text-white text-sm font-medium">Xem QR</Text>
+              </TouchableOpacity>
+            )}
+            <TouchableOpacity
+              onPress={() => {
+                sheetRef.current?.close();
+              }}
+              className="w-8 h-8 items-center justify-center"
+            >
+              <Icon name="close" size={24} color="#FFFFFF" />
+            </TouchableOpacity>
+          </View>
+          {/* <TouchableOpacity
             onPress={() => {
               sheetRef.current?.close();
             }}
             className="w-8 h-8 items-center justify-center"
           >
             <Icon name="close" size={24} color="#FFFFFF" />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         <ScrollView
@@ -427,6 +454,86 @@ const CheckInDetailModal = ({
   );
 };
 
+const QRCodeModal = ({
+  qrUrl,
+  visible,
+  onClose
+}: {
+  qrUrl: string | null;
+  visible: boolean;
+  onClose: () => void;
+}) => {
+  const sheetRef = useRef<BottomSheet>(null);
+  const snapPoints = useMemo(() => ['50%'], []);
+
+  const renderBackdrop = useCallback(
+    (props: any) => (
+      <TouchableOpacity
+        style={StyleSheet.absoluteFill}
+        activeOpacity={1}
+        onPress={props.onPress}
+      >
+        <BlurView
+          style={StyleSheet.absoluteFill}
+          blurType="light"
+          blurAmount={15}
+          reducedTransparencyFallbackColor="rgba(0,0,0,0.3)"
+        />
+      </TouchableOpacity>
+    ),
+    []
+  );
+
+  if (!qrUrl) return null;
+
+  return (
+    <BottomSheet
+      ref={sheetRef}
+      index={visible ? 0 : -1}
+      snapPoints={snapPoints}
+      enablePanDownToClose
+      backdropComponent={renderBackdrop}
+      backgroundStyle={{
+        backgroundColor: 'rgba(31, 41, 55, 0.98)',
+      }}
+      handleIndicatorStyle={{
+        backgroundColor: '#6B7280',
+        width: 40,
+        height: 4,
+      }}
+      onClose={onClose}
+    >
+      <BottomSheetView style={{ flex: 1 }}>
+        {/* Header */}
+        <View className="flex-row items-center justify-between px-6 pb-4">
+          <Text className="text-white text-lg font-semibold">
+            QR Code vé
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              sheetRef.current?.close();
+            }}
+            className="w-8 h-8 items-center justify-center"
+          >
+            <Icon name="close" size={24} color="#FFFFFF" />
+          </TouchableOpacity>
+        </View>
+
+        {/* QR Code Display */}
+        <View className="flex-1 items-center justify-center px-6">
+          <View className="bg-white p-4 rounded-2xl">
+            <Image
+              source={{ uri: qrUrl }}
+              style={{ width: 256, height: 256 }}
+              resizeMode="contain"
+            />
+          </View>
+        </View>
+      </BottomSheetView>
+    </BottomSheet>
+  );
+};
+
 // Main TicketConferenceScreen Component
 const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigation }) => {
   const [activeFilter, setActiveFilter] = useState('All');
@@ -436,6 +543,8 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
   const [selectedCheckIn, setSelectedCheckIn] = useState<CustomerCheckInDetailResponse | null>(null);
   const [transactionModalVisible, setTransactionModalVisible] = useState(false);
   const [checkInModalVisible, setCheckInModalVisible] = useState(false);
+  const [qrDialogVisible, setQrDialogVisible] = useState(false);
+  const [selectedQrUrl, setSelectedQrUrl] = useState<string | null>(null);
 
   const { tickets, loading, ticketsError, refetchTickets } = useTicket();
 
@@ -489,7 +598,7 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
     <TouchableOpacity
       onPress={() => handleTransactionPress(item)}
       className="bg-gray-800 rounded-2xl p-4 mr-3 border border-gray-600"
-      style={{ 
+      style={{
         width: 250,
         shadowColor: '#000',
         shadowOffset: {
@@ -527,7 +636,7 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
     <TouchableOpacity
       onPress={() => handleCheckInPress(item)}
       className="bg-gray-800 rounded-2xl p-4 mr-3 border border-gray-600"
-      style={{ 
+      style={{
         width: 280,
         shadowColor: '#000',
         shadowOffset: {
@@ -675,7 +784,7 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
           Error loading tickets
         </Text>
         <Text className="text-gray-400 text-center mt-2">
-          {ticketsError.data?.Message}
+          {ticketsError.data?.message}
         </Text>
         <TouchableOpacity
           onPress={refetchTickets}
@@ -754,8 +863,19 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
             setCheckInModalVisible(false);
             setSelectedCheckIn(null);
           }}
+          setSelectedQrUrl={setSelectedQrUrl}
+          setQrDialogVisible={setQrDialogVisible}
         />
       </View>
+
+      <QRCodeModal
+        qrUrl={selectedQrUrl}
+        visible={qrDialogVisible}
+        onClose={() => {
+          setQrDialogVisible(false);
+          setSelectedQrUrl(null);
+        }}
+      />
     </GestureHandlerRootView>
   );
 };
