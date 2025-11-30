@@ -1,4 +1,4 @@
-import { useGetOwnPaidTicketsQuery, useLazyGetOwnPaidTicketsQuery } from "@/store/api/ticketApi";
+import { useGetOwnPaidTicketsQuery, useLazyGetOwnPaidTicketsByConferenceQuery, useLazyGetOwnPaidTicketsQuery } from "@/store/api/ticketApi";
 import { parseApiError } from "@/utils/api";
 
 export const useTicket = (filters?: {
@@ -20,8 +20,26 @@ export const useTicket = (filters?: {
         { isLoading: lazyTicketsLoading, error: lazyTicketsRawError },
     ] = useLazyGetOwnPaidTicketsQuery();
 
+    // const [
+    //     refundTicket,
+    //     {
+    //         data: refundData,
+    //         error: refundError,
+    //         isLoading: refunding,
+    //         isSuccess: refundSuccess,
+    //         isError: refundFailed,
+    //     },
+    // ] = useRefundTicketMutation();
+
+    const [
+        getTicketsByConference,
+        { isLoading: lazyTicketsByConfLoading, error: lazyTicketsByConfError },
+    ] = useLazyGetOwnPaidTicketsByConferenceQuery();
+
     const ticketsError = parseApiError<string>(ticketsRawError);
     const lazyTicketsError = parseApiError<string>(lazyTicketsRawError);
+    // const refundParsedError = parseApiError<string>(refundError);
+    const lazyTicketsByConfParsedError = parseApiError<string>(lazyTicketsByConfError);
 
     const fetchTickets = async (params?: typeof filters) => {
         try {
@@ -32,6 +50,23 @@ export const useTicket = (filters?: {
         }
     };
 
+    // const handleRefundTicket = async (request: RefundTicketRequest) => {
+    //     try {
+    //         const res = await refundTicket(request).unwrap();
+    //         return res;
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // };
+
+    const fetchTicketsByConference = async (conferenceId: string | number, params?: typeof filters) => {
+        try {
+            const result = await getTicketsByConference({ conferenceId, ...params }).unwrap();
+            return result;
+        } catch (error) {
+            throw error;
+        }
+    };
 
     return {
         // Data
@@ -41,13 +76,19 @@ export const useTicket = (filters?: {
 
         // Methods
         fetchTickets,
+        fetchTicketsByConference,
         refetchTickets,
+        //   handleRefundTicket,
 
         // Loading states
         loading: ticketsLoading || lazyTicketsLoading,
+        // refunding,
+        loadingByConference: lazyTicketsByConfLoading,
 
         // Errors
         ticketsError: ticketsError || lazyTicketsError,
+        // refundError: refundParsedError,
+        ticketsByConferenceError: lazyTicketsByConfParsedError,
     };
 };
 

@@ -104,6 +104,15 @@ const AccountSettingScreen = () => {
       icon: 'history',
       hasArrow: true,
       onPress: () => navigation.navigate('ConferenceCalendar')
+    },
+
+    {
+      id: '8',
+      title: 'Report Issue',
+      description: 'Send us your problem',
+      icon: 'history',
+      hasArrow: true,
+      onPress: () => navigation.navigate('ReportIssue')
     }
   ];
 

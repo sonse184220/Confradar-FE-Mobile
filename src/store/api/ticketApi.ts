@@ -73,6 +73,51 @@ export const ticketApi = createApi({
                     ]
                     : [{ type: "Ticket", id: "LIST" }],
         }),
+
+        // refundTicket: builder.mutation<ApiResponse<number>, RefundTicketRequest>({
+        //     query: (body) => ({
+        //         url: "/Ticket/refund-ticket",
+        //         method: "POST",
+        //         body,
+        //     }),
+        //     invalidatesTags: (result, error, { ticketId }) => [
+        //         { type: "Ticket", id: ticketId },
+        //         { type: "Ticket", id: "LIST" },
+        //     ],
+        // }),
+
+        getOwnPaidTicketsByConference: builder.query<
+            ApiResponsePagination<CustomerPaidTicketResponse[]>,
+            {
+                conferenceId: number | string;
+                keyword?: string;
+                pageNumber?: number;
+                pageSize?: number;
+                sessionStartTime?: string | number;
+                sessionEndTime?: string | number;
+            }
+        >({
+            query: ({
+                conferenceId,
+                keyword,
+                pageNumber = 1,
+                pageSize = 10,
+                sessionStartTime,
+                sessionEndTime,
+            }) => ({
+                url: "/ticket/get-own-paid-ticket-by-conference",
+                method: "GET",
+                params: { conferenceId, keyword, pageNumber, pageSize, sessionStartTime, sessionEndTime },
+            }),
+            providesTags: (result) =>
+                result?.data?.items
+                    ? [
+                        ...result.data.items.map(({ ticketId }) => ({ type: "Ticket" as const, id: ticketId })),
+                        { type: "Ticket", id: "LIST" },
+                    ]
+                    : [{ type: "Ticket", id: "LIST" }],
+        }),
+
     }),
 });
 
@@ -80,4 +125,7 @@ export const {
     // useCreatePaymentForTechMutation,
     useGetOwnPaidTicketsQuery,
     useLazyGetOwnPaidTicketsQuery,
+    //   useRefundTicketMutation,
+    useGetOwnPaidTicketsByConferenceQuery,
+    useLazyGetOwnPaidTicketsByConferenceQuery,
 } = ticketApi;
