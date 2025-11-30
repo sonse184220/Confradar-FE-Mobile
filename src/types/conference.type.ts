@@ -88,7 +88,7 @@ export interface ResearchConferenceDetailResponse {
   rankingFileUrls?: RankingFileUrlResponse[];
   materialDownloads?: MaterialDownloadResponse[];
   rankingReferenceUrls?: RankingReferenceUrlResponse[];
-  researchPhase?: ResearchConferencePhaseResponse;
+  researchPhase?: ResearchConferencePhaseResponse[];
   researchSessions?: ResearchConferenceSessionResponse[];
 
   // Shared data (same as technical conference)
@@ -135,6 +135,7 @@ export interface ConferencePricePhaseResponse {
   applyPercent?: number;
   totalSlot?: number;
   availableSlot?: number;
+  refundPolicies?: RefundPolicyResponse[];
 }
 
 export interface TechnicalConferenceSessionResponse {
@@ -204,14 +205,55 @@ export interface ResearchConferencePhaseResponse {
   isWaitlist?: boolean;
   isActive?: boolean;
   revisionRoundDeadlines?: RevisionRoundDeadlineResponse[];
+
+  waitlistPhase?: ResearchConferencePhaseResponse;
+
+  abstractDecideStatusStart?: string;
+  abstractDecideStatusEnd?: string;
+  fullPaperDecideStatusStart?: string;
+  fullPaperDecideStatusEnd?: string;
+  revisionPaperReviewStart?: string;
+  revisionPaperReviewEnd?: string;
+  revisionPaperDecideStatusStart?: string;
+  revisionPaperDecideStatusEnd?: string;
+  cameraReadyDecideStatusStart?: string;
+  cameraReadyDecideStatusEnd?: string;
+
 }
 
 export interface RevisionRoundDeadlineResponse {
   revisionRoundDeadlineId?: string;
-  endDate?: string;
+  startSubmissionDate?: string;
+  endSubmissionDate?: string;
   roundNumber?: number;
   researchConferencePhaseId?: string;
 }
+
+
+// export interface ResearchConferencePhaseResponse {
+//   researchConferencePhaseId?: string;
+//   conferenceId?: string;
+//   registrationStartDate?: string;
+//   registrationEndDate?: string;
+//   fullPaperStartDate?: string;
+//   fullPaperEndDate?: string;
+//   reviewStartDate?: string;
+//   reviewEndDate?: string;
+//   reviseStartDate?: string;
+//   reviseEndDate?: string;
+//   cameraReadyStartDate?: string;
+//   cameraReadyEndDate?: string;
+//   isWaitlist?: boolean;
+//   isActive?: boolean;
+//   revisionRoundDeadlines?: RevisionRoundDeadlineResponse[];
+// }
+
+// export interface RevisionRoundDeadlineResponse {
+//   revisionRoundDeadlineId?: string;
+//   endDate?: string;
+//   roundNumber?: number;
+//   researchConferencePhaseId?: string;
+// }
 
 export interface ResearchConferenceSessionResponse {
   conferenceSessionId: string;

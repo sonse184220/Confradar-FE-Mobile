@@ -36,6 +36,9 @@ import ResearchPaperInformationTab from '@/components/conference-discovery/confe
 import FeedbackTab from '@/components/conference-discovery/conference-detail/FeedbackTab';
 import { BlurView } from '@react-native-community/blur';
 import { formatDate } from '@/utils/helper';
+import ResearchTimelineTab from '@/components/conference-discovery/conference-detail/ResearchTimelineTab';
+import ResearchDocumentsTab from '@/components/conference-discovery/conference-detail/ResearchDocumentsTab';
+import PolicyTab from '@/components/conference-discovery/conference-detail/PolicyTab';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -245,10 +248,11 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   }
 
   const tabs = [
-    { key: 'info', label: 'Information' },
-    { key: 'sessions', label: 'Sessions' },
-    { key: 'price', label: 'Price' },
-    ...(isResearch ? [{ key: 'research', label: 'Research Detail' }] : []),
+    { key: 'info', label: 'Thông tin' },
+    { key: 'sessions', label: 'Lịch trình' },
+    { key: 'price', label: 'Giá' },
+    ...(isResearch ? [{ key: 'timeline', label: 'Timeline hội nghị' }, { key: 'document', label: 'Tài liệu, link liên quan của hội nghị' }] : []),
+    { key: 'policy', label: 'Chính sách' },
     { key: 'feedback', label: 'Feedback' }
   ];
 
@@ -591,6 +595,7 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
                   isResearch={isResearch}
                   formatDate={formatDate}
                   formatTime={formatTime}
+                  setSelectedImage={setSelectedImage}
                 />
               )}
 
@@ -656,12 +661,33 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
                 </View>
               )} */}
 
-              {activeTab === 'research' && isResearch && (
+              {/* {activeTab === 'research' && isResearch && (
                 <ResearchPaperInformationTab
                   conference={(conference as ResearchConferenceDetailResponse)}
                   formatDate={formatDate}
                   formatTime={formatTime}
                 />
+              )} */}
+
+              {activeTab === 'timeline' && isResearch && (
+                <ResearchTimelineTab
+                  conference={(conference as ResearchConferenceDetailResponse)}
+                  formatDate={formatDate}
+                // formatTime={formatTime}
+                />
+              )}
+
+
+              {activeTab === 'document' && isResearch && (
+                <ResearchDocumentsTab
+                  conference={(conference as ResearchConferenceDetailResponse)}
+                // formatDate={formatDate}
+                // formatTime={formatTime}
+                />
+              )}
+
+              {activeTab === 'policy' && (
+                <PolicyTab conference={conference} />
               )}
 
               {activeTab === 'feedback' && (
