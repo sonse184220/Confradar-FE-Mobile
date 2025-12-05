@@ -107,5 +107,6 @@ export const ENDPOINTS = {
         GET_UNRESOLVED: "/report/unresolved",
         RESPONSE: (reportId: string) => `/report/${reportId}/response`,
         GET_RESPONSE: (reportId: string) => `/report/${reportId}/get-response`,
+        GET_OWN_REPORTS: "/report/get-own-reports",
     },
 } as const;
