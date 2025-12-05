@@ -21,10 +21,11 @@ interface NavBarProps {
 }
 
 const tabData = [
-  { key: 'HomeStack' as TabType, label: 'Home', icon: 'home-outline' },
-  { key: 'CurrentStack' as TabType, label: 'Current', icon: 'calendar-today' },
-  { key: 'UpcomingStack' as TabType, label: 'Notification', icon: 'bell-ring-outline' },
-  { key: 'MoreStack' as TabType, label: 'Account', icon: 'account-circle-outline' },
+  { key: 'HomeStack' as TabType, label: 'Home', icon: 'home-variant-outline' },
+  { key: 'TicketStack' as TabType, label: 'Ticket', icon: 'ticket-confirmation-outline' },
+  { key: 'ScheduleStack' as TabType, label: 'Schedule', icon: 'calendar-month-outline' },
+  { key: 'NotificationStack' as TabType, label: 'Notification', icon: 'bell-ring-outline' },
+  { key: 'AccountStack' as TabType, label: 'Account', icon: 'account-circle-outline' },
 ];
 
 const BottomBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, navigation, state }) => {
@@ -83,7 +84,7 @@ const BottomBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, navigation,
     // >
     <View className="bg-gray-900 flex-row items-end justify-between px-4 py-0" style={styles.bottomBar}>
       <View className="flex-row flex-1">
-        {tabData.slice(0, 2).map((tab) => (
+        {tabData.map((tab) => (
           <TabButton
             key={tab.key}
             tab={tab.key}
@@ -92,9 +93,18 @@ const BottomBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, navigation,
           />
         ))}
       </View>
+      {/* <View className="flex-row flex-1">
+        {tabData.slice(0, 2).map((tab) => (
+          <TabButton
+            key={tab.key}
+            tab={tab.key}
+            label={tab.label}
+            icon={tab.icon}
+          />
+        ))}
+      </View> */}
 
-      <View className="items-center justify-center w-20">
-        {/* <View style={styles.cameraContainer}> */}
+      {/* <View className="items-center justify-center w-20">
         <TouchableOpacity
           onPress={handleCameraPress}
           className="bg-purple-600 rounded-full items-center justify-center"
@@ -106,10 +116,9 @@ const BottomBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, navigation,
             iconColor="#FFFFFF"
           />
         </TouchableOpacity>
-        {/* </View> */}
-      </View>
+      </View> */}
 
-      <View className="flex-row flex-1">
+      {/* <View className="flex-row flex-1">
         {tabData.slice(2, 4).map((tab) => (
           <TabButton
             key={tab.key}
@@ -118,7 +127,7 @@ const BottomBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, navigation,
             icon={tab.icon}
           />
         ))}
-      </View>
+      </View> */}
     </View>
     // </View>
   );

@@ -7,13 +7,14 @@ import type { AppDispatch } from '../index';
 import { ENDPOINTS } from '@/constants/endpoints';
 import { ApiResponse } from '@/types/api';
 import { jwtDecode } from 'jwt-decode';
+import { Notification } from '@/types/notification.type';
 
 
 
 export const authApi = createApi({
     reducerPath: 'authApi',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['Auth'],
+    tagTypes: ['Auth', 'Notifications'],
     endpoints: (builder) => ({
         // Login
         login: builder.mutation<ApiResponse<LoginResponse>, LoginCredentials>({
@@ -215,6 +216,14 @@ export const authApi = createApi({
                 body: { token },
             }),
         }),
+
+        getOwnNotifications: builder.query<ApiResponse<Notification[]>, void>({
+            query: () => ({
+                url: ENDPOINTS.AUTH.GET_NOTIFICATION,
+                method: "GET",
+            }),
+            providesTags: ["Notifications"],
+        }),
     }),
 });
 
@@ -231,4 +240,6 @@ export const {
     useChangePasswordMutation,
 
     useFirebaseLoginMutation,
+
+    useGetOwnNotificationsQuery,
 } = authApi;

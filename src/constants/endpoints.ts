@@ -12,6 +12,8 @@ export const ENDPOINTS = {
         CHANGE_PASSWORD: "/Auth/change-password",
 
         GOOGLE: "/Auth/firebase-login",
+
+        GET_NOTIFICATION: "/notification/own-notification",
     },
     USER: {
         PROFILE: '/users',

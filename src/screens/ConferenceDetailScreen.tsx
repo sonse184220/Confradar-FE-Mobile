@@ -39,6 +39,7 @@ import { formatDate } from '@/utils/helper';
 import ResearchTimelineTab from '@/components/conference-discovery/conference-detail/ResearchTimelineTab';
 import ResearchDocumentsTab from '@/components/conference-discovery/conference-detail/ResearchDocumentsTab';
 import PolicyTab from '@/components/conference-discovery/conference-detail/PolicyTab';
+import { useTime } from '@/hooks/useFakeTime';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -69,6 +70,8 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   const conferenceId = route?.params?.conferenceId || '';
   const type = route?.params?.type || 'technical';
   const isResearch = type === 'research';
+
+  const { now, useFakeTime } = useTime();
 
   const {
     technicalConference,
@@ -136,7 +139,8 @@ const ConferenceDetailScreen: React.FC<ConferenceDetailScreenProps> = ({
   // };
 
   const canPurchaseTicket = () => {
-    const now = new Date();
+    // const now = new Date();
+    // const now = 
 
     const prices = (conference as TechnicalConferenceDetailResponse)?.conferencePrices;
 

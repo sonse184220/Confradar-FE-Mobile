@@ -14,13 +14,15 @@ import CurrentStack, { CurrentStackParamList } from "./CurrentStack";
 import NotificationScreen from "../screens/NotificationScreen";
 import AccountSettingScreen from "../screens/AccountSettingScreen";
 import TicketConferenceScreen from "@/screens/TicketConferenceScreen";
+import ConferenceCalendarScreen from "@/screens/ConferenceCalendarScreen";
 
 export type AppStackParamList = {
     HomeStack: undefined;
     // CurrentStack: undefined;
-    CurrentStack: { screen?: keyof CurrentStackParamList; params?: any };
-    UpcomingStack: undefined;
-    MoreStack: undefined;
+    TicketStack: { screen?: keyof CurrentStackParamList; params?: any };
+    ScheduleStack: undefined;
+    NotificationStack: undefined;
+    AccountStack: undefined;
 };
 
 const Tab = createBottomTabNavigator<AppStackParamList>();
@@ -28,17 +30,21 @@ const SCREEN_WIDTH = Dimensions.get('window').width;
 
 const appStackKeys: (keyof AppStackParamList)[] = [
     "HomeStack",
-    "CurrentStack",
-    "UpcomingStack",
-    "MoreStack",
+    "TicketStack",
+    "ScheduleStack",
+    "NotificationStack",
+    "AccountStack",
 ];
 
-const UpcomingStack = () => (
-    // <View style={{ flex: 1, backgroundColor: '#0F0F0F' }} />
+const ScheduleStack = () => (
+    <ConferenceCalendarScreen />
+);
+
+const NotificationStack = () => (
     <NotificationScreen />
 );
 
-const MoreStack = () => (
+const AccountStack = () => (
     // <View style={{ flex: 1, backgroundColor: '#0F0F0F' }} />
     <AccountSettingScreen />
 );
@@ -94,9 +100,10 @@ const AppStack = () => {
             // }}
             >
                 <Tab.Screen name="HomeStack" component={HomeStack} />
-                <Tab.Screen name="CurrentStack" component={TicketConferenceScreen} />
-                <Tab.Screen name="UpcomingStack" component={UpcomingStack} />
-                <Tab.Screen name="MoreStack" component={MoreStack} />
+                <Tab.Screen name="TicketStack" component={TicketConferenceScreen} />
+                <Tab.Screen name="ScheduleStack" component={ScheduleStack} />
+                <Tab.Screen name="NotificationStack" component={NotificationStack} />
+                <Tab.Screen name="AccountStack" component={AccountStack} />
             </Tab.Navigator>
 
             {/* <NavBar activeTab={activeTab} setActiveTab={handleTabChange} /> */}

@@ -24,6 +24,8 @@ import { ConferencePriceResponse, ConferenceResponse, PurchasedInfo, TechnicalCo
 import { useTransaction } from '@/hooks/useTransaction';
 import { PaymentMethod } from '@/types/transaction.type';
 import { formatDate } from '@/utils/helper';
+import { useTime } from '@/hooks/useFakeTime';
+import { useGlobalTime } from '@/utils/TimeContext';
 
 const { width: screenWidth } = Dimensions.get('window');
 
@@ -144,7 +146,8 @@ const TicketTypeCard: React.FC<{
   isSelected: boolean;
   onSelect: () => void;
 }> = ({ ticket, purchasedInfo, isSelected, onSelect }) => {
-  const now = new Date();
+  const { now, useFakeTime } = useGlobalTime();
+  // const now = new Date();
   const currentPhase = ticket.pricePhases?.find((phase) => {
     const startDate = new Date(phase.startDate || "");
     const endDate = new Date(phase.endDate || "");
@@ -385,6 +388,8 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
 
   const conferenceId = route?.params?.conferenceId || '';
 
+  const { now, useFakeTime } = useTime();
+
   const {
     purchaseTechTicket,
     loading: paymentLoading,
@@ -425,15 +430,6 @@ const TicketSelectionScreen: React.FC<TicketSelectionScreenProps> = ({
 
   // Use conference prices directly from TechnicalConferenceDetailResponse
   const ticketTypes: ConferencePriceResponse[] = technicalConference?.conferencePrices || [];
-
-  useEffect(() => {
-    console.log('=== DEBUG TICKET DATA ===');
-    console.log('technicalConference:', technicalConference);
-    console.log('conferencePrices:', technicalConference?.conferencePrices);
-    console.log('ticketTypes length:', ticketTypes.length);
-    console.log('selectedTicketId:', selectedTicketId);
-    console.log('selectedPaymentMethodId:', selectedPaymentMethodId);
-  }, [technicalConference, ticketTypes, selectedTicketId, selectedPaymentMethodId]);
 
   // Set first ticket as default selection
   useEffect(() => {
