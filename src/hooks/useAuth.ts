@@ -8,7 +8,8 @@ import {
     useGetProfileByIdQuery,
     useUpdateProfileMutation,
     useChangePasswordMutation,
-    useFirebaseLoginMutation
+    useFirebaseLoginMutation,
+    useGetOwnNotificationsQuery
 } from '@/store/api/authApi';
 import { setUser, clearAuth, setToken } from '@/store/slices/authSlice';
 import type { ChangePasswordRequest, LoginCredentials, ProfileUpdateRequest, RegisterData } from '@/types/auth';
@@ -45,6 +46,15 @@ export const useAuth = () => {
     const [changePasswordMutation, { isLoading: isChanging, error: changePasswordError, data: changePasswordData }] = useChangePasswordMutation();
 
     const [firebaseLoginMutation, { isLoading: googleLoading, error: googleRawError, data: googleData }] = useFirebaseLoginMutation();
+
+    const {
+        data: notificationsData,
+        error: notificationsError,
+        isLoading: isNotiLoading,
+        refetch: refetchNotifications,
+    } = useGetOwnNotificationsQuery(undefined, {
+        skip: !isAuthenticated,
+    });
 
     const updateProfile = async (payload: ProfileUpdateRequest) => {
         if (!user?.id!) throw new Error("User not logged in");
@@ -258,5 +268,10 @@ export const useAuth = () => {
         googleLoading,
         googleLoginError,
         googleResponse: googleData,
+
+        notifications: notificationsData?.data ?? [],
+        notificationsError,
+        isNotiLoading,
+        refetchNotifications,
     };
 };

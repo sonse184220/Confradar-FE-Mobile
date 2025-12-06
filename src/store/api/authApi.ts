@@ -9,8 +9,6 @@ import { ApiResponse } from '@/types/api';
 import { jwtDecode } from 'jwt-decode';
 import { Notification } from '@/types/notification.type';
 
-
-
 export const authApi = createApi({
     reducerPath: 'authApi',
     baseQuery: baseQueryWithReauth,
@@ -18,63 +16,26 @@ export const authApi = createApi({
     endpoints: (builder) => ({
         // Login
         login: builder.mutation<ApiResponse<LoginResponse>, LoginCredentials>({
-            query: (credentials) => ({
+            query: ({ email, password, firebaseWebFcmToken, firebaseMobileFcmToken }) => ({
                 url: ENDPOINTS.AUTH.LOGIN,
-                method: 'POST',
-                body: credentials,
+                method: "POST",
+                body: {
+                    email,
+                    password,
+                    firebaseWebFcmToken,
+                    firebaseMobileFcmToken,
+                },
             }),
-            // async onQueryStarted(arg, { queryFulfilled, dispatch }) {
-            //     dispatch(setLoading(true));
-            //     try {
-            //         const { data } = await queryFulfilled;
-
-            //         if (data.data) {
-            //             const { accessToken, refreshToken } = data.data;
-
-            //             // ✅ Decode token using jwt-decode
-            //             const decoded = jwtDecode<JwtPayload>(accessToken);
-
-            //             const user: User = {
-            //                 id: decoded.sub,
-            //                 email: decoded.email,
-            //                 name: decoded.email.split('@')[0],
-            //                 role: decoded['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
-            //                 avatar: undefined,
-            //                 createdAt: new Date().toISOString(),
-            //                 updatedAt: new Date().toISOString(),
-            //             };
-
-            //             // Save to AsyncStorage
-            //             await AsyncStorage.multiSet([
-            //                 ['access_token', accessToken],
-            //                 ['refresh_token', refreshToken],
-            //                 ['user', JSON.stringify(user)],
-            //             ]);
-
-            //             // Dispatch to Redux
-            //             dispatch(setToken({ accessToken, refreshToken }));
-            //             dispatch(setUser(user));
-            //         }
-            //     } catch (err: any) {
-            //         // dispatch(setError(err?.error?.data?.message || 'Login failed'));
-            //     }
-            //     finally {
-            //         dispatch(setLoading(false));
-            //     }
-            // },
-            //   async onQueryStarted(arg, { queryFulfilled }) {
-            //     try {
-            //       const { data } = await queryFulfilled;
-            //       if (data.token) {
-            //         await AsyncStorage.setItem('auth_token', data.token);
-
-            //       }
-            //     } catch (error) {
-            //       console.error('Login error:', error);
-            //     }
-            //   },
             invalidatesTags: ['Auth'],
         }),
+        // login: builder.mutation<ApiResponse<LoginResponse>, LoginCredentials>({
+        //     query: (credentials) => ({
+        //         url: ENDPOINTS.AUTH.LOGIN,
+        //         method: 'POST',
+        //         body: credentials,
+        //     }),
+        //     invalidatesTags: ['Auth'],
+        // }),
 
         // Register
         register: builder.mutation<ApiResponse<null>, FormData>({
@@ -101,25 +62,6 @@ export const authApi = createApi({
             },
             invalidatesTags: ['Auth'],
         }),
-        // register: builder.mutation<AuthResponse, RegisterData>({
-        //     query: (data) => ({
-        //         url: ENDPOINTS.AUTH.REGISTER,
-        //         method: 'POST',
-        //         body: data,
-        //     }),
-        //     async onQueryStarted(arg, { queryFulfilled }) {
-        //         try {
-        //             const { data } = await queryFulfilled;
-        //             if (data.token) {
-        //                 await AsyncStorage.setItem('auth_token', data.token);
-        //             }
-        //         } catch (error) {
-        //             console.error('Register error:', error);
-        //         }
-        //     },
-        //     invalidatesTags: ['Auth'],
-        // }),
-
         // Logout
         logout: builder.mutation<{ message: string }, void>({
             query: () => ({
@@ -210,12 +152,24 @@ export const authApi = createApi({
         }),
 
         firebaseLogin: builder.mutation({
-            query: (token) => ({
+            query: ({ token, firebaseWebFcmToken, firebaseMobileFcmToken }) => ({
                 url: ENDPOINTS.AUTH.GOOGLE,
                 method: "POST",
-                body: { token },
+                body: {
+                    token,
+                    ...(firebaseWebFcmToken && { firebaseWebFcmToken }),
+                    ...(firebaseMobileFcmToken && { firebaseMobileFcmToken }),
+                },
             }),
         }),
+
+        // firebaseLogin: builder.mutation({
+        //     query: (token) => ({
+        //         url: ENDPOINTS.AUTH.GOOGLE,
+        //         method: "POST",
+        //         body: { token },
+        //     }),
+        // }),
 
         getOwnNotifications: builder.query<ApiResponse<Notification[]>, void>({
             query: () => ({

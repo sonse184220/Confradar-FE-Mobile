@@ -127,6 +127,23 @@ const ConferenceListScreen: React.FC = () => {
         // }
     }, [currentPage, searchQuery, selectedCity, startDateFilter, endDateFilter, fetchConferencesWithPrices]);
 
+    const refetchList = () => {
+        const params = {
+            page: currentPage,
+            pageSize: itemsPerPage,
+            ...(searchQuery && { searchKeyword: searchQuery }),
+            ...(selectedCity !== 'all' && { cityId: selectedCity }),
+            ...(startDateFilter && { startDate: startDateFilter.toISOString().split('T')[0] }),
+            ...(endDateFilter && { endDate: endDateFilter.toISOString().split('T')[0] })
+        };
+
+        // if (selectedStatus !== 'all') {
+        //     fetchConferencesByStatus(selectedStatus, params);
+        // } else {
+        fetchConferencesWithPrices(params);
+        // }
+    };
+
     const getCurrentConferences = (): ConferenceResponse[] => {
         if (selectedStatus !== 'all') {
             return statusConferences?.items || [];
@@ -452,6 +469,8 @@ const ConferenceListScreen: React.FC = () => {
                     totalPages={totalPages}
                     currentPage={currentPage}
                     setCurrentPage={setCurrentPage}
+                    refetchList={refetchList}
+                    refetching={lazyWithPricesLoading}
                 />
 
                 <DatePickerModal

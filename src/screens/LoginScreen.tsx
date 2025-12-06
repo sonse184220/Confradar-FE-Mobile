@@ -11,6 +11,7 @@ import { AuthStackParamList } from '../navigation/AuthStack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useAuth } from '../hooks/useAuth';
 import { signInWithGoogle } from '@/modules/authProviders/firebaseGoogleProvider';
+import { getFcmToken } from '@/modules/messagingProvider/firebaseMessagingProvider';
 
 const { height } = Dimensions.get('window');
 
@@ -22,7 +23,6 @@ const LoginScreen = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [cl, setCL] = useState('');
 
   const {
     login,
@@ -39,17 +39,20 @@ const LoginScreen = () => {
       return;
     }
 
+    const { webToken, mobileToken } = await getFcmToken();
+
     try {
-      const result = await login({ email, password });
-      console.log('data:', result);
-      console.log('Message:', result.message);
+      const result = await login({
+        email,
+        password,
+        firebaseWebFcmToken: webToken,
+        firebaseMobileFcmToken: mobileToken,
+      });
+
       if (result.success) {
-        // console.log('Message:', result.Message);
-        console.log('Hello Reactotron');
         navigation2.replace('App');
       }
     } catch (error) {
-      // Error will be handled by useAuth hook and available in loginError
       console.log('Login failed:', error);
     }
   };
@@ -236,7 +239,6 @@ const LoginScreen = () => {
             {/* Social Login Buttons */}
             <View className="flex-row mb-6">
               <SocialButton title="Google" iconName='google' iconColor="#EA4335" onPress={handleGoogleLogin} />
-              <SocialButton title="Facebook" iconName='facebook' iconColor="#3B5998" onPress={handleFacebookLogin} />
             </View>
 
             {/* Sign Up Link */}
