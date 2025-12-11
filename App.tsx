@@ -10,10 +10,15 @@ import { Provider } from "react-redux";
 import { PaperProvider } from "react-native-paper";
 import { store } from "./src/store";
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import RNBootSplash from "react-native-bootsplash";
 
 const { width, height } = Dimensions.get("window");
 
 export default function App() {
+  useEffect(() => {
+    RNBootSplash.hide({ fade: true });
+  }, []);
+
   useEffect(() => {
     GoogleSignin.configure({
       webClientId: '530552883525-u99ph42meedfh2bpv9r5islcm3b0no4v.apps.googleusercontent.com',

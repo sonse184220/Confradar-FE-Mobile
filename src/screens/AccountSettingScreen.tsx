@@ -112,7 +112,7 @@ const AccountSettingScreen = () => {
       description: 'Send us your problem',
       icon: 'history',
       hasArrow: true,
-      onPress: () => navigation.navigate('ReportIssue')
+      onPress: () => navigation.navigate('ReportList')
     }
   ];
 

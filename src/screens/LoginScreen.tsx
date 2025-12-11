@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, Platform, Image } from 'react-native';
 import { TextInput, Button, Card, Icon } from 'react-native-paper';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import LinearGradient from 'react-native-linear-gradient';
@@ -111,7 +111,12 @@ const LoginScreen = () => {
             elevation: 5,
           }}
         >
-          <Text className="text-[32px]">📱</Text>
+          {/* <Text className="text-[32px]">📱</Text> */}
+          <Image
+            source={require('../assets/ConfradarLogo_Light.png')}
+            style={{ width: 40, height: 40 }}
+            resizeMode="contain"
+          />
         </View>
         <Text className="text-white text-center text-2xl font-bold mb-1.5">
           Chào mừng trở lại
