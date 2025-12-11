@@ -402,7 +402,7 @@ const PaperDetailScreen: React.FC<PaperDetailScreenProps> = ({
 
   if (loading) {
     return (
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-gray-600">
         <Appbar.Header>
           <Appbar.BackAction onPress={() => navigation.goBack()} />
           <Appbar.Content title="Chi tiết Paper" />
@@ -417,7 +417,7 @@ const PaperDetailScreen: React.FC<PaperDetailScreenProps> = ({
 
   if (paperDetailError || !paperDetail) {
     return (
-      <View className="flex-1 bg-white">
+      <View className="flex-1 bg-gray-600">
         <Appbar.Header>
           <Appbar.BackAction onPress={() => navigation.goBack()} />
           <Appbar.Content title="Chi tiết Paper" />
