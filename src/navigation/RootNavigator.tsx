@@ -15,6 +15,7 @@ import ConferenceCalendarScreen from "@/screens/ConferenceCalendarScreen";
 import ReportIssueScreen from "@/screens/ReportIssueScreen";
 import { TimeProvider } from "@/utils/TimeContext";
 import ReportListScreen from "@/screens/ReportListScreen";
+import WalletScreen from "@/screens/WalletScreen";
 
 const navTheme = {
     ...DefaultTheme,
@@ -37,6 +38,7 @@ export type RootStackParamList = {
     ConferenceCalendar: undefined;
     ReportList: undefined;
     ReportIssue: undefined;
+    Wallet: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -65,6 +67,7 @@ const RootNavigator = () => {
                             <Stack.Screen name="ConferenceCalendar" component={ConferenceCalendarScreen} />
                             <Stack.Screen name="ReportList" component={ReportListScreen} />
                             <Stack.Screen name="ReportIssue" component={ReportIssueScreen} />
+                            <Stack.Screen name="Wallet" component={WalletScreen} />
                         </>
                     ) : (
                         <Stack.Screen name="Auth" component={AuthStack} />

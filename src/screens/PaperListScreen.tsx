@@ -383,7 +383,7 @@ const PaperListScreen: React.FC<PaperListScreenProps> = ({ navigation }) => {
   if (loading && !refreshing) {
     return (
       <View className="flex-1 bg-gray-600">
-        <Appbar.Header style={{ backgroundColor: '#FFFFFF' }}>
+        <Appbar.Header style={{ backgroundColor: 'transparent' }}>
           <Appbar.BackAction onPress={() => navigation.goBack()} />
           <Appbar.Content title="Danh sách Paper" />
         </Appbar.Header>
@@ -395,7 +395,7 @@ const PaperListScreen: React.FC<PaperListScreenProps> = ({ navigation }) => {
   if (submittedPapersError && !refreshing) {
     return (
       <View className="flex-1 bg-gray-600">
-        <Appbar.Header style={{ backgroundColor: '#FFFFFF' }}>
+        <Appbar.Header style={{ backgroundColor: 'transparent' }}>
           <Appbar.BackAction onPress={() => navigation.goBack()} />
           <Appbar.Content title="Danh sách Paper" />
         </Appbar.Header>

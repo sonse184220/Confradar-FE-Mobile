@@ -7,7 +7,7 @@ import Svg, { Defs, RadialGradient, Path, Stop, LinearGradient, Line, Rect, Elli
 import { Dimensions } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Provider } from "react-redux";
-import { PaperProvider } from "react-native-paper";
+import { MD3LightTheme, PaperProvider } from "react-native-paper";
 import { store } from "./src/store";
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import RNBootSplash from "react-native-bootsplash";
@@ -25,9 +25,13 @@ export default function App() {
     });
   }, []);
 
+  const lightTheme = {
+    ...MD3LightTheme,
+  };
+
   return (
     <Provider store={store}>
-      <PaperProvider>
+      <PaperProvider theme={lightTheme}>
         <GestureHandlerRootView style={{ flex: 1 }}>
           <SafeAreaProvider>
             <AppInner />
@@ -98,7 +102,8 @@ function AppInner() {
       <StatusBar
         translucent
         backgroundColor="transparent"
-        barStyle={isDarkMode ? "light-content" : "dark-content"}
+        // barStyle={isDarkMode ? "light-content" : "dark-content"}
+        barStyle={"light-content"}
       />
       {/* <View style={[StyleSheet.absoluteFill, { backgroundColor: '#0a0a0a' }]} /> */}
       <View
@@ -193,7 +198,7 @@ function AppInner() {
               <Path
                 key={`wave-${i}`}
                 d={pathData}
-                stroke="#ffffff"          // tạm cho trắng dễ thấy
+                stroke="#ffffff"
                 strokeWidth="0.8"
                 fill="none"
                 opacity={0.3 + i * 0.03}

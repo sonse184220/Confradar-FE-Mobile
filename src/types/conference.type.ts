@@ -97,6 +97,8 @@ export interface ResearchConferenceDetailResponse {
   refundPolicies?: RefundPolicyResponse[];
   conferenceMedia?: ConferenceMediaResponse[];
   conferencePrices?: ConferencePriceResponse[];
+
+  purchasedInfo?: PurchasedInfo;
 }
 
 export interface ConferencePolicyResponse {
@@ -122,6 +124,7 @@ export interface ConferencePriceResponse {
   ticketName?: string;
   ticketDescription?: string;
   isAuthor?: boolean;
+  isPublish?: boolean;
   totalSlot?: number;
   availableSlot?: number;
   pricePhases?: ConferencePricePhaseResponse[];
@@ -202,7 +205,7 @@ export interface ResearchConferencePhaseResponse {
   reviseEndDate?: string;
   cameraReadyStartDate?: string;
   cameraReadyEndDate?: string;
-  isWaitlist?: boolean;
+  phaseOrder?: number;
   isActive?: boolean;
   revisionRoundDeadlines?: RevisionRoundDeadlineResponse[];
 
@@ -218,8 +221,41 @@ export interface ResearchConferencePhaseResponse {
   revisionPaperDecideStatusEnd?: string;
   cameraReadyDecideStatusStart?: string;
   cameraReadyDecideStatusEnd?: string;
-
+  authorPaymentStart?: string;
+  authorPaymentEnd?: string;
 }
+
+// export interface ResearchConferencePhaseResponse {
+//   researchConferencePhaseId?: string;
+//   conferenceId?: string;
+//   registrationStartDate?: string;
+//   registrationEndDate?: string;
+//   fullPaperStartDate?: string;
+//   fullPaperEndDate?: string;
+//   reviewStartDate?: string;
+//   reviewEndDate?: string;
+//   reviseStartDate?: string;
+//   reviseEndDate?: string;
+//   cameraReadyStartDate?: string;
+//   cameraReadyEndDate?: string;
+//   isWaitlist?: boolean;
+//   isActive?: boolean;
+//   revisionRoundDeadlines?: RevisionRoundDeadlineResponse[];
+
+//   waitlistPhase?: ResearchConferencePhaseResponse;
+
+//   abstractDecideStatusStart?: string;
+//   abstractDecideStatusEnd?: string;
+//   fullPaperDecideStatusStart?: string;
+//   fullPaperDecideStatusEnd?: string;
+//   revisionPaperReviewStart?: string;
+//   revisionPaperReviewEnd?: string;
+//   revisionPaperDecideStatusStart?: string;
+//   revisionPaperDecideStatusEnd?: string;
+//   cameraReadyDecideStatusStart?: string;
+//   cameraReadyDecideStatusEnd?: string;
+
+// }
 
 export interface RevisionRoundDeadlineResponse {
   revisionRoundDeadlineId?: string;

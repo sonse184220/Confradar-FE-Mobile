@@ -109,4 +109,8 @@ export const ENDPOINTS = {
         GET_RESPONSE: (reportId: string) => `/report/${reportId}/get-response`,
         GET_OWN_REPORTS: "/report/get-own-reports",
     },
+
+    WALLET: {
+        VIEW_OWN_WALLET: "/wallet/view-own-wallet",
+    },
 } as const;
