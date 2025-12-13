@@ -11,6 +11,8 @@ export interface User {
 export interface LoginCredentials {
     email: string;
     password: string;
+    firebaseWebFcmToken?: string | null;
+    firebaseMobileFcmToken?: string | null;
 }
 
 export interface RegisterData {

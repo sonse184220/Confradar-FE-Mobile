@@ -12,6 +12,8 @@ export const ENDPOINTS = {
         CHANGE_PASSWORD: "/Auth/change-password",
 
         GOOGLE: "/Auth/firebase-login",
+
+        GET_NOTIFICATION: "/notification/own-notification",
     },
     USER: {
         PROFILE: '/users',
@@ -90,5 +92,25 @@ export const ENDPOINTS = {
     CITY: {
         LIST: "/City/cities",
     },
+    ASSIGNINGPRESENTERSESSION: {
+        REQUEST_CHANGE_PRESENTER: "/assigningpresentersession/request-change-presenter",
+        REQUEST_CHANGE_SESSION: "/assigningpresentersession/request-change-session",
 
+        GET_PENDING_PRESENTER_CHANGE_REQUESTS: '/assigningpresentersession/get-pending-presenter-change-requests',
+        GET_PENDING_SESSION_CHANGE_REQUESTS: '/assigningpresentersession/get-pending-session-change-requests',
+        APPROVE_CHANGE_SESSION: '/assigningpresentersession/approve-change-session',
+        APPROVE_CHANGE_PRESENTER: '/assigningpresentersession/approve-change-presenter',
+    },
+
+    REPORT: {
+        CREATE: "/report",
+        GET_UNRESOLVED: "/report/unresolved",
+        RESPONSE: (reportId: string) => `/report/${reportId}/response`,
+        GET_RESPONSE: (reportId: string) => `/report/${reportId}/get-response`,
+        GET_OWN_REPORTS: "/report/get-own-reports",
+    },
+
+    WALLET: {
+        VIEW_OWN_WALLET: "/wallet/view-own-wallet",
+    },
 } as const;

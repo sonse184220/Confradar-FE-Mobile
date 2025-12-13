@@ -28,6 +28,8 @@ interface ConferenceListWithPaginationProps {
     totalPages: number;
     currentPage: number;
     setCurrentPage: (value: number | ((prev: number) => number)) => void;
+    refetchList: () => void;
+    refetching: boolean;
 }
 
 const ConferenceListWithPagination: React.FC<ConferenceListWithPaginationProps> = ({
@@ -35,7 +37,9 @@ const ConferenceListWithPagination: React.FC<ConferenceListWithPaginationProps> 
     renderConferenceCard,
     totalPages,
     currentPage,
-    setCurrentPage
+    setCurrentPage,
+    refetchList,
+    refetching
 }) => {
     return (
         <>
@@ -58,6 +62,8 @@ const ConferenceListWithPagination: React.FC<ConferenceListWithPaginationProps> 
                             </Text>
                         </View>
                     }
+                    onRefresh={refetchList}
+                    refreshing={refetching}
                 />
             </View>
 

@@ -104,6 +104,24 @@ const AccountSettingScreen = () => {
       icon: 'history',
       hasArrow: true,
       onPress: () => navigation.navigate('ConferenceCalendar')
+    },
+
+    {
+      id: '8',
+      title: 'Your Wallet',
+      description: 'View your wallet charge',
+      icon: 'money',
+      hasArrow: true,
+      onPress: () => navigation.navigate('Wallet')
+    },
+
+    {
+      id: '8',
+      title: 'Report Issue',
+      description: 'Send us your problem',
+      icon: 'history',
+      hasArrow: true,
+      onPress: () => navigation.navigate('ReportList')
     }
   ];
 

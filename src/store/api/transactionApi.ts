@@ -2,12 +2,12 @@ import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithReauth } from './baseApi';
 import { ApiResponse } from '../../types/api';
 import { ENDPOINTS } from '../../constants/endpoints';
-import { CreateTechPaymentRequest, GeneralPaymentResultResponse, PaymentMethod, Transaction } from '@/types/transaction.type';
+import { CreateTechPaymentRequest, GeneralPaymentResultResponse, PaymentMethod, Transaction, WalletResponse } from '@/types/transaction.type';
 
 export const transactionApi = createApi({
     reducerPath: 'transactionApi',
     baseQuery: baseQueryWithReauth,
-    tagTypes: ['Transaction', 'PaymentMethod'],
+    tagTypes: ['Transaction', 'PaymentMethod', "Wallet"],
     endpoints: (builder) => ({
         createPaymentForTech: builder.mutation<ApiResponse<GeneralPaymentResultResponse>, CreateTechPaymentRequest>({
             query: (request) => ({
@@ -48,6 +48,11 @@ export const transactionApi = createApi({
             query: () => ENDPOINTS.PAYMENT_METHOD.GET_ALL,
             providesTags: ["PaymentMethod"],
         }),
+
+        getOwnWallet: builder.query<ApiResponse<WalletResponse>, void>({
+            query: () => ENDPOINTS.WALLET.VIEW_OWN_WALLET,
+            providesTags: ["Wallet"],
+        }),
     }),
 });
 
@@ -57,4 +62,7 @@ export const {
     useLazyGetOwnTransactionsQuery,
     useGetAllPaymentMethodsQuery,
     useLazyGetAllPaymentMethodsQuery,
+
+    useGetOwnWalletQuery,
+    useLazyGetOwnWalletQuery,
 } = transactionApi;

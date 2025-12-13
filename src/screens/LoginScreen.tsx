@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Dimensions, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, Platform, Image } from 'react-native';
 import { TextInput, Button, Card, Icon } from 'react-native-paper';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import LinearGradient from 'react-native-linear-gradient';
@@ -11,6 +11,7 @@ import { AuthStackParamList } from '../navigation/AuthStack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { useAuth } from '../hooks/useAuth';
 import { signInWithGoogle } from '@/modules/authProviders/firebaseGoogleProvider';
+import { getFcmToken } from '@/modules/messagingProvider/firebaseMessagingProvider';
 
 const { height } = Dimensions.get('window');
 
@@ -22,7 +23,6 @@ const LoginScreen = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [cl, setCL] = useState('');
 
   const {
     login,
@@ -39,17 +39,20 @@ const LoginScreen = () => {
       return;
     }
 
+    const { webToken, mobileToken } = await getFcmToken();
+
     try {
-      const result = await login({ email, password });
-      console.log('data:', result);
-      console.log('Message:', result.message);
+      const result = await login({
+        email,
+        password,
+        firebaseWebFcmToken: webToken,
+        firebaseMobileFcmToken: mobileToken,
+      });
+
       if (result.success) {
-        // console.log('Message:', result.Message);
-        console.log('Hello Reactotron');
         navigation2.replace('App');
       }
     } catch (error) {
-      // Error will be handled by useAuth hook and available in loginError
       console.log('Login failed:', error);
     }
   };
@@ -108,7 +111,12 @@ const LoginScreen = () => {
             elevation: 5,
           }}
         >
-          <Text className="text-[32px]">📱</Text>
+          {/* <Text className="text-[32px]">📱</Text> */}
+          <Image
+            source={require('../assets/ConfradarLogo_Light.png')}
+            style={{ width: 40, height: 40 }}
+            resizeMode="contain"
+          />
         </View>
         <Text className="text-white text-center text-2xl font-bold mb-1.5">
           Chào mừng trở lại
@@ -236,7 +244,6 @@ const LoginScreen = () => {
             {/* Social Login Buttons */}
             <View className="flex-row mb-6">
               <SocialButton title="Google" iconName='google' iconColor="#EA4335" onPress={handleGoogleLogin} />
-              <SocialButton title="Facebook" iconName='facebook' iconColor="#3B5998" onPress={handleFacebookLogin} />
             </View>
 
             {/* Sign Up Link */}

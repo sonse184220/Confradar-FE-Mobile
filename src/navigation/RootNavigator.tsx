@@ -12,6 +12,10 @@ import TicketConferenceScreen from "@/screens/TicketConferenceScreen";
 import PaperListScreen from "@/screens/PaperListScreen";
 import PaperDetailScreen from "@/screens/PaperDetailScreen";
 import ConferenceCalendarScreen from "@/screens/ConferenceCalendarScreen";
+import ReportIssueScreen from "@/screens/ReportIssueScreen";
+import { TimeProvider } from "@/utils/TimeContext";
+import ReportListScreen from "@/screens/ReportListScreen";
+import WalletScreen from "@/screens/WalletScreen";
 
 const navTheme = {
     ...DefaultTheme,
@@ -32,6 +36,9 @@ export type RootStackParamList = {
     PaperList: undefined;
     PaperDetail: { paperId: string };
     ConferenceCalendar: undefined;
+    ReportList: undefined;
+    ReportIssue: undefined;
+    Wallet: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -41,27 +48,32 @@ const RootNavigator = () => {
 
     return (
         <NavigationContainer ref={navigationRef} theme={navTheme}>
-            {/* {isAuthenticated ? <AppStack /> : <AuthStack />} */}
-            {/* <AuthStack /> */}
-            <Stack.Navigator screenOptions={{ headerShown: false }}>
-                {isAuthenticated ? (
-                    <>
+            <TimeProvider>
+                {/* {isAuthenticated ? <AppStack /> : <AuthStack />} */}
+                {/* <AuthStack /> */}
+                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                    {isAuthenticated ? (
+                        <>
+                            <Stack.Screen name="Auth" component={AuthStack} />
+                            {/* <Stack.Screen name="Auth" component={ConferenceDetailScreen} /> */}
+                            <Stack.Screen name="App" component={AppStack} />
+                            <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+                            <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+                            <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
+                            <Stack.Screen name="FavoriteConferences" component={FavoriteConferencesScreen} />
+                            <Stack.Screen name="TicketConference" component={TicketConferenceScreen} />
+                            <Stack.Screen name="PaperList" component={PaperListScreen} />
+                            <Stack.Screen name="PaperDetail" component={PaperDetailScreen} />
+                            <Stack.Screen name="ConferenceCalendar" component={ConferenceCalendarScreen} />
+                            <Stack.Screen name="ReportList" component={ReportListScreen} />
+                            <Stack.Screen name="ReportIssue" component={ReportIssueScreen} />
+                            <Stack.Screen name="Wallet" component={WalletScreen} />
+                        </>
+                    ) : (
                         <Stack.Screen name="Auth" component={AuthStack} />
-                        {/* <Stack.Screen name="Auth" component={ConferenceDetailScreen} /> */}
-                        <Stack.Screen name="App" component={AppStack} />
-                        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
-                        <Stack.Screen name="ChangePassword" component={ChangePasswordScreen} />
-                        <Stack.Screen name="TransactionHistory" component={TransactionHistoryScreen} />
-                        <Stack.Screen name="FavoriteConferences" component={FavoriteConferencesScreen} />
-                        <Stack.Screen name="TicketConference" component={TicketConferenceScreen} />
-                        <Stack.Screen name="PaperList" component={PaperListScreen} />
-                        <Stack.Screen name="PaperDetail" component={PaperDetailScreen} />
-                        <Stack.Screen name="ConferenceCalendar" component={ConferenceCalendarScreen} />
-                    </>
-                ) : (
-                    <Stack.Screen name="Auth" component={AuthStack} />
-                )}
-            </Stack.Navigator>
+                    )}
+                </Stack.Navigator>
+            </TimeProvider>
         </NavigationContainer>
     );
 };

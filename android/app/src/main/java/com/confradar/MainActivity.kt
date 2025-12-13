@@ -1,6 +1,9 @@
 package com.confradar
 import expo.modules.ReactActivityDelegateWrapper
 
+import android.os.Bundle
+import com.zoontek.rnbootsplash.RNBootSplash
+
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
@@ -20,4 +23,9 @@ class MainActivity : ReactActivity() {
    */
   override fun createReactActivityDelegate(): ReactActivityDelegate =
       ReactActivityDelegateWrapper(this, BuildConfig.IS_NEW_ARCHITECTURE_ENABLED, DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled))
+
+      override fun onCreate(savedInstanceState: Bundle?) {
+        RNBootSplash.init(this, R.style.BootTheme)
+        super.onCreate(savedInstanceState)
+    }
 }

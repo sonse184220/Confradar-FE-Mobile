@@ -8,6 +8,8 @@ import { ticketApi } from './api/ticketApi';
 import { transactionApi } from './api/transactionApi';
 import { paperApi } from './api/paperApi';
 import { cityApi } from './api/cityApi';
+import { reportApi } from './api/reportApi';
+import { presenterApi } from './api/assigningpresentersessionApi';
 
 export const store = configureStore({
     reducer: {
@@ -19,6 +21,8 @@ export const store = configureStore({
         [transactionApi.reducerPath]: transactionApi.reducer,
         [paperApi.reducerPath]: paperApi.reducer,
         [cityApi.reducerPath]: cityApi.reducer,
+        [reportApi.reducerPath]: reportApi.reducer,
+        [presenterApi.reducerPath]: presenterApi.reducer,
 
         // Slice reducers (cho local state)
         auth: authReducer,
@@ -32,6 +36,8 @@ export const store = configureStore({
             transactionApi.middleware,
             paperApi.middleware,
             cityApi.middleware,
+            reportApi.middleware,
+            presenterApi.middleware,
         ),
 });
 
