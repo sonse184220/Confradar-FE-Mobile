@@ -5,7 +5,8 @@ import {
     Searchbar,
     Menu,
     Icon,
-    Button
+    Button,
+    Checkbox
 } from 'react-native-paper';
 import Slider from '@react-native-community/slider';
 
@@ -53,6 +54,9 @@ interface ConferenceSearchProps {
     getCategoryLabel: () => string;
     getBannerLabel: () => string;
     getCityLabel: () => string;  // THÊM
+
+    isComplete: boolean;
+    setIsComplete: (value: boolean) => void;
 }
 
 const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
@@ -98,7 +102,10 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
     getStatusLabel,
     getCategoryLabel,
     getBannerLabel,
-    getCityLabel  // THÊM
+    getCityLabel,  // THÊM
+
+    isComplete,
+    setIsComplete
 }) => {
     const FilterChip = ({ label, isSelected, onPress }: { label: string; isSelected: boolean; onPress: () => void }) => (
         <Chip
@@ -273,7 +280,7 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
                                 setSelectedCategory(category.conferenceCategoryId);
                                 setCategoryMenuVisible(false);
                             }}
-                            title={category.categoryName}
+                            title={category.conferenceCategoryName}
                             titleStyle={{ color: '#F6F1F1' }}
                         />
                     ))}
@@ -510,6 +517,28 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
                 </Menu>
             </ScrollView>
 
+            <View
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginTop: 12,
+                }}
+            >
+                <Checkbox
+                    status={isComplete ? 'checked' : 'unchecked'}
+                    onPress={() => setIsComplete(!isComplete)}
+                    color="#19A7CE"
+                />
+                <Text
+                    style={{
+                        color: '#F6F1F1',
+                        fontSize: 14,
+                    }}
+                >
+                    Chỉ hiển thị hội nghị đã kết thúc
+                </Text>
+            </View>
+
             {/* Quick Filter Chips */}
             {/* <ScrollView
                 horizontal
@@ -539,6 +568,7 @@ const ConferenceSearch: React.FC<ConferenceSearchProps> = ({
                         setEndDateFilter(null);
                         setPriceRange([0, absoluteMaxPrice]);
                         setSortBy('date');
+                        setIsComplete(false);
                     }}
                     style={{
                         borderColor: '#EF4444',

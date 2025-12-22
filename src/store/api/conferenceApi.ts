@@ -33,12 +33,12 @@ export const conferenceApi = createApi({
 
         //get all conf for customer with prices
         getAllConferencesWithPricesPagination: builder.query<ApiResponsePagination<ConferenceResponse[]>,
-            { page?: number; pageSize?: number; searchKeyword?: string; cityId?: string; startDate?: string; endDate?: string }
+            { page?: number; pageSize?: number; searchKeyword?: string; cityId?: string; startDate?: string; endDate?: string, isComplete?: boolean; }
         >({
-            query: ({ page = 1, pageSize = 12, searchKeyword, cityId, startDate, endDate }) => ({
+            query: ({ page = 1, pageSize = 12, searchKeyword, cityId, startDate, endDate, isComplete }) => ({
                 url: ENDPOINTS.CONFERENCE.LIST_WITH_PRICES,
                 method: 'GET',
-                params: { page, pageSize, searchKeyword, cityId, startDate, endDate },
+                params: { page, pageSize, searchKeyword, cityId, startDate, endDate, isComplete },
             }),
             providesTags: (result) =>
                 result?.data?.items

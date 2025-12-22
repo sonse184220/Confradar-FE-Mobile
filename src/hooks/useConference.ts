@@ -85,7 +85,7 @@ export const useConference = (params?: { page?: number; pageSize?: number; id?: 
     );
 
     const fetchConferencesWithPrices = useCallback(
-        (params?: { page?: number; pageSize?: number; searchKeyword?: string; cityId?: string; startDate?: string; endDate?: string }) =>
+        (params?: { page?: number; pageSize?: number; searchKeyword?: string; cityId?: string; startDate?: string; endDate?: string, isComplete?: boolean; }) =>
             triggerGetAllWithPrices(params || {}).unwrap(),
         [triggerGetAllWithPrices]
     );

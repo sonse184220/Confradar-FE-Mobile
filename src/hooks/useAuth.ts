@@ -185,6 +185,13 @@ export const useAuth = () => {
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
+            // Clear AsyncStorage
+            await AsyncStorage.multiRemove([
+                'access_token',
+                'refresh_token',
+                'user'
+            ]);
+
             dispatch(clearAuth());
         }
     };

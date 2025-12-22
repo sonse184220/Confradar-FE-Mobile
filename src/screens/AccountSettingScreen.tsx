@@ -16,6 +16,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '@/hooks/useAuth';
+import { CommonActions } from '@react-navigation/native';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
@@ -38,6 +40,7 @@ const AccountSettingScreen = () => {
   const [locationEnabled, setLocationEnabled] = useState(false);
 
   const navigation = useNavigation<NavigationProp>();
+  const { logout } = useAuth();
 
   const userInfo = {
     name: 'Jin Yong Lim',
@@ -48,32 +51,32 @@ const AccountSettingScreen = () => {
   const accountSettings: SettingItem[] = [
     {
       id: '1',
-      title: 'Edit Profile',
-      description: 'Update your personal information',
+      title: 'Chỉnh sửa hồ sơ',
+      description: 'Chỉnh sửa hồ sơ của bạn',
       icon: 'account-edit',
       hasArrow: true,
       onPress: () => navigation.navigate('EditProfile')
     },
     {
       id: '2',
-      title: 'Change Password',
-      description: 'Manage your account security',
+      title: 'Đổi mật khẩu',
+      description: 'Quản lý bảo mật tài khoản của bạn',
       icon: 'lock',
       hasArrow: true,
       onPress: () => navigation.navigate('ChangePassword')
     },
-    {
-      id: '3',
-      title: 'Transaction History',
-      description: 'Manage your payment transaction',
-      icon: 'money',
-      hasArrow: true,
-      onPress: () => navigation.navigate('TransactionHistory')
-    },
+    // {
+    //   id: '3',
+    //   title: 'Transaction History',
+    //   description: 'Manage your payment transaction',
+    //   icon: 'money',
+    //   hasArrow: true,
+    //   onPress: () => navigation.navigate('TransactionHistory')
+    // },
     {
       id: '4',
-      title: 'Favorite Conferences',
-      description: 'View your favorite events',
+      title: 'Hội nghị yêu thích',
+      description: 'Xem những hội nghị yêu thích của bạn',
       icon: 'history',
       hasArrow: true,
       onPress: () => navigation.navigate('FavoriteConferences')
@@ -81,8 +84,8 @@ const AccountSettingScreen = () => {
 
     {
       id: '5',
-      title: 'My Tickets',
-      description: 'View your successfully registered tickets',
+      title: 'Vé tham dự của tôi',
+      description: 'Xem những vé thanh toán thành công của bạn',
       icon: 'history',
       hasArrow: true,
       onPress: () => navigation.navigate('TicketConference')
@@ -90,8 +93,8 @@ const AccountSettingScreen = () => {
 
     {
       id: '6',
-      title: 'My Paper',
-      description: 'View your successfully registered tickets',
+      title: 'Bài báo của tôi',
+      description: 'Xem những bài báo đã nộp',
       icon: 'history',
       hasArrow: true,
       onPress: () => navigation.navigate('PaperList')
@@ -99,8 +102,8 @@ const AccountSettingScreen = () => {
 
     {
       id: '7',
-      title: 'My Calendar',
-      description: 'View your successfully registered conferences',
+      title: 'Lịch hội nghị của tôi',
+      description: 'Xem những hội nghị đã đăng ký thành công trên lịch',
       icon: 'history',
       hasArrow: true,
       onPress: () => navigation.navigate('ConferenceCalendar')
@@ -108,8 +111,8 @@ const AccountSettingScreen = () => {
 
     {
       id: '8',
-      title: 'Your Wallet',
-      description: 'View your wallet charge',
+      title: 'Ví của tôi',
+      description: 'Xem ví của bạn trên hệ thống',
       icon: 'money',
       hasArrow: true,
       onPress: () => navigation.navigate('Wallet')
@@ -117,8 +120,8 @@ const AccountSettingScreen = () => {
 
     {
       id: '8',
-      title: 'Report Issue',
-      description: 'Send us your problem',
+      title: 'Báo cáo vấn đề',
+      description: 'Báo cáo vấn đề của bạn',
       icon: 'history',
       hasArrow: true,
       onPress: () => navigation.navigate('ReportList')
@@ -259,7 +262,7 @@ const AccountSettingScreen = () => {
       <Appbar.Header style={{ backgroundColor: 'transparent', elevation: 0 }}>
         {/* <Appbar.BackAction iconColor="#ffffff" onPress={() => { }} /> */}
         <Appbar.Content
-          title="Settings"
+          title="Tài khoản của tôi"
           titleStyle={{ color: '#ffffff', fontSize: 20, fontWeight: '600', textAlign: 'center' }}
           style={{ alignItems: 'center' }}
         />
@@ -270,7 +273,7 @@ const AccountSettingScreen = () => {
         showsVerticalScrollIndicator={false}
       >
         {/* User Profile Section */}
-        <View className="px-4 py-6">
+        {/* <View className="px-4 py-6">
           <Surface className="rounded-lg p-6" style={{ backgroundColor: '#1a1a1a', borderRadius: 8, padding: 24 }}>
             <View className="flex-row items-center">
               <Avatar.Text
@@ -294,16 +297,16 @@ const AccountSettingScreen = () => {
               </View>
             </View>
           </Surface>
-        </View>
+        </View> */}
 
         {/* Account Settings */}
-        <SettingSection title="Account" items={accountSettings} />
+        <SettingSection title="Các mục quản lý" items={accountSettings} />
 
         {/* App Settings */}
-        <SettingSection title="Preferences" items={appSettings} />
+        {/* <SettingSection title="Preferences" items={appSettings} /> */}
 
         {/* Support Settings */}
-        <SettingSection title="Support" items={supportSettings} />
+        {/* <SettingSection title="Support" items={supportSettings} /> */}
 
         {/* Logout Section */}
         <View className="px-4 mb-6">
@@ -321,7 +324,15 @@ const AccountSettingScreen = () => {
                   />
                 </View>
               )}
-              onPress={() => console.log('Log out')}
+              onPress={async () => {
+                await logout();
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [{ name: 'Auth' }],
+                  })
+                );
+              }}
               className="py-2 px-4"
             />
           </Surface>

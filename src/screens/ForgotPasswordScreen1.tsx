@@ -31,9 +31,9 @@ const ForgotPasswordScreen1 = () => {
       if (result.success) {
         // setSuccessMessage('Hãy mở email để reset password');
         // Auto navigate after 2 seconds
-        setTimeout(() => {
-          navigation.navigate('ForgotPassword2');
-        }, 2000);
+        // setTimeout(() => {
+        //   navigation.navigate('ForgotPassword2');
+        // }, 2000);
       }
     } catch (error: any) {
       // Error will be handled by useAuth hook and available in forgotError
