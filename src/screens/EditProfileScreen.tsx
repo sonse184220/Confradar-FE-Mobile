@@ -38,18 +38,30 @@ const EditProfileScreen = () => {
 
   const handleSaveChanges = async () => {
     try {
-      const updateData: any = {};
+      // const updateData: any = {};
 
-      if (name !== (profile?.fullName || '')) updateData.fullName = name;
-      if (phoneNumber !== (profile?.phoneNumber || '')) updateData.phoneNumber = phoneNumber;
-      if (dateOfBirth !== (profile?.birthDay || '')) updateData.birthDay = dateOfBirth;
-      if (gender !== (profile?.gender || '')) updateData.gender = gender as 'Male' | 'Female' | 'Other';
-      if (bioDescription !== (profile?.bioDescription || '')) updateData.bioDescription = bioDescription;
-      if (avatarFile) updateData.avatarFile = avatarFile;
+      // if (name !== (profile?.fullName || '')) updateData.fullName = name;
+      // if (phoneNumber !== (profile?.phoneNumber || '')) updateData.phoneNumber = phoneNumber;
+      // if (dateOfBirth !== (profile?.birthDay || '')) updateData.birthDay = dateOfBirth;
+      // if (gender !== (profile?.gender || '')) updateData.gender = gender as 'Male' | 'Female' | 'Other';
+      // if (bioDescription !== (profile?.bioDescription || '')) updateData.bioDescription = bioDescription;
+      // if (avatarFile) updateData.avatarFile = avatarFile;
 
-      if (Object.keys(updateData).length === 0) {
-        Alert.alert('Thông báo', 'Không có thay đổi nào để lưu.');
-        return;
+      // if (Object.keys(updateData).length === 0) {
+      //   Alert.alert('Thông báo', 'Không có thay đổi nào để lưu.');
+      //   return;
+      // }
+
+      const updateData: any = {
+        fullName: name,
+        phoneNumber: phoneNumber,
+        birthDay: dateOfBirth,
+        gender: gender as 'Male' | 'Female' | 'Other',
+        bioDescription: bioDescription,
+      };
+
+      if (avatarFile) {
+        updateData.avatarFile = avatarFile;
       }
 
       await updateProfile(updateData);
@@ -185,7 +197,7 @@ const EditProfileScreen = () => {
       </View> */}
       <Appbar.Header style={{ backgroundColor: 'transparent', elevation: 0 }}>
         <Appbar.BackAction onPress={() => goBack()} />
-        <Appbar.Content title="Edit Profile" titleStyle={{ color: '#F6F1F1', fontWeight: 'bold', textAlign: 'center' }} />
+        <Appbar.Content title="Chỉnh sửa hồ sơ" titleStyle={{ color: '#F6F1F1', fontWeight: 'bold', textAlign: 'center' }} />
         <Appbar.Action icon="" onPress={() => { }} />
       </Appbar.Header>
 
@@ -228,11 +240,11 @@ const EditProfileScreen = () => {
         >
           {/* Name Field */}
           <View className="mb-4">
-            <Text className="text-white text-sm mb-2 font-medium">Full Name</Text>
+            <Text className="text-white text-sm mb-2 font-medium">Tên của bạn</Text>
             <TextInput
               value={name}
               onChangeText={setName}
-              placeholder={isLoading ? "Loading..." : "Enter your name"}
+              placeholder={isLoading ? "Loading..." : "Nhập tên của bạn"}
               style={{
                 backgroundColor: 'transparent',
               }}
@@ -290,11 +302,11 @@ const EditProfileScreen = () => {
 
           {/* Phone Number Field */}
           <View className="mb-4">
-            <Text className="text-white text-sm mb-2 font-medium">Phone Number</Text>
+            <Text className="text-white text-sm mb-2 font-medium">Số điện thoại</Text>
             <TextInput
               value={phoneNumber}
               onChangeText={setPhoneNumber}
-              placeholder={isLoading ? "Loading..." : "Enter your phone number"}
+              placeholder={isLoading ? "Loading..." : "Nhập số điện thoại của bạn"}
               style={{
                 backgroundColor: 'transparent',
               }}
@@ -321,7 +333,7 @@ const EditProfileScreen = () => {
 
           {/* Date of Birth Field */}
           <View className="mb-4">
-            <Text className="text-white text-sm mb-2 font-medium">Date of Birth</Text>
+            <Text className="text-white text-sm mb-2 font-medium">Ngày sinh</Text>
             <TextInput
               value={dateOfBirth}
               onChangeText={setDateOfBirth}
@@ -352,7 +364,7 @@ const EditProfileScreen = () => {
 
           {/* Gender Dropdown */}
           <View className="mb-4">
-            <Text className="text-white text-sm mb-2 font-medium">Gender</Text>
+            <Text className="text-white text-sm mb-2 font-medium">Giới tính</Text>
             <Menu
               key={`menu-gender-${showGenderMenu}`}
               visible={showGenderMenu}
@@ -364,7 +376,7 @@ const EditProfileScreen = () => {
                   style={{ borderColor: '#F6F1F1', backgroundColor: 'rgba(246, 241, 241, 0.1)' }}
                   disabled={isLoading}
                 >
-                  <Text className="text-white">{gender || (isLoading ? "Loading..." : "Select gender")}</Text>
+                  <Text className="text-white">{gender || (isLoading ? "Loading..." : "Chọn giới tính")}</Text>
                   <Text className="text-white">▼</Text>
                 </TouchableOpacity>
               }
@@ -384,11 +396,11 @@ const EditProfileScreen = () => {
 
           {/* Bio Description Field */}
           <View className="mb-6">
-            <Text className="text-white text-sm mb-2 font-medium">Bio Description</Text>
+            <Text className="text-white text-sm mb-2 font-medium">Miêu tả về hồ sơ cá nhân</Text>
             <TextInput
               value={bioDescription}
               onChangeText={setBioDescription}
-              placeholder={isLoading ? "Loading..." : "Tell us about yourself"}
+              placeholder={isLoading ? "Loading..." : "Viết về bản thân của bạn"}
               multiline
               numberOfLines={3}
               style={{
@@ -429,7 +441,7 @@ const EditProfileScreen = () => {
             labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
             loading={isUpdating}
           >
-            {isUpdating ? 'Saving...' : 'Save changes'}
+            {isUpdating ? 'Đang lưu...' : 'Lưu thay đổi'}
           </Button>
         </KeyboardAwareScrollView>
       </View>

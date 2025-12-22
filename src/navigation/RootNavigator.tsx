@@ -16,6 +16,7 @@ import ReportIssueScreen from "@/screens/ReportIssueScreen";
 import { TimeProvider } from "@/utils/TimeContext";
 import ReportListScreen from "@/screens/ReportListScreen";
 import WalletScreen from "@/screens/WalletScreen";
+import { useAppSelector } from '@/hooks/useRedux';
 
 const navTheme = {
     ...DefaultTheme,
@@ -44,7 +45,8 @@ export type RootStackParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator = () => {
-    const isAuthenticated = true;
+    // const isAuthenticated = true;
+    const { isAuthenticated } = useAppSelector((state) => state.auth);
 
     return (
         <NavigationContainer ref={navigationRef} theme={navTheme}>

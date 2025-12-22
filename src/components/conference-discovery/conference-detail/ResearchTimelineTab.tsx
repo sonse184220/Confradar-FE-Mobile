@@ -16,11 +16,16 @@ const ResearchTimelineTab: React.FC<ResearchTimelineTabProps> = ({
     conference,
     formatDate,
 }) => {
-    const [activeSubTab, setActiveSubTab] = useState<'main' | 'waitlist'>('main');
+    // const [activeSubTab, setActiveSubTab] = useState<'main' | 'waitlist'>('main');
+    const [activePhaseIndex, setActivePhaseIndex] = useState<number>(0);
 
     const researchPhases = conference.researchPhase || [];
-    const mainPhases = researchPhases.filter((phase) => !phase.isWaitlist);
-    const waitlistPhases = researchPhases.filter((phase) => phase.isWaitlist);
+
+    const sortedPhases = [...researchPhases].sort((a, b) =>
+        (a.phaseOrder || 0) - (b.phaseOrder || 0)
+    );
+    // const mainPhases = researchPhases.filter((phase) => !phase.isWaitlist);
+    // const waitlistPhases = researchPhases.filter((phase) => phase.isWaitlist);
 
     const renderPhaseSection = (
         title: string,
@@ -104,7 +109,8 @@ const ResearchTimelineTab: React.FC<ResearchTimelineTabProps> = ({
                     >
                         <View style={{ marginBottom: 16, paddingBottom: 12, borderBottomWidth: 1, borderBottomColor: 'rgba(255,255,255,0.2)' }}>
                             <Text style={{ color: 'white', fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>
-                                Giai đoạn {phaseIndex + 1}
+                                {/* Giai đoạn {phaseIndex + 1} */}
+                                Giai đoạn {phase.phaseOrder || 'N/A'}
                             </Text>
                             <View style={{ flexDirection: 'row', gap: 8 }}>
                                 {phase.isActive ? (
@@ -264,76 +270,134 @@ const ResearchTimelineTab: React.FC<ResearchTimelineTabProps> = ({
                 Timeline nộp bài báo
             </Text>
 
-            {/* Sub-tabs */}
-            <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8, padding: 4 }}>
-                <TouchableOpacity
-                    onPress={() => setActiveSubTab('main')}
-                    style={{
-                        flex: 1,
-                        paddingVertical: 10,
-                        paddingHorizontal: 12,
-                        borderRadius: 6,
-                        backgroundColor: activeSubTab === 'main' ? '#3B82F6' : 'transparent',
-                    }}
+            {/* Tabs cho từng phase */}
+            {sortedPhases.length > 0 && (
+                <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    style={{ marginBottom: 16 }}
                 >
-                    <Text
-                        style={{
-                            color: activeSubTab === 'main' ? 'white' : 'rgba(255,255,255,0.7)',
-                            textAlign: 'center',
-                            fontWeight: '500',
-                            fontSize: 13,
-                        }}
-                    >
-                        Timeline chính
-                    </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                    onPress={() => setActiveSubTab('waitlist')}
-                    style={{
-                        flex: 1,
-                        paddingVertical: 10,
-                        paddingHorizontal: 12,
-                        borderRadius: 6,
-                        backgroundColor: activeSubTab === 'waitlist' ? '#F59E0B' : 'transparent',
-                    }}
-                >
-                    <Text
-                        style={{
-                            color: activeSubTab === 'waitlist' ? 'white' : 'rgba(255,255,255,0.7)',
-                            textAlign: 'center',
-                            fontWeight: '500',
-                            fontSize: 13,
-                        }}
-                    >
-                        Timeline Waitlist
-                    </Text>
-                </TouchableOpacity>
+                    <View style={{ flexDirection: 'row', gap: 8, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8, padding: 4 }}>
+                        {sortedPhases.map((phase, index) => (
+                            <TouchableOpacity
+                                key={phase.researchConferencePhaseId || index}
+                                onPress={() => setActivePhaseIndex(index)}
+                                style={{
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 16,
+                                    borderRadius: 6,
+                                    backgroundColor: activePhaseIndex === index ? '#3B82F6' : 'transparent',
+                                }}
+                            >
+                                <Text
+                                    style={{
+                                        color: activePhaseIndex === index ? 'white' : 'rgba(255,255,255,0.7)',
+                                        textAlign: 'center',
+                                        fontWeight: '500',
+                                        fontSize: 13,
+                                    }}
+                                >
+                                    Giai đoạn {phase.phaseOrder || index + 1}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
+                    </View>
+                </ScrollView>
+            )}
+
+            {/* Thông tin chung */}
+            <View style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.3)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
+                <Text style={{ color: '#93C5FD', fontSize: 12, lineHeight: 18 }}>
+                    Hội nghị có thể có nhiều giai đoạn (phases) để nộp bài báo. Vui lòng tuân thủ các mốc thời gian của từng giai đoạn để đảm bảo bài báo của bạn được xem xét.
+                </Text>
             </View>
 
-            {/* Main Timeline */}
-            {activeSubTab === 'main' && (
-                <View>
-                    <View style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.3)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
-                        <Text style={{ color: '#93C5FD', fontSize: 12, lineHeight: 18 }}>
-                            <Text style={{ fontWeight: 'bold' }}>Timeline chính:</Text> Đây là lịch trình chuẩn để nộp bài báo và tham gia hội nghị. Vui lòng tuân thủ các mốc thời gian để đảm bảo bài báo của bạn được xem xét.
-                        </Text>
-                    </View>
-                    {renderPhaseContent(mainPhases)}
-                </View>
-            )}
-
-            {/* Waitlist Timeline */}
-            {activeSubTab === 'waitlist' && (
-                <View>
-                    <View style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 1, borderColor: 'rgba(245, 158, 11, 0.3)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
-                        <Text style={{ color: '#FCD34D', fontSize: 12, lineHeight: 18 }}>
-                            <Text style={{ fontWeight: 'bold' }}>⚠️ Lưu ý về Waitlist:</Text> Timeline waitlist chỉ được mở khi timeline chính chưa đủ số lượng bài báo cần thiết. Nếu bạn đăng ký tham dự chậm hoặc muốn có cơ hội dự phòng, vui lòng tham gia vào waitlist để chờ đợi. Bài báo trong waitlist sẽ được xem xét nếu có chỗ trống.
-                        </Text>
-                    </View>
-                    {renderPhaseContent(waitlistPhases)}
-                </View>
+            {/* Hiển thị content của phase được chọn */}
+            {sortedPhases.length > 0 && sortedPhases[activePhaseIndex] ? (
+                renderPhaseContent([sortedPhases[activePhaseIndex]])
+            ) : (
+                <Surface style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8, padding: 24 }}>
+                    <Text style={{ color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>
+                        Chưa có thông tin timeline
+                    </Text>
+                </Surface>
             )}
         </ScrollView>
+        // <ScrollView>
+        //     <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold', marginBottom: 16 }}>
+        //         Timeline nộp bài báo
+        //     </Text>
+
+        //     {/* Sub-tabs */}
+        //     <View style={{ flexDirection: 'row', gap: 8, marginBottom: 16, backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 8, padding: 4 }}>
+        //         <TouchableOpacity
+        //             onPress={() => setActiveSubTab('main')}
+        //             style={{
+        //                 flex: 1,
+        //                 paddingVertical: 10,
+        //                 paddingHorizontal: 12,
+        //                 borderRadius: 6,
+        //                 backgroundColor: activeSubTab === 'main' ? '#3B82F6' : 'transparent',
+        //             }}
+        //         >
+        //             <Text
+        //                 style={{
+        //                     color: activeSubTab === 'main' ? 'white' : 'rgba(255,255,255,0.7)',
+        //                     textAlign: 'center',
+        //                     fontWeight: '500',
+        //                     fontSize: 13,
+        //                 }}
+        //             >
+        //                 Timeline chính
+        //             </Text>
+        //         </TouchableOpacity>
+        //         <TouchableOpacity
+        //             onPress={() => setActiveSubTab('waitlist')}
+        //             style={{
+        //                 flex: 1,
+        //                 paddingVertical: 10,
+        //                 paddingHorizontal: 12,
+        //                 borderRadius: 6,
+        //                 backgroundColor: activeSubTab === 'waitlist' ? '#F59E0B' : 'transparent',
+        //             }}
+        //         >
+        //             <Text
+        //                 style={{
+        //                     color: activeSubTab === 'waitlist' ? 'white' : 'rgba(255,255,255,0.7)',
+        //                     textAlign: 'center',
+        //                     fontWeight: '500',
+        //                     fontSize: 13,
+        //                 }}
+        //             >
+        //                 Timeline Waitlist
+        //             </Text>
+        //         </TouchableOpacity>
+        //     </View>
+
+        //     {/* Main Timeline */}
+        //     {activeSubTab === 'main' && (
+        //         <View>
+        //             <View style={{ backgroundColor: 'rgba(59, 130, 246, 0.1)', borderWidth: 1, borderColor: 'rgba(59, 130, 246, 0.3)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
+        //                 <Text style={{ color: '#93C5FD', fontSize: 12, lineHeight: 18 }}>
+        //                     <Text style={{ fontWeight: 'bold' }}>Timeline chính:</Text> Đây là lịch trình chuẩn để nộp bài báo và tham gia hội nghị. Vui lòng tuân thủ các mốc thời gian để đảm bảo bài báo của bạn được xem xét.
+        //                 </Text>
+        //             </View>
+        //             {renderPhaseContent(mainPhases)}
+        //         </View>
+        //     )}
+
+        //     {/* Waitlist Timeline */}
+        //     {activeSubTab === 'waitlist' && (
+        //         <View>
+        //             <View style={{ backgroundColor: 'rgba(245, 158, 11, 0.1)', borderWidth: 1, borderColor: 'rgba(245, 158, 11, 0.3)', borderRadius: 8, padding: 12, marginBottom: 16 }}>
+        //                 <Text style={{ color: '#FCD34D', fontSize: 12, lineHeight: 18 }}>
+        //                     <Text style={{ fontWeight: 'bold' }}>⚠️ Lưu ý về Waitlist:</Text> Timeline waitlist chỉ được mở khi timeline chính chưa đủ số lượng bài báo cần thiết. Nếu bạn đăng ký tham dự chậm hoặc muốn có cơ hội dự phòng, vui lòng tham gia vào waitlist để chờ đợi. Bài báo trong waitlist sẽ được xem xét nếu có chỗ trống.
+        //                 </Text>
+        //             </View>
+        //             {renderPhaseContent(waitlistPhases)}
+        //         </View>
+        //     )}
+        // </ScrollView>
     );
 };
 

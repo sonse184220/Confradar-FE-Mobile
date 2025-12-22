@@ -21,11 +21,11 @@ interface NavBarProps {
 }
 
 const tabData = [
-  { key: 'HomeStack' as TabType, label: 'Home', icon: 'home-variant-outline' },
-  { key: 'TicketStack' as TabType, label: 'Ticket', icon: 'ticket-confirmation-outline' },
-  { key: 'ScheduleStack' as TabType, label: 'Schedule', icon: 'calendar-month-outline' },
-  { key: 'NotificationStack' as TabType, label: 'Notification', icon: 'bell-ring-outline' },
-  { key: 'AccountStack' as TabType, label: 'Account', icon: 'account-circle-outline' },
+  { key: 'HomeStack' as TabType, label: 'Trang chủ', icon: 'home-variant-outline' },
+  { key: 'TicketStack' as TabType, label: 'Vé', icon: 'ticket-confirmation-outline' },
+  { key: 'ScheduleStack' as TabType, label: 'Lịch', icon: 'calendar-month-outline' },
+  { key: 'NotificationStack' as TabType, label: 'Thông báo', icon: 'bell-ring-outline' },
+  { key: 'AccountStack' as TabType, label: 'Tài khoản', icon: 'account-circle-outline' },
 ];
 
 const BottomBar: React.FC<NavBarProps> = ({ activeTab, setActiveTab, navigation, state }) => {

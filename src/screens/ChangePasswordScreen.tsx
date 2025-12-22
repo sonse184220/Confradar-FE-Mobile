@@ -10,7 +10,7 @@ import { goBack } from '../utils/navigationUtil';
 
 const ChangePasswordScreen = () => {
   const { changePassword, isChanging, changePasswordError } = useAuth();
-  
+
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -32,15 +32,15 @@ const ChangePasswordScreen = () => {
         newPassword: newPassword,
         confirmNewPassword: confirmPassword
       });
-      
+
       Alert.alert('Thành công', 'Đổi mật khẩu thành công!', [
         { text: 'OK', onPress: () => goBack() }
       ]);
     } catch (error: any) {
-      const errorMessage = changePasswordError ? 
-        (typeof changePasswordError === 'object' && 'data' in changePasswordError ? 
-          (changePasswordError.data as any)?.message || (changePasswordError.data as any)?.Message || 'Có lỗi xảy ra' 
-          : 'Có lỗi xảy ra') 
+      const errorMessage = changePasswordError ?
+        (typeof changePasswordError === 'object' && 'data' in changePasswordError ?
+          (changePasswordError.data as any)?.message || (changePasswordError.data as any)?.Message || 'Có lỗi xảy ra'
+          : 'Có lỗi xảy ra')
         : 'Có lỗi xảy ra';
       Alert.alert('Lỗi', errorMessage);
     }
@@ -86,7 +86,7 @@ const ChangePasswordScreen = () => {
 
       <Appbar.Header style={{ backgroundColor: 'transparent', elevation: 0, }}>
         <Appbar.BackAction onPress={() => goBack()} />
-        <Appbar.Content title="Change Password" titleStyle={{ color: '#F6F1F1', fontWeight: 'bold', textAlign: 'center' }} />
+        <Appbar.Content title="Đổi mật khẩu" titleStyle={{ color: '#F6F1F1', fontWeight: 'bold', textAlign: 'center' }} />
         <Appbar.Action icon="" onPress={() => { }} />
       </Appbar.Header>
 
@@ -102,10 +102,10 @@ const ChangePasswordScreen = () => {
           <Icon name="shield-key-outline" size={48} color="#F6F1F1" />
         </View>
         <Text className="text-white text-2xl font-extrabold text-center mb-1">
-          Secure Your Account
+          Bảo vệ tài khoản của bạn
         </Text>
         <Text className="text-white text-base text-center">
-          Update your Confradar password for better protection
+          Cập nhật mật khẩu cho tài khoản Confradar của bạn
         </Text>
       </View>
 
@@ -118,11 +118,11 @@ const ChangePasswordScreen = () => {
           extraScrollHeight={20}
         >
           <View className="mb-4">
-            <Text className="text-white text-sm mb-2 font-medium">Current password</Text>
+            <Text className="text-white text-sm mb-2 font-medium">Mật khẩu hiện tại</Text>
             <TextInput
               value={oldPassword}
               onChangeText={setOldPassword}
-              placeholder="Enter current password"
+              placeholder="Nhập mật khâu hiện tại"
               secureTextEntry={true}
               style={{
                 backgroundColor: 'transparent',
@@ -149,11 +149,11 @@ const ChangePasswordScreen = () => {
           </View>
 
           <View className="mb-4">
-            <Text className="text-white text-sm mb-2 font-medium">New password</Text>
+            <Text className="text-white text-sm mb-2 font-medium">Mật khẩu mới</Text>
             <TextInput
               value={newPassword}
               onChangeText={setNewPassword}
-              placeholder="Enter new password"
+              placeholder="Nhập mật khẩu mới"
               secureTextEntry={true}
               style={{
                 backgroundColor: 'transparent',
@@ -180,11 +180,11 @@ const ChangePasswordScreen = () => {
           </View>
 
           <View className="mb-6">
-            <Text className="text-white text-sm mb-2 font-medium">Confirm password</Text>
+            <Text className="text-white text-sm mb-2 font-medium">Xác nhận mật khẩu mới</Text>
             <TextInput
               value={confirmPassword}
               onChangeText={setConfirmPassword}
-              placeholder="Enter confirm password"
+              placeholder="Nhập xác nhận mật khẩu mới"
               secureTextEntry={true}
               style={{
                 backgroundColor: 'transparent',
@@ -233,7 +233,7 @@ const ChangePasswordScreen = () => {
             labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
             loading={isChanging}
           >
-            {isChanging ? 'Changing...' : 'Confirm'}
+            {isChanging ? 'Đang đổi...' : 'Xác nhận'}
           </Button>
         </KeyboardAwareScrollView>
       </View>

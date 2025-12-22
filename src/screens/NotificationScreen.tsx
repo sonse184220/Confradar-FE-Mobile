@@ -78,7 +78,7 @@ const NotificationScreen = () => {
       }}
     >
       <List.Item
-        title={item.title || 'Notification'}
+        title={item.title || 'Thông báo'}
         description={item.message || ''}
         titleStyle={{
           color: '#ffffff',
@@ -126,19 +126,19 @@ const NotificationScreen = () => {
         />
       </View>
       <Text className="text-white text-xl font-semibold mb-2">
-        No notifications yet
+        Chưa có thông báo nào
       </Text>
       <Text className="text-gray-400 text-center px-8 mb-6">
-        Your notifications will appear here once you've received them.
+        Thông báo của bạn sẽ xuất hiện ở đây.
       </Text>
-      <Text className="text-gray-400 text-sm mb-2">
+      {/* <Text className="text-gray-400 text-sm mb-2">
         Missing notifications?
-      </Text>
-      <TouchableOpacity onPress={() => setActiveTab('previously')}>
+      </Text> */}
+      {/* <TouchableOpacity onPress={() => setActiveTab('previously')}>
         <Text className="text-purple-400 text-sm underline">
           Go to historical notifications
         </Text>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
     </View>
   );
 
@@ -152,16 +152,16 @@ const NotificationScreen = () => {
         />
       </View>
       <Text className="text-white text-xl font-semibold mb-2">
-        Error loading notifications
+        Lỗi khi tải thông báo
       </Text>
       <Text className="text-gray-400 text-center px-8 mb-6">
-        Something went wrong. Please try again.
+        Có lỗi xảy ra vui lòng thử lại
       </Text>
       <TouchableOpacity
         onPress={refetchNotifications}
         className="bg-purple-600 px-6 py-3 rounded-lg"
       >
-        <Text className="text-white font-medium">Retry</Text>
+        <Text className="text-white font-medium">Tải lại</Text>
       </TouchableOpacity>
     </View>
   );
@@ -175,13 +175,13 @@ const NotificationScreen = () => {
   return (
     <View className="flex-1">
       <Appbar.Header style={{ backgroundColor: 'transparent', elevation: 0 }}>
-        <Appbar.Action
+        {/* <Appbar.Action
           icon="cog-outline"
           iconColor="#ffffff"
           onPress={() => { }}
-        />
+        /> */}
         <Appbar.Content
-          title="Notifications"
+          title="Thông báo"
           titleStyle={{
             color: '#ffffff',
             fontSize: 20,
@@ -190,11 +190,11 @@ const NotificationScreen = () => {
           }}
           style={{ alignItems: 'center' }}
         />
-        <Appbar.Action
+        {/* <Appbar.Action
           icon="cog-outline"
           iconColor="#ffffff"
           onPress={() => { }}
-        />
+        /> */}
       </Appbar.Header>
 
       <View className="mx-4 mb-4">
@@ -204,7 +204,7 @@ const NotificationScreen = () => {
           padding: 16
         }}>
           <Text className="text-white text-center font-medium">
-            Customize your notifications!
+            Thông báo của bạn
           </Text>
         </Surface>
       </View>
@@ -217,7 +217,7 @@ const NotificationScreen = () => {
         >
           <Text className={`text-center font-medium ${activeTab === 'recent' ? 'text-white' : 'text-gray-400'
             }`}>
-            Recent ({recentNotifications.length})
+            Gần đây ({recentNotifications.length})
           </Text>
         </TouchableOpacity>
 
@@ -228,7 +228,7 @@ const NotificationScreen = () => {
         >
           <Text className={`text-center font-medium ${activeTab === 'previously' ? 'text-white' : 'text-gray-400'
             }`}>
-            Previously ({previousNotifications.length})
+            Trước đó ({previousNotifications.length})
           </Text>
         </TouchableOpacity>
       </View>
@@ -237,7 +237,7 @@ const NotificationScreen = () => {
         {isNotiLoading ? (
           <View className="flex-1 justify-center items-center">
             <ActivityIndicator size="large" color="#8A2BE2" />
-            <Text className="text-gray-400 mt-4">Loading notifications...</Text>
+            <Text className="text-gray-400 mt-4">Đang tải thông báo...</Text>
           </View>
         ) : notificationsError ? (
           <ErrorState />
@@ -267,8 +267,8 @@ const NotificationScreen = () => {
               >
                 <Text className="text-purple-400 text-sm underline">
                   {activeTab === 'recent'
-                    ? 'Go to historical notifications'
-                    : 'Go to recent notifications'}
+                    ? 'Xem thông báo trước đó'
+                    : 'Xem thông báo gần đây'}
                 </Text>
               </TouchableOpacity>
             </View>

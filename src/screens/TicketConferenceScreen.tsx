@@ -170,7 +170,7 @@ const TransactionDetailModal = ({
         {/* Header */}
         <View className="flex-row items-center justify-between px-6 pb-4">
           <Text className="text-white text-lg font-semibold">
-            Transaction Details
+            Chi tiết giao dịch
           </Text>
           <TouchableOpacity
             onPress={() => {
@@ -231,7 +231,7 @@ const TransactionDetailModal = ({
             {/* Payment Method */}
             {transaction.paymentMethodName && (
               <View className="mb-5">
-                <Text className="text-gray-500 text-xs mb-1.5">Payment Method</Text>
+                <Text className="text-gray-500 text-xs mb-1.5">Phương thức thanh toán</Text>
                 <Text className="text-white font-medium text-base">
                   {transaction.paymentMethodName}
                 </Text>
@@ -241,7 +241,7 @@ const TransactionDetailModal = ({
             {/* Currency */}
             {transaction.currency && (
               <View className="mb-5">
-                <Text className="text-gray-500 text-xs mb-1.5">Currency</Text>
+                <Text className="text-gray-500 text-xs mb-1.5">Đơn vị tiền tệ</Text>
                 <Text className="text-white font-medium text-base">
                   {transaction.currency}
                 </Text>
@@ -250,11 +250,11 @@ const TransactionDetailModal = ({
 
             {/* Status */}
             <View className="mb-5">
-              <Text className="text-gray-500 text-xs mb-1.5">Status</Text>
+              <Text className="text-gray-500 text-xs mb-1.5">Trạng thái</Text>
               <View className="flex-row items-center">
                 <View className={`px-3 py-1 rounded-full ${transaction.isRefunded ? 'bg-red-500/20' : 'bg-green-500/20'}`}>
                   <Text className={`text-sm font-medium ${transaction.isRefunded ? 'text-red-400' : 'text-green-400'}`}>
-                    {transaction.isRefunded ? 'Refunded' : 'Completed'}
+                    {transaction.isRefunded ? 'Đã hoàn tiền' : 'Vé khả dụng'}
                   </Text>
                 </View>
               </View>
@@ -324,7 +324,7 @@ const CheckInDetailModal = ({
         {/* Header */}
         <View className="flex-row items-center justify-between px-6 pb-4">
           <Text className="text-white text-lg font-semibold">
-            Check-in Details
+            Chi tiết điểm danh (Check-in)
           </Text>
           <View className="flex-row items-center gap-2">
             {/* Nút xem QR */}
@@ -396,7 +396,7 @@ const CheckInDetailModal = ({
           <View className="pb-6">
             {/* Check-in Time */}
             <View className="mb-5">
-              <Text className="text-gray-500 text-xs mb-1.5">Check-in Time</Text>
+              <Text className="text-gray-500 text-xs mb-1.5">Thời gian Check-in</Text>
               <Text className="text-white font-medium text-base">
                 {formatDateTime(checkIn.checkInTime)}
               </Text>
@@ -405,7 +405,7 @@ const CheckInDetailModal = ({
             {/* Session Date */}
             {checkIn.conferenceSessionDetail?.sessionDate && (
               <View className="mb-5">
-                <Text className="text-gray-500 text-xs mb-1.5">Session Date</Text>
+                <Text className="text-gray-500 text-xs mb-1.5">Ngày diễn ra</Text>
                 <Text className="text-white font-medium text-base">
                   {formatDate(checkIn.conferenceSessionDetail.sessionDate)}
                 </Text>
@@ -415,7 +415,7 @@ const CheckInDetailModal = ({
             {/* Conference */}
             {checkIn.conferenceSessionDetail?.conferenceName && (
               <View className="mb-5">
-                <Text className="text-gray-500 text-xs mb-1.5">Conference</Text>
+                <Text className="text-gray-500 text-xs mb-1.5">Hội nghị</Text>
                 <Text className="text-white font-medium text-base">
                   {checkIn.conferenceSessionDetail.conferenceName}
                 </Text>
@@ -425,7 +425,7 @@ const CheckInDetailModal = ({
             {/* Room */}
             {checkIn.conferenceSessionDetail?.roomDisplayName && (
               <View className="mb-5">
-                <Text className="text-gray-500 text-xs mb-1.5">Room</Text>
+                <Text className="text-gray-500 text-xs mb-1.5">Phòng</Text>
                 <Text className="text-white font-medium text-base">
                   {checkIn.conferenceSessionDetail.roomDisplayName}
                 </Text>
@@ -435,7 +435,7 @@ const CheckInDetailModal = ({
             {/* Location */}
             {checkIn.conferenceSessionDetail?.destinationName && (
               <View className="mb-5">
-                <Text className="text-gray-500 text-xs mb-1.5">Location</Text>
+                <Text className="text-gray-500 text-xs mb-1.5">Địa điểm</Text>
                 <Text className="text-white font-medium text-base">
                   {checkIn.conferenceSessionDetail.destinationName}
                   {checkIn.conferenceSessionDetail.cityName && `, ${checkIn.conferenceSessionDetail.cityName}`}
@@ -667,7 +667,7 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
         </View>
         {item.isPresenter && (
           <View className="px-2 py-1 rounded-full bg-purple-500/20">
-            <Text className="text-purple-400 text-xs">Presenter</Text>
+            <Text className="text-purple-400 text-xs">Tác giả trình bày</Text>
           </View>
         )}
       </View>
@@ -679,14 +679,14 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
       {/* Main ticket info */}
       <View className="p-4">
         <View className="flex-row items-center mb-3">
-          <View className="w-12 h-12 rounded-full bg-gray-700 items-center justify-center mr-3">
+          {/* <View className="w-12 h-12 rounded-full bg-gray-700 items-center justify-center mr-3">
             <Text className="text-white font-bold">
-              {getTicketInitials(ticket.ticketId)}
+              {getTicketInitials(ticket.conferenceName ?? '')}
             </Text>
-          </View>
+          </View> */}
           <View className="flex-1">
             <Text className="text-white text-lg font-semibold">
-              Ticket #{ticket.ticketId.slice(-8)}
+              Vé {ticket.conferenceName ?? 'Tên chưa xác định'}
             </Text>
             <Text className="text-gray-400 text-sm">
               {formatDate(ticket.registeredDate)} • {formatPrice(ticket.actualPrice)}
@@ -701,14 +701,14 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
 
         {/* Action buttons */}
         <View className="flex-row items-center justify-between">
-          <View className="flex-row">
+          {/* <View className="flex-row">
             <TouchableOpacity className="bg-gray-700 rounded-xl px-4 py-2 mr-2">
               <Text className="text-white text-sm font-medium">QR Code</Text>
             </TouchableOpacity>
             <TouchableOpacity className="bg-gray-700 rounded-xl px-4 py-2">
               <Text className="text-white text-sm font-medium">Download</Text>
             </TouchableOpacity>
-          </View>
+          </View> */}
           <TouchableOpacity
             onPress={() => toggleExpand(ticket.ticketId)}
             className="bg-gray-700 rounded-xl px-4 py-2"
@@ -728,7 +728,7 @@ const TicketConferenceScreen: React.FC<TicketConferenceScreenProps> = ({ navigat
             <View className="mb-4">
               <View className="flex-row items-center justify-between mb-3">
                 <Text className="text-white text-lg font-semibold">
-                  Transactions ({ticket.transactions.length})
+                  Giao dịch ({ticket.transactions.length})
                 </Text>
                 <Icon name="payment" size={20} color="#10B981" />
               </View>
